@@ -1,0 +1,11 @@
+StAXON - JSON via StAX
+----------------------
+
+Features:
+- stream JSON using XMLStreamReader/Writer
+- works with Jackson and Gson
+- supports XML namespaces
+
+License: APL2
+Status: experimental
+
