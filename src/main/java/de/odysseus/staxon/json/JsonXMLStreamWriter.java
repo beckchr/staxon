@@ -6,6 +6,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 
 import de.odysseus.staxon.core.AbstractXMLStreamWriter;
+import de.odysseus.staxon.core.XMLStreamWriterScope;
 import de.odysseus.staxon.json.io.JsonStreamTarget;
 
 /**
@@ -52,9 +53,9 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	}
 
 	@Override
-	protected void writeElementTagStart() throws XMLStreamException {
-		ScopeInfo parentInfo = getScope().getParent().getInfo();
-		String fieldName = getScope().getTagName();
+	protected void writeElementTagStart(XMLStreamWriterScope<ScopeInfo> newScope) throws XMLStreamException {
+		ScopeInfo parentInfo = getScope().getInfo();
+		String fieldName = newScope.getTagName();
 		try {
 			if (parentInfo.getArrayName() == null) {
 				if (!parentInfo.startObjectWritten) {
@@ -72,7 +73,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 		} catch (IOException e) {
 			throw new XMLStreamException("Cannot write start element: " + fieldName, e);
 		}
-		getScope().setInfo(new ScopeInfo());
+		newScope.setInfo(new ScopeInfo());
 	}
 	
 	@Override

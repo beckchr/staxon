@@ -71,6 +71,29 @@ public class JsonXMLStreamWriterTest {
 	}
 
 	/**
+	 * <code>&lt;alice&gt;&lt;bob&gt;charlie&lt;/bob&gt;&lt;bob&gt;david&lt;/bob&gt;&lt;edgar/&gt;&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testArray2() throws Exception {
+		StringWriter result = new StringWriter();
+		XMLStreamWriter writer = JsonXMLStreamUtil.createJsonXMLStreamWriter(result, false);
+		writer.writeStartDocument();
+		writer.writeStartElement("alice");
+		writer.writeProcessingInstruction(JsonXMLStreamUtil.PI_MULTIPLE_TARGET, "bob");
+		writer.writeStartElement("bob");
+		writer.writeCharacters("charlie");
+		writer.writeEndElement();
+		writer.writeStartElement("bob");
+		writer.writeCharacters("david");
+		writer.writeEndElement();
+		writer.writeEmptyElement("edgar");
+		writer.writeEndElement();
+		writer.writeEndDocument();
+		writer.close();
+		Assert.assertEquals("{\"alice\":{\"bob\":[\"charlie\",\"david\"],\"edgar\":null}}", result.toString());
+	}
+
+	/**
 	 * <code>&lt;alice charlie="david"&gt;bob&lt;/alice&gt;</code>
 	 */
 	@Test

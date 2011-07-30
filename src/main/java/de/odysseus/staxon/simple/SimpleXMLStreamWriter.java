@@ -7,6 +7,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 
 import de.odysseus.staxon.core.AbstractXMLStreamWriter;
+import de.odysseus.staxon.core.XMLStreamWriterScope;
 
 /**
  * Simple XML Stream Writer
@@ -52,10 +53,10 @@ public class SimpleXMLStreamWriter extends AbstractXMLStreamWriter<Object> {
  	}
 
 	@Override
-	protected void writeElementTagStart() throws XMLStreamException {
+	protected void writeElementTagStart(XMLStreamWriterScope<Object> newScope) throws XMLStreamException {
 		try {
 			writer.write('<');
-			writer.write(getScope().getTagName());
+			writer.write(newScope.getTagName());
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}

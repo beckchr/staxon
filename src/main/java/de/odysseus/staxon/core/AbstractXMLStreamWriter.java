@@ -24,7 +24,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		return scope;
 	}
 
-	protected abstract void writeElementTagStart() throws XMLStreamException;
+	protected abstract void writeElementTagStart(XMLStreamWriterScope<T> newScope) throws XMLStreamException;
 	protected abstract void writeElementTagEnd() throws XMLStreamException;
 	protected abstract void writeEndElementTag() throws XMLStreamException;
 	protected abstract void writeProperty(String name, String value) throws XMLStreamException;
@@ -80,8 +80,9 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		if (startDocumentWritten && scope.isRoot() && scope.getLastChild() != null) {
 			throw new XMLStreamException("Multiple roots within document");
 		}
-		scope = new XMLStreamWriterScope<T>(scope, prefix, localPart, emptyElement);
-		writeElementTagStart();
+		XMLStreamWriterScope<T> newScope = new XMLStreamWriterScope<T>(scope, prefix, localPart, emptyElement);
+		writeElementTagStart(newScope);
+		scope = newScope;
 	}
 
 	public void writeEndElement() throws XMLStreamException {
