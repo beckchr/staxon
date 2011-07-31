@@ -10,7 +10,6 @@ import org.junit.Test;
 
 import de.odysseus.staxon.json.JsonXMLStreamWriter;
 import de.odysseus.staxon.json.io.jackson.JacksonStreamFactory;
-import de.odysseus.staxon.json.io.util.AutoArrayTarget;
 
 public class AutoArrayTargetTest {
 	private AutoArrayTarget createTarget(StringWriter result) throws IOException {
@@ -54,6 +53,27 @@ public class AutoArrayTargetTest {
 		Assert.assertEquals("{\"alice\":{\"bob\":[\"charlie\",\"david\"]}}", result.toString());
 	}
 
+	/**
+	 * <code>&lt;alice&gt;&lt;bob&gt;charlie&lt;/bob&gt;&lt;bob&gt;david&lt;/bob&gt;&lt;edgar/&gt;&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testArray2() throws Exception {
+		StringWriter result = new StringWriter();
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result));
+		writer.writeStartDocument();
+		writer.writeStartElement("alice");
+		writer.writeStartElement("bob");
+		writer.writeCharacters("charlie");
+		writer.writeEndElement();
+		writer.writeStartElement("bob");
+		writer.writeCharacters("david");
+		writer.writeEndElement();
+		writer.writeEmptyElement("edgar");
+		writer.writeEndElement();
+		writer.writeEndDocument();
+		writer.close();
+		Assert.assertEquals("{\"alice\":{\"bob\":[\"charlie\",\"david\"],\"edgar\":null}}", result.toString());
+	}
 
 	/**
 	 * <code>&lt;alice&gt;&lt;bob&gt;charlie&lt;/bob&gt;&lt;david&gt;edgar&lt;/david&gt;&lt;/alice&gt;</code>
