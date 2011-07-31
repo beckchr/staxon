@@ -193,9 +193,9 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 	public void writeEndDocument() throws XMLStreamException {
 		if (!scope.isRoot()) {
 			ensureStartTagClosed();
-			do {
+			while (!scope.isRoot()) {
 				writeEndElement();
-			} while (!scope.isRoot());
+			}
 		}
 		startDocumentWritten = false;
 	}
