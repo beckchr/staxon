@@ -56,6 +56,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		}
 	}
 
+	@Override
 	public void writeStartElement(String localName) throws XMLStreamException {
 		if (scope.getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX) == null) {
 			throw new XMLStreamException("Default namespace URI has not been set");
@@ -63,6 +64,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		writeStartElement(XMLConstants.DEFAULT_NS_PREFIX, localName, false);
 	}
 
+	@Override
 	public void writeStartElement(String namespaceURI, String localName) throws XMLStreamException {
 		if (namespaceURI == null) {
 			throw new XMLStreamException("Namespace URI must not be null");
@@ -74,6 +76,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		writeStartElement(prefix, localName, false);
 	}
 
+	@Override
 	public void writeStartElement(String prefix, String localName, String namespaceURI) throws XMLStreamException {
 		if (prefix == null) {
 			throw new XMLStreamException("Prefix must not be null");
@@ -100,6 +103,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		scope = newScope;
 	}
 
+	@Override
 	public void writeEndElement() throws XMLStreamException {
 		ensureStartTagClosed();
 		if (scope.isRoot()) {
@@ -109,6 +113,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		scope = scope.getParent();
 	}
 
+	@Override
 	public void writeEmptyElement(String localName) throws XMLStreamException {
 		if (scope.getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX) == null) {
 			throw new XMLStreamException("Default namespace URI has not been set");
@@ -116,6 +121,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		writeStartElement(XMLConstants.DEFAULT_NS_PREFIX, localName, true);
 	}
 
+	@Override
 	public void writeEmptyElement(String namespaceURI, String localName) throws XMLStreamException {
 		if (namespaceURI == null) {
 			throw new XMLStreamException("Namespace URI must not be null");
@@ -127,6 +133,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		writeStartElement(prefix, localName, true);
 	}
 
+	@Override
 	public void writeEmptyElement(String prefix, String localName, String namespaceURI) throws XMLStreamException {
 		if (prefix == null) {
 			throw new XMLStreamException("Prefix must not be null");
@@ -140,14 +147,17 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		writeStartElement(prefix, localName, true);
 	}
 
+	@Override
 	public void writeAttribute(String localName, String value) throws XMLStreamException {
 		writeAttribute(null, null, localName, value);
 	}
 
+	@Override
 	public void writeAttribute(String namespaceURI, String localName, String value) throws XMLStreamException {
 		writeAttribute(null, namespaceURI, localName, value);
 	}
 
+	@Override
 	public void writeAttribute(String prefix, String namespaceURI, String localName, String value) throws XMLStreamException {
 		if (scope.isStartTagClosed()) {
 			throw new XMLStreamException("Cannot write attribute: element has children or text");
@@ -175,28 +185,34 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		writeProperty(name, value);
 	}
 
+	@Override
 	public void writeCharacters(String text) throws XMLStreamException {
 		ensureStartTagClosed();
 		writeData(text, XMLStreamConstants.CHARACTERS);
 	}
 	
+	@Override
 	public void writeCharacters(char[] text, int start, int length) throws XMLStreamException {
 		writeCharacters(new String(text, start, length));
 	}
 
+	@Override
 	public void writeCData(String data) throws XMLStreamException {
 		ensureStartTagClosed();
 		writeData(data, XMLStreamConstants.CDATA);
 	}
 
+	@Override
 	public void writeStartDocument() throws XMLStreamException {
 		writeStartDocument("1.0");
 	}
 
+	@Override
 	public void writeStartDocument(String version) throws XMLStreamException {
 		writeStartDocument("UTF-8", version);
 	}
 
+	@Override
 	public void writeStartDocument(String encoding, String version) throws XMLStreamException {
 		if (startDocumentWritten || !scope.isRoot()) {
 			throw new XMLStreamException("Cannot start document");
@@ -205,6 +221,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		startDocumentWritten = true;
 	}
 
+	@Override
 	public void writeEndDocument() throws XMLStreamException {
 		if (!scope.isRoot()) {
 			ensureStartTagClosed();
@@ -215,11 +232,13 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		startDocumentWritten = false;
 	}
 	
+	@Override
 	public void close() throws XMLStreamException {
 		ensureStartTagClosed();
 		flush();
 	}
 
+	@Override
 	public void writeNamespace(String prefix, String namespaceURI) throws XMLStreamException {
 		if (scope.isStartTagClosed()) {
 			throw new XMLStreamException("Cannot write namespace: element has children or text");
@@ -235,22 +254,27 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		setPrefix(prefix, namespaceURI);
 	}
 
+	@Override
 	public void writeDefaultNamespace(String namespaceURI) throws XMLStreamException {
 		writeNamespace(XMLConstants.DEFAULT_NS_PREFIX, namespaceURI);
 	}
 
+	@Override
 	public String getPrefix(String namespaceURI) throws XMLStreamException {
 		return scope.getPrefix(namespaceURI);
 	}
 
+	@Override
 	public void setPrefix(String prefix, String namespaceURI) throws XMLStreamException {
 		scope.setPrefix(prefix, namespaceURI);
 	}
 
+	@Override
 	public void setDefaultNamespace(String namespaceURI) throws XMLStreamException {
 		setPrefix(XMLConstants.DEFAULT_NS_PREFIX, namespaceURI);
 	}
 
+	@Override
 	public void setNamespaceContext(NamespaceContext context) throws XMLStreamException {
 		if (!scope.isRoot()) {
 			throw new XMLStreamException("This method may only be called once at the start of the document");
@@ -258,35 +282,42 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		scope = new XMLStreamWriterScope<T>(context, scope.getInfo());
 	}
 
+	@Override
 	public NamespaceContext getNamespaceContext() {
 		return scope;
 	}
 
+	@Override
 	public void writeComment(String data) throws XMLStreamException {
 		ensureStartTagClosed();
 		writeData(data, XMLStreamConstants.COMMENT);
 	}
 
+	@Override
 	public void writeProcessingInstruction(String target) throws XMLStreamException {
 		ensureStartTagClosed();
 		writePI(target, null);
 	}
 
+	@Override
 	public void writeProcessingInstruction(String target, String data) throws XMLStreamException {
 		ensureStartTagClosed();
 		writePI(target, data);
 	}
 
+	@Override
 	public void writeDTD(String dtd) throws XMLStreamException {
 		ensureStartTagClosed();
 		writeData(dtd, XMLStreamConstants.DTD);
 	}
 
+	@Override
 	public void writeEntityRef(String name) throws XMLStreamException {
 		ensureStartTagClosed();
 		writeData(name, XMLStreamConstants.ENTITY_REFERENCE);
 	}
 
+	@Override
 	public Object getProperty(String name) throws IllegalArgumentException {
 		throw new IllegalArgumentException("Unsupported property: " + name);
 	}

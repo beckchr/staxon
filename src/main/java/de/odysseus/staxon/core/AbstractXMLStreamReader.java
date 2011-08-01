@@ -214,6 +214,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	 */
 	protected abstract boolean consume(XMLStreamReaderScope<T> scope) throws XMLStreamException, IOException;
 
+	@Override
 	public void require(int eventType, String namespaceURI, String localName) throws XMLStreamException {
 		if (eventType != getEventType()) {
 			throw new XMLStreamException("expected event type " + getEventName(eventType) + ", was " + getEventName(getEventType()));
@@ -226,6 +227,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		}
 	}
 
+	@Override
 	public String getElementText() throws XMLStreamException {
 		require(XMLStreamConstants.START_ELEMENT, null, null);
 		StringBuilder builder = null;
@@ -256,6 +258,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		}
 	}
 
+	@Override
 	public boolean hasNext() throws XMLStreamException {
 		try {
 			while (queue.isEmpty() && moreTokens) {
@@ -267,6 +270,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		return !queue.isEmpty();
 	}
 
+	@Override
 	public int next() throws XMLStreamException {
 		if (!hasNext()) {
 			throw new IllegalStateException("No more events");
@@ -275,6 +279,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		return event.getType();
 	}
 
+	@Override
 	public int nextTag() throws XMLStreamException {
 		int eventType = next();
 		while ((eventType == XMLStreamConstants.CHARACTERS && isWhiteSpace()) // skip whitespace
@@ -290,83 +295,103 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		return eventType;
 	}
 
+	@Override
 	public void close() throws XMLStreamException {
 		scope = null;
 		queue.clear();
 	}
 
+	@Override
 	public boolean isStartElement() {
 		return getEventType() == XMLStreamConstants.START_ELEMENT;
 	}
 
+	@Override
 	public boolean isEndElement() {
 		return getEventType() == XMLStreamConstants.END_ELEMENT;
 	}
 
+	@Override
 	public boolean isCharacters() {
 		return getEventType() == XMLStreamConstants.CHARACTERS;
 	}
 
+	@Override
 	public boolean isWhiteSpace() {
 		return false;
 	}
 
+	@Override
 	public int getAttributeCount() {
 		return event.getScope().getAttributeCount();
 	}
 
+	@Override
 	public QName getAttributeName(int index) {
 		return event.getScope().getAttributeName(index);
 	}
 
+	@Override
 	public String getAttributeLocalName(int index) {
 		return getAttributeName(index).getLocalPart();
 	}
 
+	@Override
 	public String getAttributeValue(int index) {
 		return event.getScope().getAttributeValue(index);
 	}
 
+	@Override
 	public String getAttributePrefix(int index) {
 		return getAttributeName(index).getPrefix();
 	}
 
+	@Override
 	public String getAttributeNamespace(int index) {
 		return getAttributeName(index).getNamespaceURI();
 	}
 
+	@Override
 	public String getAttributeType(int index) {
 		return null;
 	}
 
+	@Override
 	public boolean isAttributeSpecified(int index) {
 		return index < getAttributeCount();
 	}
 
+	@Override
 	public String getAttributeValue(String namespaceURI, String localName) {
 		return event.getScope().getAttributeValue(namespaceURI, localName);
 	}
 
+	@Override
 	public String getNamespaceURI(String prefix) {
 		return event.getScope().getNamespaceURI(prefix);
 	}
 
+	@Override
 	public int getNamespaceCount() {
 		return hasName() ? event.getScope().getNamespaceCount() : null;
 	}
 
+	@Override
 	public String getNamespacePrefix(int index) {
 		return hasName() ? event.getScope().getNamespacePrefix(index) : null;
 	}
 
+	@Override
 	public String getNamespaceURI(int index) {
 		return hasName() ? event.getScope().getNamespaceURI(index) : null;
 	}
 
+	@Override
 	public NamespaceContext getNamespaceContext() {
 		return event.getScope();
 	}
 
+	@Override
 	public int getEventType() {
 		return event.getType();
 	}
@@ -375,38 +400,48 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		return getEventName(getEventType());
 	}
 	
+	@Override
 	public Location getLocation() {
 		return new Location() {
+			@Override
 			public int getCharacterOffset() {
 				return -1;
 			}
+			@Override
 			public int getColumnNumber() {
 				return -1;
 			}
+			@Override
 			public int getLineNumber() {
 				return -1;
 			}
+			@Override
 			public String getPublicId() {
 				return null;
 			}
+			@Override
 			public String getSystemId() {
 				return null;
 			}
 		};
 	}
 
+	@Override
 	public boolean hasText() {
 		return isCharacters();
 	}
 
+	@Override
 	public String getText() {
 		return hasText() ? event.getText() : null;
 	}
 
+	@Override
 	public char[] getTextCharacters() {
 		return hasText() ? event.getText().toCharArray() : null;
 	}
 
+	@Override
 	public int getTextCharacters(int sourceStart, char[] target, int targetStart, int length) throws XMLStreamException {
 		int count = Math.min(length, getTextLength());
 		if (count > 0) {
@@ -415,22 +450,27 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		return count;
 	}
 
+	@Override
 	public int getTextStart() {
 		return 0;
 	}
 
+	@Override
 	public int getTextLength() {
 		return hasText() ? event.getText().length() : 0;
 	}
 
+	@Override
 	public boolean hasName() {
 		return getEventType() == XMLStreamConstants.START_ELEMENT || getEventType() == XMLStreamConstants.END_ELEMENT;
 	}
 
+	@Override
 	public QName getName() {
 		return hasName() ? new QName(getNamespaceURI(), getLocalName(), getPrefix()) : null;
 	}
 
+	@Override
 	public String getLocalName() {
 		return hasName() ? event.getScope().getLocalName() : null;
 	}
@@ -439,34 +479,42 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		return hasName() ? event.getScope().getTagName() : null;
 	}
 
+	@Override
 	public String getNamespaceURI() {
 		return hasName() ? event.getScope().getNamespaceURI(event.getScope().getPrefix()) : null;
 	}
 
+	@Override
 	public String getPrefix() {
 		return hasName() ? event.getScope().getPrefix() : null;
 	}
 
+	@Override
 	public String getVersion() {
 		return null;
 	}
 
+	@Override
 	public String getEncoding() {
 		return null;
 	}
 
+	@Override
 	public boolean isStandalone() {
 		return false;
 	}
 
+	@Override
 	public boolean standaloneSet() {
 		return false;
 	}
 
+	@Override
 	public String getCharacterEncodingScheme() {
 		return null;
 	}
 
+	@Override
 	public String getPITarget() {
 		if (event.getType() != XMLStreamConstants.PROCESSING_INSTRUCTION) {
 			return null;
@@ -475,6 +523,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		return colon < 0 ? event.getText() : event.getText().substring(0, colon);
 	}
 
+	@Override
 	public String getPIData() {
 		if (event.getType() != XMLStreamConstants.PROCESSING_INSTRUCTION) {
 			return null;
@@ -483,6 +532,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		return colon < 0 ? null : event.getText().substring(colon + 1);
 	}
 
+	@Override
 	public Object getProperty(String name) throws IllegalArgumentException {
 		throw new IllegalArgumentException("Unsupported property: " + name);
 	}

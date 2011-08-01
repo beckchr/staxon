@@ -28,26 +28,32 @@ class JacksonStreamTarget implements JsonStreamTarget {
 		this.generator = generator;
 	}
 
+	@Override
 	public void endArray() throws IOException {
 		generator.writeEndArray();
 	}
 
+	@Override
 	public void endObject() throws IOException {
 		generator.writeEndObject();
 	}
 
+	@Override
 	public void name(String name) throws IOException {
 		generator.writeFieldName(name);
 	}
 
+	@Override
 	public void startArray() throws IOException {
 		generator.writeStartArray();
 	}
 
+	@Override
 	public void startObject() throws IOException {
 		generator.writeStartObject();
 	}
 
+	@Override
 	public void value(String value) throws IOException {
 		if (value == null) {
 			generator.writeNull();
@@ -56,10 +62,12 @@ class JacksonStreamTarget implements JsonStreamTarget {
 		}
 	}
 
+	@Override
 	public void flush() throws IOException {
 		generator.flush();
 	}
 
+	@Override
 	public void close() throws IOException {
 		generator.close();
 	}

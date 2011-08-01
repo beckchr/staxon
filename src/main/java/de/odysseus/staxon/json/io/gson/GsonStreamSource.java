@@ -61,35 +61,42 @@ class GsonStreamSource implements JsonStreamSource {
 		}
 	}
 
+	@Override
 	public void endArray() throws IOException {
 		consume(JsonStreamToken.END_ARRAY);
 		reader.endArray();
 	}
 
+	@Override
 	public void endObject() throws IOException {
 		consume(JsonStreamToken.END_OBJECT);
 		reader.endObject();
 	}
 
+	@Override
 	public String name() throws IOException {
 		consume(JsonStreamToken.NAME);
 		return reader.nextName();
 	}
 
+	@Override
 	public JsonStreamToken peek() throws IOException {
 		return peek == null ? peek = read() : peek;
 	}
 
+	@Override
 	public void startArray() throws IOException {
 		consume(JsonStreamToken.START_ARRAY);
 		reader.beginArray();
 	}
 
+	@Override
 	public void startObject() throws IOException {
 		consume(JsonStreamToken.START_OBJECT);
 		reader.beginObject();
 	}
 
+	@Override
 	public String value() throws IOException {
 		consume(JsonStreamToken.VALUE);
 		switch (reader.peek()) {
@@ -106,6 +113,7 @@ class GsonStreamSource implements JsonStreamSource {
 		}
 	}
 
+	@Override
 	public void close() throws IOException {
 		reader.close();
 	}

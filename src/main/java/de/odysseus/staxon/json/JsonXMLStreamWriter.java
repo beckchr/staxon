@@ -150,6 +150,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 		}		
 	}
 
+	@Override
 	public void writeStartDocument(String encoding, String version) throws XMLStreamException {
 		super.writeStartDocument(encoding, version);
 		try {
@@ -160,6 +161,8 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 		getScope().getInfo().startObjectWritten = true;
 	}
 
+	
+	@Override
 	public void writeEndDocument() throws XMLStreamException {
 		super.writeEndDocument();
 		try {
@@ -196,6 +199,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 		}
 	}
 
+	@Override
 	public void close() throws XMLStreamException {
 		super.close();
 		try {
@@ -205,6 +209,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 		}
 	}
 
+	@Override
 	public void flush() throws XMLStreamException {
 		try {
 			target.flush();

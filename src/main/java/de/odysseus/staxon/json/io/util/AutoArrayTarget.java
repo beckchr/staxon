@@ -53,6 +53,7 @@ public class AutoArrayTarget implements JsonStreamTarget {
 		public void write(JsonStreamTarget target) throws IOException {
 			target.startObject();
 		}
+		@Override
 		public JsonStreamToken token() {
 			return JsonStreamToken.START_OBJECT;
 		}
@@ -67,6 +68,7 @@ public class AutoArrayTarget implements JsonStreamTarget {
 		public void write(JsonStreamTarget target) throws IOException {
 			target.endObject();
 		}
+		@Override
 		public JsonStreamToken token() {
 			return JsonStreamToken.END_OBJECT;
 		}
@@ -81,6 +83,7 @@ public class AutoArrayTarget implements JsonStreamTarget {
 		public void write(JsonStreamTarget target) throws IOException {
 			target.endArray();
 		}
+		@Override
 		public JsonStreamToken token() {
 			return JsonStreamToken.END_ARRAY;
 		}

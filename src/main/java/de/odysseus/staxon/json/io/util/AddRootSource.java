@@ -38,6 +38,7 @@ public class AddRootSource implements JsonStreamSource {
 		this.root = root;
 	}
 
+	@Override
 	public String name() throws IOException {
 		if (state == State.ROOT_NAME) {
 			state = State.DELEGATE;
@@ -46,10 +47,12 @@ public class AddRootSource implements JsonStreamSource {
 		return delegate.name();
 	}
 
+	@Override
 	public String value() throws IOException {
 		return delegate.value();
 	}
 
+	@Override
 	public void startObject() throws IOException {
 		if (state == State.START_DOC) {
 			state = State.ROOT_NAME;
@@ -59,6 +62,7 @@ public class AddRootSource implements JsonStreamSource {
 		depth++;
 	}
 
+	@Override
 	public void endObject() throws IOException {
 		if (depth == 1 && state == State.DELEGATE && delegate.peek() == JsonStreamToken.NONE) {
 			state = State.END_DOC;
@@ -69,14 +73,17 @@ public class AddRootSource implements JsonStreamSource {
 		depth--;
 	}
 
+	@Override
 	public void startArray() throws IOException {
 		delegate.startArray();
 	}
 
+	@Override
 	public void endArray() throws IOException {
 		delegate.endArray();
 	}
 
+	@Override
 	public JsonStreamToken peek() throws IOException {
 		switch (state) {
 		case START_DOC: return JsonStreamToken.START_OBJECT;
@@ -90,6 +97,7 @@ public class AddRootSource implements JsonStreamSource {
 		return result;
 	}
 
+	@Override
 	public void close() throws IOException {
 		delegate.close();
 	}

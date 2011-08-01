@@ -32,20 +32,24 @@ import de.odysseus.staxon.json.io.JsonStreamSource;
 import de.odysseus.staxon.json.io.JsonStreamTarget;
 
 public class GsonStreamFactory implements JsonStreamFactory {
+	@Override
 	public JsonStreamSource createJsonStreamSource(InputStream input) throws IOException {
 		return createJsonStreamSource(new InputStreamReader(input));
 	}
 	
+	@Override
 	public JsonStreamSource createJsonStreamSource(Reader reader) {
 		JsonReader jsonReader = new JsonReader(reader);
 		jsonReader.setLenient(false);
 		return new GsonStreamSource(jsonReader);
 	}
 
+	@Override
 	public JsonStreamTarget createJsonStreamTarget(OutputStream output, boolean pretty) throws IOException {
 		return createJsonStreamTarget(new OutputStreamWriter(output), pretty);
 	}
 	
+	@Override
 	public JsonStreamTarget createJsonStreamTarget(Writer writer, boolean pretty) {
 		JsonWriter jsonWriter = new JsonWriter(new BufferedWriter(writer));
 		jsonWriter.setLenient(false);

@@ -81,34 +81,42 @@ class JacksonStreamSource implements JsonStreamSource {
 		return parser.getCurrentToken() == JsonToken.VALUE_NULL ? null : parser.getText();
 	}
 	
+	@Override
 	public void endArray() throws IOException {
 		expect(JsonStreamToken.END_ARRAY).consume();
 	}
 
+	@Override
 	public void endObject() throws IOException {
 		expect(JsonStreamToken.END_OBJECT).consume();
 	}
 
+	@Override
 	public String name() throws IOException {
 		return expect(JsonStreamToken.NAME).consume(parser.getCurrentName());
 	}
 
+	@Override
 	public JsonStreamToken peek() throws IOException {
 		return peek == null ? peek = read() : peek;
 	}
 
+	@Override
 	public void startArray() throws IOException {
 		expect(JsonStreamToken.START_ARRAY).consume();
 	}
 
+	@Override
 	public void startObject() throws IOException {
 		expect(JsonStreamToken.START_OBJECT).consume();
 	}
 
-	public String value() throws IOException {
+	@Override
+ 	public String value() throws IOException {
 		return expect(JsonStreamToken.VALUE).consume(text());
 	}
 
+	@Override
 	public void close() throws IOException {
 		parser.close();
 	}

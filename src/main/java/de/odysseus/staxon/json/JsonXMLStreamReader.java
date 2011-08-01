@@ -77,6 +77,7 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 		}
 	}
 	
+	@Override
 	protected boolean consume(XMLStreamReaderScope<ScopeInfo> scope) throws XMLStreamException, IOException {
 		switch (source.peek()) {
 		case NAME:
@@ -143,6 +144,7 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 		}
 	}
 
+	@Override
 	public void close() throws XMLStreamException {
 		super.close();
 		try {
@@ -150,14 +152,5 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
-	}
-
-	public Object getProperty(String name) throws IllegalArgumentException {
-		throw new IllegalArgumentException("Unsupported property: " + name);
-	}
-	
-	@Override
-	public String toString() {
-		return getClass().getSimpleName() + "(" + getEventName() + ")";
 	}
 }

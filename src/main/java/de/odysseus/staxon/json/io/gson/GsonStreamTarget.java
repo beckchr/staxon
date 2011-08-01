@@ -28,26 +28,32 @@ class GsonStreamTarget implements JsonStreamTarget {
 		this.writer = writer;
 	}
 
+	@Override
 	public void endArray() throws IOException {
 		writer.endArray();
 	}
 
+	@Override
 	public void endObject() throws IOException {
 		writer.endObject();
 	}
 
+	@Override
 	public void name(String name) throws IOException {
 		writer.name(name);
 	}
 
+	@Override
 	public void startArray() throws IOException {
 		writer.beginArray();
 	}
 
+	@Override
 	public void startObject() throws IOException {
 		writer.beginObject();
 	}
 
+	@Override
 	public void value(String value) throws IOException {
 		if (value == null) {
 			writer.nullValue();
@@ -56,10 +62,12 @@ class GsonStreamTarget implements JsonStreamTarget {
 		}
 	}
 
+	@Override
 	public void flush() throws IOException {
 		writer.flush();
 	}
 	
+	@Override
 	public void close() throws IOException {
 		writer.close();
 	}

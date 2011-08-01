@@ -120,6 +120,7 @@ public class AbstractXMLStreamScope implements NamespaceContext {
 		this.startTagClosed = startTagClosed;
 	}
 
+	@Override
 	public String getPrefix(String namespaceURI) {
 		if (namespaceURI == null) {
 			throw new IllegalArgumentException();
@@ -163,6 +164,7 @@ public class AbstractXMLStreamScope implements NamespaceContext {
 		}
 	}
 
+	@Override
 	public Iterator<String> getPrefixes(final String namespaceURI) {
 		if (namespaceURI == null) {
 			throw new IllegalArgumentException();
@@ -214,6 +216,7 @@ public class AbstractXMLStreamScope implements NamespaceContext {
 					}
 				}
 
+				@Override
 				public boolean hasNext() {
 					if (next == null) {
 						next = next0();
@@ -221,6 +224,7 @@ public class AbstractXMLStreamScope implements NamespaceContext {
 					return next != null;
 				}
 
+				@Override
 				public String next() {
 					if (!hasNext()) {
 						throw new NoSuchElementException();
@@ -230,6 +234,7 @@ public class AbstractXMLStreamScope implements NamespaceContext {
 					return result;
 				}
 
+				@Override
 				public void remove() {
 					throw new UnsupportedOperationException("Cannot remove prefix");
 				}
@@ -237,6 +242,7 @@ public class AbstractXMLStreamScope implements NamespaceContext {
 		}
 	}
 
+	@Override
 	public String getNamespaceURI(String prefix) {
 		if (prefix == null) {
 			throw new IllegalArgumentException();
