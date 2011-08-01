@@ -6,7 +6,7 @@ Features:
 - Full XML namespace support
 - Start JSON arrays via XML processing instruction
 - Memory efficient, even for very large documents
-- It's pretty fast…
+- It's pretty fast...
 
 
 Wiki: https://github.com/beckchr/staxon/wiki
