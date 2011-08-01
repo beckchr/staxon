@@ -2,10 +2,15 @@ StAXON - JSON via StAX
 ----------------------
 
 Features:
-- stream JSON using XMLStreamReader/Writer
-- works with Jackson and Gson
-- supports XML namespaces
+- Supports Jackson and Gson as JSON backends
+- Full XML namespace support
+- Start JSON arrays via XML processing instruction
+- Memory efficient, even for very large documents
+- It's pretty fast…
 
-License: APL2
-Status: experimental
 
+Wiki: https://github.com/beckchr/staxon/wiki
+
+License: Apache License, Version 2
+
+(c) 2011 Odysseus Software
