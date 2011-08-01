@@ -45,6 +45,14 @@
 				<configuration>
 					<excludeResources>true</excludeResources>
 				</configuration>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
