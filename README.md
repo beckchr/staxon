@@ -21,6 +21,9 @@ JSON objects to generate a more compact JSON.
 If you know StAX, you'll notice that there's little new: just obtain an `XMLStreamReader` or `XMLStreamWriter`
 from StAXON and you're ready to go.
 
+Make sure you have the `staxon` and `jackson-core` jars on your classpath
+([jackson download](http://wiki.fasterxml.com/JacksonDownload)).
+
 ### Writing JSON
 
 Create a JSON-based writer:
