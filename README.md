@@ -59,24 +59,24 @@ Create a JSON-based reader:
 
 Read your document:
 
-		assert reader.getEventType() == XMLStreamConstants.START_DOCUMENT;
-		reader.nextTag(); 
-		assert reader.isStartElement() && "alice".equals(reader.getLocalName());
-		reader.next();
-		assert reader.hasText() && "charlie".equals(reader.getText());
-		reader.nextTag();
-		assert reader.isEndElement();
-		reader.next();
-		assert reader.getEventType() == XMLStreamConstants.END_DOCUMENT;
-		reader.close();
+	assert reader.getEventType() == XMLStreamConstants.START_DOCUMENT;
+	reader.nextTag(); 
+	assert reader.isStartElement() && "alice".equals(reader.getLocalName());
+	reader.next();
+	assert reader.hasText() && "charlie".equals(reader.getText());
+	reader.nextTag();
+	assert reader.isEndElement();
+	reader.next();
+	assert reader.getEventType() == XMLStreamConstants.END_DOCUMENT;
+	reader.close();
 
 ## Documentation
 
-[StAXON Wiki](https://github.com/beckchr/staxon/wiki/).
+[StAXON Wiki](https://github.com/beckchr/staxon/wiki/)
 
 ## License
 
 StAXON is available under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
 
 
-<small>(c) 2011 Odysseus Software</small>
+_(c) 2011 Odysseus Software_
