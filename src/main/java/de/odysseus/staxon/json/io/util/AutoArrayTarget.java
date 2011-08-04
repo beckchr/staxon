@@ -35,7 +35,7 @@ import de.odysseus.staxon.json.io.JsonStreamToken;
  * 
  * It is recommended to handle array boundaries via the
  * {@link JsonXMLStreamWriter#writeStartArray(String)} and
- * {@link JsonXMLStreamWriter#writeEndArray(String)} methods
+ * {@link JsonXMLStreamWriter#writeEndArray()} methods
  * or by producing <code>&lt;?xml-muliple ...?&gt;</code>
  * processing instructions.
  */
