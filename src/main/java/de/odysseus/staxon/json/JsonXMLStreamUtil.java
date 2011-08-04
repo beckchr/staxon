@@ -50,12 +50,14 @@ public class JsonXMLStreamUtil {
 	private static JsonStreamFactory getDefaultFactory() {
 		try {
 			return JacksonStreamFactory.class.newInstance();
-		} catch (Exception e1) {
+		} catch (NoClassDefFoundError e) {
 			try {
 				return GsonStreamFactory.class.newInstance();
 			} catch (Exception e2) {
-				throw new RuntimeException("Failed to create JsonStreamFactory");
+				throw new RuntimeException("Failed to create GsonStreamFactory", e);
 			}
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to create JacksonStreamFactory", e);
 		}
 	}
 	
