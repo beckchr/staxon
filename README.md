@@ -16,13 +16,39 @@ The XML-to-JSON [Mapping Convention](https://github.com/beckchr/staxon/wiki/Mapp
 similar to the [Badgerfish](http://www.sklar.com/badgerfish/) convention but attempts to avoid needless text-only
 JSON objects to generate a more compact JSON.
 
+## Dependencies
+
+Make sure you have the `staxon` and `jackson-core` (and/or `gson`) jars on your classpath
+([jackson download](http://wiki.fasterxml.com/JacksonDownload)).
+
+## Maven Setup
+
+If you're using maven, you can get StAXON from our maven repository at github: 
+
+	<repositories>
+		<repository>
+			<id>beckchr.github.com</id>
+			<url>http://beckchr.github.com/maven/releases</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>de.odysseus.staxon</groupId>
+			<artifactId>staxon</artifactId>
+			<version>0.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-core-asl</artifactId>
+			<version>1.8.4</version>
+		</dependency>
+	</dependencies>
+
 ## Basic Usage
 
 If you know StAX, you'll notice that there's little new: just obtain an `XMLStreamReader` or `XMLStreamWriter`
 from StAXON and you're ready to go.
-
-Make sure you have the `staxon` and `jackson-core` jars on your classpath
-([jackson download](http://wiki.fasterxml.com/JacksonDownload)).
 
 ### Writing JSON
 
