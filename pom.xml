@@ -27,6 +27,18 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
+	<distributionManagement>
+		<repository>
+			<id>snapshots</id>
+			<url>file:../beckchr.github.com/mvnrepo/releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>snapshots</id>
+			<uniqueVersion>false</uniqueVersion>
+			<url>file:../beckchr.github.com/mvnrepo/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -77,4 +89,5 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	
 </project>
