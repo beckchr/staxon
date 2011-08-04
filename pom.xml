@@ -30,7 +30,7 @@
 	<distributionManagement>
 		<repository>
 			<id>releases</id>
-			<url>file:../beckchr.github.com/mvnrepo/releases</url>
+			<url>file:../../../beckchr.github.com/mvnrepo/releases</url>
 		</repository>
 		<snapshotRepository>
 			<id>snapshots</id>
