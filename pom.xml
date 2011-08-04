@@ -29,8 +29,8 @@
 
 	<distributionManagement>
 		<repository>
-			<id>snapshots</id>
-			<url>file:///${basedir}/../beckchr.github.com/mvnrepo/releases</url>
+			<id>releases</id>
+			<url>file:../beckchr.github.com/mvnrepo/releases</url>
 		</repository>
 		<snapshotRepository>
 			<id>snapshots</id>
