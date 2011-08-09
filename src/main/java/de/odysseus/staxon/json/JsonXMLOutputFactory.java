@@ -160,9 +160,10 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 				prettyPrint = Boolean.valueOf(value.toString());
 			} else if (PROP_STREAM_FACTORY.equals(name)) {
 				streamFactory = (JsonStreamFactory)value;
+			} else {
+				throw new IllegalArgumentException("Unsupported output property: " + name);
 			}
 		}
-		throw new IllegalArgumentException("Unsupported property: " + name);
 	}
 
 	@Override
@@ -178,9 +179,10 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 				return prettyPrint;
 			} else if (PROP_STREAM_FACTORY.equals(name)) {
 				return streamFactory;
+			} else {
+				throw new IllegalArgumentException("Unsupported property: " + name);
 			}
 		}
-		throw new IllegalArgumentException("Unsupported property: " + name);
 	}
 
 	@Override
