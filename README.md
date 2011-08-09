@@ -36,7 +36,7 @@ If you're using maven, you can get StAXON from our maven repository at github:
 		<dependency>
 			<groupId>de.odysseus.staxon</groupId>
 			<artifactId>staxon</artifactId>
-			<version>0.3.0</version>
+			<version>0.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
