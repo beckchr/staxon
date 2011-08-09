@@ -54,7 +54,7 @@ from StAXON and you're ready to go.
 
 Create a JSON-based writer:
 
-	XMLStreamWriter writer = JsonXMLStreamUtil.createJsonXMLStreamWriter(System.out, true);
+	XMLStreamWriter writer = new JsonXMLOutputFactory().createXMLStreamWriter(System.out);
 
 Write your document:
 
@@ -72,16 +72,14 @@ With an XML-based writer, this would have produced something like
 
 However, with our JSON-based writer, the output is
 
-	{
-	  "alice" : "charlie"
-	}
+	{"alice":"charlie"}
 
 ### Reading JSON
 
 Create a JSON-based reader:
 
 	StringReader json = new StringReader("{\"alice\":\"charlie\"}");
-	XMLStreamReader reader = JsonXMLStreamUtil.createJsonXMLStreamReader(json);
+	XMLStreamReader reader = new JsonXMLInputFactory().createXMLStreamReader(json);
 
 Read your document:
 
