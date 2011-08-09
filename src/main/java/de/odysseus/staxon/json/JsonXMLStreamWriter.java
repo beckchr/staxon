@@ -36,9 +36,9 @@ import de.odysseus.staxon.json.io.JsonStreamTarget;
  *   <li><code>writeProcessingInstruction(...)</code> does nothing (except for target <code>xml-multiple</code>, see below).</li>
  * </ul>
  * 
- * <p>The writer consumes processing instructions
- * <code>&lt;?xml-multiple element-name?&gt;</code> to properly insert JSON array tokens (<code>'['</code>
- * and <code>']'</code>). The client must provide this instruction through the
+ * <p>The writer may consume processing instructions
+ * (e.g. <code>&lt;?xml-multiple element-name?&gt;</code>) to properly insert JSON array tokens (<code>'['</code>
+ * and <code>']'</code>). The client provides this instruction through the
  * {@link #writeProcessingInstruction(String, String)} method,
  * passing the (possibly prefixed) field name as data e.g.</p>
  * <pre>
@@ -59,12 +59,19 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	}
 
 	private final JsonStreamTarget target;
-	private final boolean useMultiplePI = true;
-	private final boolean autoEndArray = useMultiplePI;
+	private final boolean multiplePI;
+	private final boolean autoEndArray;
 
-	public JsonXMLStreamWriter(JsonStreamTarget target) {
+	/**
+	 * Create writer instance.
+	 * @param target stream target
+	 * @param multiplePI whether to use processing instruction to trigger array start
+	 */
+	public JsonXMLStreamWriter(JsonStreamTarget target, boolean multiplePI) {
 		super(new ScopeInfo());
 		this.target = target;
+		this.multiplePI = multiplePI;
+		this.autoEndArray = true;
 	}
 
 	@Override
@@ -220,7 +227,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 
 	@Override
 	protected void writePI(String target, String data) throws XMLStreamException {
-		if (useMultiplePI && JsonXMLStreamUtil.PI_MULTIPLE_TARGET.equals(target)) {
+		if (multiplePI && JsonXMLStreamConstants.MULTIPLE_PI_TARGET.equals(target)) {
 			writeStartArray(data);
 		}
 	}

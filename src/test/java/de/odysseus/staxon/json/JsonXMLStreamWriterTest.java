@@ -22,8 +22,6 @@ import javax.xml.stream.XMLStreamWriter;
 import org.junit.Assert;
 import org.junit.Test;
 
-import de.odysseus.staxon.json.JsonXMLStreamUtil;
-
 public class JsonXMLStreamWriterTest {
 	/**
 	 * <code>&lt;alice&gt;bob&lt;/alice&gt;</code>
@@ -31,7 +29,7 @@ public class JsonXMLStreamWriterTest {
 	@Test
 	public void testTextContent() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = JsonXMLStreamUtil.createJsonXMLStreamWriter(result, false);
+		XMLStreamWriter writer = new JsonXMLOutputFactory().createXMLStreamWriter(result);
 		//<code>&lt;alice&gt;bob&lt;/alice&gt;</code>
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
@@ -48,7 +46,7 @@ public class JsonXMLStreamWriterTest {
 	@Test
 	public void testNested() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = JsonXMLStreamUtil.createJsonXMLStreamWriter(result, false);
+		XMLStreamWriter writer = new JsonXMLOutputFactory().createXMLStreamWriter(result);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeStartElement("bob");
@@ -69,10 +67,10 @@ public class JsonXMLStreamWriterTest {
 	@Test
 	public void testArray() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = JsonXMLStreamUtil.createJsonXMLStreamWriter(result, false);
+		XMLStreamWriter writer = new JsonXMLOutputFactory().createXMLStreamWriter(result);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
-		writer.writeProcessingInstruction(JsonXMLStreamUtil.PI_MULTIPLE_TARGET, "bob");
+		writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET, "bob");
 		writer.writeStartElement("bob");
 		writer.writeCharacters("charlie");
 		writer.writeEndElement();
@@ -91,10 +89,10 @@ public class JsonXMLStreamWriterTest {
 	@Test
 	public void testArray2() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = JsonXMLStreamUtil.createJsonXMLStreamWriter(result, false);
+		XMLStreamWriter writer = new JsonXMLOutputFactory().createXMLStreamWriter(result);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
-		writer.writeProcessingInstruction(JsonXMLStreamUtil.PI_MULTIPLE_TARGET, "bob");
+		writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET, "bob");
 		writer.writeStartElement("bob");
 		writer.writeCharacters("charlie");
 		writer.writeEndElement();
@@ -114,7 +112,7 @@ public class JsonXMLStreamWriterTest {
 	@Test
 	public void testAttributes() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = JsonXMLStreamUtil.createJsonXMLStreamWriter(result, false);
+		XMLStreamWriter writer = new JsonXMLOutputFactory().createXMLStreamWriter(result);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeAttribute("charlie", "david");
@@ -131,7 +129,7 @@ public class JsonXMLStreamWriterTest {
 	@Test
 	public void testNamespaces() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = JsonXMLStreamUtil.createJsonXMLStreamWriter(result, false);
+		XMLStreamWriter writer = new JsonXMLOutputFactory().createXMLStreamWriter(result);
 		writer.setDefaultNamespace("http://some-namespace");
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");

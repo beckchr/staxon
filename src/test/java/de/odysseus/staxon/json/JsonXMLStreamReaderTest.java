@@ -24,8 +24,6 @@ import javax.xml.stream.XMLStreamReader;
 import org.junit.Assert;
 import org.junit.Test;
 
-import de.odysseus.staxon.json.JsonXMLStreamUtil;
-
 public class JsonXMLStreamReaderTest {
 	void verify(XMLStreamReader reader, int expectedEventType, String expectedLocalName, String expectedText) {
 		Assert.assertEquals(expectedEventType, reader.getEventType());
@@ -39,7 +37,7 @@ public class JsonXMLStreamReaderTest {
 	@Test
 	public void testTextContent() throws Exception {
 		String input = "{\"alice\":\"bob\"}";
-		XMLStreamReader reader = JsonXMLStreamUtil.createJsonXMLStreamReader(new StringReader(input));
+		XMLStreamReader reader = new JsonXMLInputFactory().createXMLStreamReader(new StringReader(input));
 		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
 		reader.next();
 		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
@@ -58,7 +56,7 @@ public class JsonXMLStreamReaderTest {
 	@Test
 	public void testNested() throws Exception {
 		String input = "{\"alice\":{\"bob\":\"charlie\",\"david\":\"edgar\"}}";
-		XMLStreamReader reader = JsonXMLStreamUtil.createJsonXMLStreamReader(new StringReader(input));
+		XMLStreamReader reader = new JsonXMLInputFactory().createXMLStreamReader(new StringReader(input));
 		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
 		reader.next();
 		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
@@ -87,13 +85,13 @@ public class JsonXMLStreamReaderTest {
 	@Test
 	public void testArray() throws Exception {
 		String input = "{\"alice\":{\"bob\":[\"charlie\",\"david\"]}}";
-		XMLStreamReader reader = JsonXMLStreamUtil.createJsonXMLStreamReader(new StringReader(input));
+		XMLStreamReader reader = new JsonXMLInputFactory().createXMLStreamReader(new StringReader(input));
 		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
 		reader.next();
 		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
 		reader.next();
 		verify(reader, XMLStreamConstants.PROCESSING_INSTRUCTION, null, null);
-		Assert.assertEquals(JsonXMLStreamUtil.PI_MULTIPLE_TARGET, reader.getPITarget());
+		Assert.assertEquals(JsonXMLStreamConstants.MULTIPLE_PI_TARGET, reader.getPITarget());
 		Assert.assertEquals("bob", reader.getPIData());
 		reader.next();
 		verify(reader, XMLStreamConstants.START_ELEMENT, "bob", null);
@@ -120,7 +118,7 @@ public class JsonXMLStreamReaderTest {
 	@Test
 	public void testAttributes() throws Exception {
 		String input = "{\"alice\":{\"@charlie\":\"david\",\"$\":\"bob\"}}";
-		XMLStreamReader reader = JsonXMLStreamUtil.createJsonXMLStreamReader(new StringReader(input));
+		XMLStreamReader reader = new JsonXMLInputFactory().createXMLStreamReader(new StringReader(input));
 		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
 		reader.next();
 		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
@@ -142,7 +140,7 @@ public class JsonXMLStreamReaderTest {
 	@Test
 	public void testNamespaces() throws Exception {
 		String input = "{\"alice\":{\"@xmlns\":\"http://some-namespace\",\"$\":\"bob\"}}";
-		XMLStreamReader reader = JsonXMLStreamUtil.createJsonXMLStreamReader(new StringReader(input));
+		XMLStreamReader reader = new JsonXMLInputFactory().createXMLStreamReader(new StringReader(input));
 		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
 		reader.next();
 		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);

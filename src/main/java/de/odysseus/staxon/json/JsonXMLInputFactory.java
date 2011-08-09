@@ -15,10 +15,12 @@
  */
 package de.odysseus.staxon.json;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 
 import javax.xml.stream.EventFilter;
 import javax.xml.stream.StreamFilter;
@@ -31,21 +33,76 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.util.XMLEventAllocator;
 import javax.xml.transform.Source;
 
+import de.odysseus.staxon.json.io.JsonStreamFactory;
+import de.odysseus.staxon.json.io.gson.GsonStreamFactory;
+import de.odysseus.staxon.json.io.jackson.JacksonStreamFactory;
+
 public class JsonXMLInputFactory extends XMLInputFactory {
+	/**
+	 * <p>JSON stream factory.</p>
+	 * 
+	 * <p>The default is to try <em>Jackson</em> first, the <em>Gson</em>.</p>
+	 */
+	public static final String PROP_STREAM_FACTORY = "JsonXMLInputFactory.streamFactory";
+	
+	/**
+	 * <p>Whether to use the {@link JsonXMLStreamConstants#MULTIPLE_PI_TARGET}
+	 * processing instruction to indicate an array start.
+	 * If not <code>true</code>, this reader will insert a PI with the field
+	 * name as PI data. 
+	 *  
+	 * <p>Note that the element given in the PI may occur zero times,
+	 * indicating an "empty array".</p>
+	 * 
+	 * <p>The default value is <code>true</code>.</p>
+	 */
+	public static final String PROP_MULTIPLE_PI = "JsonXMLInputFactory.multiplePI";
+
+	private static JsonStreamFactory getDefaultFactory() {
+		try {
+			return JacksonStreamFactory.class.newInstance();
+		} catch (NoClassDefFoundError e) {
+			try {
+				return GsonStreamFactory.class.newInstance();
+			} catch (Exception e2) {
+				throw new RuntimeException("Failed to create GsonStreamFactory", e);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to create JacksonStreamFactory", e);
+		}
+	}
+	
+	private JsonStreamFactory streamFactory = null;
+	private boolean multiplePI = true;
 	private boolean coalescing;
 	
+	private JsonStreamFactory streamFactory() {
+		if (streamFactory == null) {
+			streamFactory = getDefaultFactory();
+		}
+		return streamFactory;
+	}
+	
 	@Override
-	public XMLStreamReader createXMLStreamReader(Reader reader) throws XMLStreamException {
-		return JsonXMLStreamUtil.createJsonXMLStreamReader(reader);
+	public JsonXMLStreamReader createXMLStreamReader(Reader reader) throws XMLStreamException {
+		try {
+			return new JsonXMLStreamReader(streamFactory().createJsonStreamSource(reader), multiplePI);
+		} catch (IOException e) {
+			throw new XMLStreamException(e);
+		}
 	}
 
 	@Override
-	public XMLStreamReader createXMLStreamReader(InputStream stream) throws XMLStreamException {
-		return createXMLStreamReader(stream, "UTF-8");
+	public JsonXMLStreamReader createXMLStreamReader(InputStream stream) throws XMLStreamException {
+		try {
+			return new JsonXMLStreamReader(streamFactory().createJsonStreamSource(stream), multiplePI);
+		} catch (IOException e) {
+			throw new XMLStreamException(e);
+		}
 	}
 
 	@Override
-	public XMLStreamReader createXMLStreamReader(InputStream stream, String encoding) throws XMLStreamException {
+	public JsonXMLStreamReader createXMLStreamReader(InputStream stream, String encoding) throws XMLStreamException {
 		try {
 			return createXMLStreamReader(new InputStreamReader(stream, encoding));
 		} catch (UnsupportedEncodingException e) {
@@ -54,17 +111,17 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 	}
 
 	@Override
-	public XMLStreamReader createXMLStreamReader(Source source) throws XMLStreamException {
+	public JsonXMLStreamReader createXMLStreamReader(Source source) throws XMLStreamException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public XMLStreamReader createXMLStreamReader(String systemId, InputStream stream) throws XMLStreamException {
+	public JsonXMLStreamReader createXMLStreamReader(String systemId, InputStream stream) throws XMLStreamException {
 		return createXMLStreamReader(stream);
 	}
 
 	@Override
-	public XMLStreamReader createXMLStreamReader(String systemId, Reader reader) throws XMLStreamException {
+	public JsonXMLStreamReader createXMLStreamReader(String systemId, Reader reader) throws XMLStreamException {
 		return createXMLStreamReader(reader);
 	}
 
@@ -153,9 +210,14 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 			if (Boolean.valueOf(value.toString())) {
 				throw new IllegalArgumentException();
 			}
-		} else {
-			throw new IllegalArgumentException();
+		} else { // proprietary properties
+			if (PROP_MULTIPLE_PI.equals(name)) {
+				multiplePI = Boolean.valueOf(value.toString());
+			} else if (PROP_STREAM_FACTORY.equals(name)) {
+				streamFactory = (JsonStreamFactory)value;
+			}
 		}
+		throw new IllegalArgumentException("Unsupported property: " + name);
 	}
 
 	@Override
@@ -170,9 +232,14 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 			return false;
 		} else if (XMLInputFactory.IS_VALIDATING.equals(name)) {
 			return false;
-		} else {
-			throw new IllegalArgumentException();
+		} else { // proprietary properties
+			 if (PROP_MULTIPLE_PI.equals(name)) {
+				return multiplePI;
+			} else if (PROP_STREAM_FACTORY.equals(name)) {
+				return streamFactory;
+			}
 		}
+		throw new IllegalArgumentException("Unsupported property: " + name);
 	}
 
 	@Override
@@ -187,8 +254,8 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 			return true;
 		} else if (XMLInputFactory.IS_VALIDATING.equals(name)) {
 			return true;
-		} else {
-			return false;
+		} else { // proprietary properties
+			return Arrays.asList(PROP_MULTIPLE_PI, PROP_STREAM_FACTORY).contains(name);
 		}
 	}
 

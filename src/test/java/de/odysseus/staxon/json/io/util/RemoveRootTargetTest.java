@@ -38,7 +38,7 @@ public class RemoveRootTargetTest {
 	@Test
 	public void testTextContent() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result));
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result), true);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeCharacters("bob");
@@ -54,7 +54,7 @@ public class RemoveRootTargetTest {
 	@Test
 	public void testArray() throws Exception {
 		StringWriter result = new StringWriter();
-		JsonXMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result));
+		JsonXMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result), true);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeStartArray("bob");
@@ -78,7 +78,7 @@ public class RemoveRootTargetTest {
 	@Test
 	public void testNested() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result));
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result), true);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeStartElement("bob");
@@ -99,7 +99,7 @@ public class RemoveRootTargetTest {
 	@Test
 	public void testAttributes() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result));
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result), true);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeAttribute("charlie", "david");
@@ -116,7 +116,7 @@ public class RemoveRootTargetTest {
 	@Test
 	public void testNamespaces() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result));
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result), true);
 		writer.setDefaultNamespace("http://some-namespace");
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
@@ -134,7 +134,7 @@ public class RemoveRootTargetTest {
 	@Test
 	public void testEmpty() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result));
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result), true);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeEndElement();

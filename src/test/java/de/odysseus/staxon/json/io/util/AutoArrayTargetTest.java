@@ -37,7 +37,7 @@ public class AutoArrayTargetTest {
 	@Test
 	public void testTextContent() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result));
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result), true);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeCharacters("bob");
@@ -53,7 +53,7 @@ public class AutoArrayTargetTest {
 	@Test
 	public void testArray() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result));
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result), true);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeStartElement("bob");
@@ -74,7 +74,7 @@ public class AutoArrayTargetTest {
 	@Test
 	public void testArray2() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result));
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result), true);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeStartElement("bob");
@@ -96,7 +96,7 @@ public class AutoArrayTargetTest {
 	@Test
 	public void testNested() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result));
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result), true);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeStartElement("bob");
@@ -117,7 +117,7 @@ public class AutoArrayTargetTest {
 	@Test
 	public void testAttributes() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result));
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result), true);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeAttribute("charlie", "david");
@@ -134,7 +134,7 @@ public class AutoArrayTargetTest {
 	@Test
 	public void testNamespaces() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result));
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result), true);
 		writer.setDefaultNamespace("http://some-namespace");
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
@@ -152,7 +152,7 @@ public class AutoArrayTargetTest {
 	@Test
 	public void testEmpty() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result));
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result), true);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeEndElement();

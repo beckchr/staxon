@@ -31,7 +31,9 @@ import de.odysseus.staxon.json.io.jackson.JacksonStreamFactory;
 
 /**
  * Create JSON StAX readers and writers.
+ * @deprecated use {@link JsonXMLInputFactory} and {@link JsonXMLOutputFactory} instead.
  */
+@Deprecated
 public class JsonXMLStreamUtil {
 	/**
 	 * The name of the processing instruction used to indicate collections:
@@ -43,7 +45,7 @@ public class JsonXMLStreamUtil {
 	 * of the following muliple element to the writer. Note that the element
 	 * given in the PI may be written zero times, indicating an "empty array". 
 	 */
-	public static final String PI_MULTIPLE_TARGET = "xml-multiple";
+	public static final String PI_MULTIPLE_TARGET = JsonXMLStreamConstants.MULTIPLE_PI_TARGET;
 
 	private static JsonStreamFactory factory;
 	
@@ -80,7 +82,7 @@ public class JsonXMLStreamUtil {
 	 */
 	public static XMLStreamReader createJsonXMLStreamReader(InputStream input) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamReader(getFactory().createJsonStreamSource(input));
+			return new JsonXMLStreamReader(getFactory().createJsonStreamSource(input), true);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -94,7 +96,7 @@ public class JsonXMLStreamUtil {
 	 */
 	public static XMLStreamReader createJsonXMLStreamReader(Reader reader) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamReader(getFactory().createJsonStreamSource(reader));
+			return new JsonXMLStreamReader(getFactory().createJsonStreamSource(reader), true);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -109,7 +111,7 @@ public class JsonXMLStreamUtil {
 	 */
 	public static XMLStreamWriter createJsonXMLStreamWriter(OutputStream output, boolean pretty) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamWriter(getFactory().createJsonStreamTarget(output, pretty));
+			return new JsonXMLStreamWriter(getFactory().createJsonStreamTarget(output, pretty), true);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -124,7 +126,7 @@ public class JsonXMLStreamUtil {
 	 */
 	public static XMLStreamWriter createJsonXMLStreamWriter(Writer writer, boolean pretty) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamWriter(getFactory().createJsonStreamTarget(writer, pretty));
+			return new JsonXMLStreamWriter(getFactory().createJsonStreamTarget(writer, pretty), true);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}

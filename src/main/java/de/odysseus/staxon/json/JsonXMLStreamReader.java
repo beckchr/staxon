@@ -34,7 +34,7 @@ import de.odysseus.staxon.json.io.JsonStreamToken;
  *   <li>Mixed content (e.g. <code>&lt;alice&gt;bob&lt;edgar/&gt;&lt;/alice&gt;</code>) is not supported.</li>
  * </ul>
  * 
- * <p>The reader produces processing instructions
+ * <p>The reader may produce processing instructions
  * <code>&lt;?xml-multiple element-name?&gt;</code>
  * to indicate array starts (<code>'['</code>).</p>
  */
@@ -44,11 +44,18 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 	}
 	
 	private final JsonStreamSource source;
-	private final boolean useMultiplePI = true;
+	private final boolean multiplePI;
 
-	public JsonXMLStreamReader(JsonStreamSource source) throws XMLStreamException {
+	/**
+	 * Create reader instance.
+	 * @param source stream source
+	 * @param multiplePI whether to use processing instruction to trigger array start
+	 * @throws XMLStreamException
+	 */
+	public JsonXMLStreamReader(JsonStreamSource source, boolean multiplePI) throws XMLStreamException {
 		super(new ScopeInfo());
 		this.source = source;
+		this.multiplePI = multiplePI;
 		init();
 	}
 
@@ -92,8 +99,8 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 				throw new IOException("Array name missing");
 			}
 			scope.getInfo().startArray(scope.getInfo().currentTagName);
-			if (useMultiplePI) {
-				readPI(JsonXMLStreamUtil.PI_MULTIPLE_TARGET, scope.getInfo().currentTagName);
+			if (multiplePI) {
+				readPI(JsonXMLStreamConstants.MULTIPLE_PI_TARGET, scope.getInfo().currentTagName);
 			}
 			return consume(scope);
 		case START_OBJECT:
