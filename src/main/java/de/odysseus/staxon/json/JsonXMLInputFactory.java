@@ -239,7 +239,7 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 			} else if (PROP_STREAM_FACTORY.equals(name)) {
 				return streamFactory;
 			} else {
-				throw new IllegalArgumentException("Unsupported property: " + name);
+				throw new IllegalArgumentException("Unsupported input property: " + name);
 			}
 		}
 	}

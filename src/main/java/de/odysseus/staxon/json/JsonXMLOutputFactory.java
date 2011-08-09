@@ -180,7 +180,7 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 			} else if (PROP_STREAM_FACTORY.equals(name)) {
 				return streamFactory;
 			} else {
-				throw new IllegalArgumentException("Unsupported property: " + name);
+				throw new IllegalArgumentException("Unsupported output property: " + name);
 			}
 		}
 	}
