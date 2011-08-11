@@ -27,8 +27,8 @@ If you're using maven, you can get StAXON from our maven repository at github:
 
 	<repositories>
 		<repository>
-			<id>beckchr.github.com</id>
-			<url>http://beckchr.github.com/maven/releases</url>
+			<id>staxon</id>
+			<url>http://beckchr.github.com/staxon/maven/releases</url>
 		</repository>
 	</repositories>
 

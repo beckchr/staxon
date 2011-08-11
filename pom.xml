@@ -7,7 +7,7 @@
 	<name>StAXON</name>
 	<description>JSON via StAX</description>
 
-	<url>http://github.com/beckchr/staxon/</url>
+	<url>http://beckchr.github.com/staxon/</url>
 	<inceptionYear>2011</inceptionYear>
 
 	<licenses>
@@ -30,12 +30,12 @@
 	<distributionManagement>
 		<repository>
 			<id>releases</id>
-			<url>file:../../../beckchr.github.com/maven/releases</url>
+			<url>file:../../../staxon.gh-pages/maven/releases</url>
 		</repository>
 		<snapshotRepository>
 			<id>snapshots</id>
 			<uniqueVersion>false</uniqueVersion>
-			<url>file:../beckchr.github.com/maven/snapshots</url>
+			<url>file:../staxon.gh-pages/maven/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 
