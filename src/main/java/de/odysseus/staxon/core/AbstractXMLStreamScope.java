@@ -24,7 +24,6 @@ import java.util.NoSuchElementException;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 
-
 /**
  * Represent document/element scope. Used to store namespace declarations and
  * attributes, implements {@link NamespaceContext}.
