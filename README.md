@@ -12,7 +12,7 @@
 
 StAXON provides implementations of `javax.xml.stream.XMLStreamReader` and  `javax.xml.stream.XMLStreamWriter`.
 
-The XML-to-JSON [Mapping Convention](https://github.com/beckchr/staxon/wiki/Mapping Convention) used by StAXON is
+The XML-to-JSON [Mapping Convention](https://github.com/beckchr/staxon/wiki/Mapping-Convention) used by StAXON is
 similar to the [Badgerfish](http://www.sklar.com/badgerfish/) convention but attempts to avoid needless text-only
 JSON objects to generate a more compact JSON.
 
