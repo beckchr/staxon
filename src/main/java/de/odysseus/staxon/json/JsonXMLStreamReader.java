@@ -76,6 +76,8 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 					}
 				}
 				source.endObject();
+			} else {
+				throw new IllegalStateException("Expected attribute value");
 			}
 		} else if ("$".equals(fieldName)) {
 			readData(source.value(), XMLStreamConstants.CHARACTERS);
