@@ -17,6 +17,7 @@ package de.odysseus.staxon.json;
 
 import java.io.IOException;
 
+import javax.xml.XMLConstants;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 
@@ -74,10 +75,14 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 		this.autoEndArray = true;
 	}
 
+	private String getFieldName(String prefix, String localName) {
+		return XMLConstants.DEFAULT_NS_PREFIX.equals(prefix) ? localName : prefix + ':' + localName;
+	}
+	
 	@Override
 	protected void writeElementTagStart(XMLStreamWriterScope<ScopeInfo> newScope) throws XMLStreamException {
 		ScopeInfo parentInfo = getScope().getInfo();
-		String fieldName = newScope.getTagName();
+		String fieldName = getFieldName(newScope.getPrefix(), newScope.getLocalName());
 		try {
 			if (parentInfo.getArrayName() == null) {
 				if (!parentInfo.startObjectWritten) {
@@ -117,7 +122,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 				target.value(null);
 			}
 		} catch (IOException e) {
-			throw new XMLStreamException("Cannot write end element: " + getScope().getTagName(), e);
+			throw new XMLStreamException("Cannot write end element: " + getFieldName(getScope().getPrefix(), getScope().getLocalName()), e);
 		}
 	}
 

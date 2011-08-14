@@ -18,6 +18,7 @@ package de.odysseus.staxon.simple;
 import java.io.IOException;
 import java.io.Writer;
 
+import javax.xml.XMLConstants;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 
@@ -25,9 +26,11 @@ import de.odysseus.staxon.core.AbstractXMLStreamWriter;
 import de.odysseus.staxon.core.XMLStreamWriterScope;
 
 /**
- * Simple XML Stream Writer
+ * Simple XML Stream Writer.
+ * 
+ * The scope info is the element tag name.
  */
-public class SimpleXMLStreamWriter extends AbstractXMLStreamWriter<Object> {
+public class SimpleXMLStreamWriter extends AbstractXMLStreamWriter<String> {
 	private final Writer writer;
 	
 	public SimpleXMLStreamWriter(Writer writer) {
@@ -58,6 +61,10 @@ public class SimpleXMLStreamWriter extends AbstractXMLStreamWriter<Object> {
 		}
 	}
 	
+	private String getTagName(String prefix, String localName) {
+		return XMLConstants.DEFAULT_NS_PREFIX.equals(prefix) ? localName : prefix + ':' + localName;
+	}
+	
 	@Override
 	public void flush() throws XMLStreamException {
 		try {
@@ -68,10 +75,11 @@ public class SimpleXMLStreamWriter extends AbstractXMLStreamWriter<Object> {
  	}
 
 	@Override
-	protected void writeElementTagStart(XMLStreamWriterScope<Object> newScope) throws XMLStreamException {
+	protected void writeElementTagStart(XMLStreamWriterScope<String> newScope) throws XMLStreamException {
+		newScope.setInfo(getTagName(newScope.getPrefix(), newScope.getLocalName()));
 		try {
 			writer.write('<');
-			writer.write(newScope.getTagName());
+			writer.write(newScope.getInfo());
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -94,7 +102,7 @@ public class SimpleXMLStreamWriter extends AbstractXMLStreamWriter<Object> {
 		try {
 			writer.write('<');
 			writer.write('/');
-			writer.write(getScope().getTagName());
+			writer.write(getScope().getInfo());
 			writer.write('>');
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
@@ -159,4 +167,5 @@ public class SimpleXMLStreamWriter extends AbstractXMLStreamWriter<Object> {
 			throw new XMLStreamException(e);
 		}
 	}
+	
 }

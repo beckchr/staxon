@@ -60,7 +60,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		public String toString() {
 			return new StringBuilder()
 			.append(getEventName(type))
-			.append(": ").append(getText() != null ? getText() : getScope().getTagName())
+			.append(": ").append(getText() != null ? getText() : getLocalName())
 			.toString();
 		}
 	}
@@ -473,10 +473,6 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	@Override
 	public String getLocalName() {
 		return hasName() ? event.getScope().getLocalName() : null;
-	}
-	
-	protected String getTagName() {
-		return hasName() ? event.getScope().getTagName() : null;
 	}
 
 	@Override

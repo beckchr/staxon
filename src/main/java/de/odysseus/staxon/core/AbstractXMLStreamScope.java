@@ -29,11 +29,10 @@ import javax.xml.namespace.NamespaceContext;
  * Represent document/element scope. Used to store namespace declarations and
  * attributes, implements {@link NamespaceContext}.
  */
-public class AbstractXMLStreamScope implements NamespaceContext {
+public abstract class AbstractXMLStreamScope implements NamespaceContext {
 	private final NamespaceContext parent;
 	private final String prefix;
 	private final String localName;
-	private final String tagName;
 
 	private String defaultNamespace;
 	private List<Pair<String, String>> prefixes;
@@ -49,7 +48,6 @@ public class AbstractXMLStreamScope implements NamespaceContext {
 		this.parent = null;
 		this.prefix = null;
 		this.localName = null;
-		this.tagName = null;
 		this.defaultNamespace = defaultNamespace;
 		this.startTagClosed = true;
 	}
@@ -64,7 +62,6 @@ public class AbstractXMLStreamScope implements NamespaceContext {
 		this.parent = parent;
 		this.prefix = null;
 		this.localName = null;
-		this.tagName = null;
 		this.defaultNamespace = parent.getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX);
 		this.startTagClosed = true;
 	}
@@ -82,7 +79,6 @@ public class AbstractXMLStreamScope implements NamespaceContext {
 		this.localName = localName;
 		this.startTagClosed = false;
 		
-		tagName = XMLConstants.DEFAULT_NS_PREFIX.equals(prefix) ? localName : prefix + ':' + localName;
 		defaultNamespace = parent.getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX);
 		parent.lastChild = this;
 		parent.startTagClosed = true;
@@ -95,13 +91,9 @@ public class AbstractXMLStreamScope implements NamespaceContext {
 	public String getLocalName() {
 		return localName;
 	}
-	
-	public String getTagName() {
-		return tagName;
-	}
 
 	public boolean isRoot() {
-		return tagName == null;
+		return localName == null;
 	}
 
 	public AbstractXMLStreamScope getParent() {

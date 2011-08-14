@@ -25,9 +25,11 @@ import de.odysseus.staxon.core.AbstractXMLStreamReader;
 import de.odysseus.staxon.core.XMLStreamReaderScope;
 
 /**
- * Simple XML Stream Reader
+ * Simple XML Stream Reader.
+ * 
+ * The scope info is the element tag name.
  */
-public class SimpleXMLStreamReader extends AbstractXMLStreamReader<Object> {
+public class SimpleXMLStreamReader extends AbstractXMLStreamReader<String> {
 	private final Reader reader;
 	private int ch;
 	
@@ -43,7 +45,7 @@ public class SimpleXMLStreamReader extends AbstractXMLStreamReader<Object> {
 	}
 
 	@Override
-	protected boolean consume(XMLStreamReaderScope<Object> scope) throws XMLStreamException, IOException {
+	protected boolean consume(XMLStreamReaderScope<String> scope) throws XMLStreamException, IOException {
 		skipWhitespace();
 
 		if (ch == -1) {
@@ -56,7 +58,7 @@ public class SimpleXMLStreamReader extends AbstractXMLStreamReader<Object> {
 			if (ch == '/') { // END_ELEMENT
 				nextChar();
 				String tagName = readName('>');
-				if (scope.getTagName().equals(tagName)) {
+				if (scope.getInfo().equals(tagName)) {
 					readEndElementTag();
 				} else {
 					throw new XMLStreamException("not well-formed");
@@ -88,7 +90,9 @@ public class SimpleXMLStreamReader extends AbstractXMLStreamReader<Object> {
 				} while (breakstep < 3);
 				readData(comment.substring(0, comment.length() - 3), XMLStreamConstants.COMMENT);
 			} else { // START_ELEMENT
-				scope = readStartElementTag(readName(' '));
+				String tagName = readName(' ');
+				scope = readStartElementTag(tagName);
+				scope.setInfo(tagName);
 				while (ch != '>' && ch != '/') {
 					String name = readName('=');
 					nextChar();
