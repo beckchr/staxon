@@ -1,6 +1,6 @@
 # StAXON - JSON via StAX
 
-[StAXON](https://github.com/beckchr/staxon/) lets you read and write JSON using the Java Streaming API for XML.
+[StAXON](http://beckchr.github.com/staxon/) lets you read and write JSON using the Java Streaming API for XML.
 
 ## Main Features
 
@@ -15,35 +15,6 @@ StAXON provides implementations of `javax.xml.stream.XMLStreamReader` and  `java
 The XML-to-JSON [Mapping Convention](https://github.com/beckchr/staxon/wiki/Mapping Convention) used by StAXON is
 similar to the [Badgerfish](http://www.sklar.com/badgerfish/) convention but attempts to avoid needless text-only
 JSON objects to generate a more compact JSON.
-
-## Dependencies
-
-Make sure you have the `staxon` and `jackson-core` (and/or `gson`) jars on your classpath
-([jackson download](http://wiki.fasterxml.com/JacksonDownload)).
-
-## Maven Setup
-
-If you're using maven, you can get StAXON from our maven repository at github: 
-
-	<repositories>
-		<repository>
-			<id>staxon</id>
-			<url>http://beckchr.github.com/staxon/maven/releases</url>
-		</repository>
-	</repositories>
-
-	<dependencies>
-		<dependency>
-			<groupId>de.odysseus.staxon</groupId>
-			<artifactId>staxon</artifactId>
-			<version>0.4.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-core-asl</artifactId>
-			<version>1.8.4</version>
-		</dependency>
-	</dependencies>
 
 ## Basic Usage
 
@@ -97,6 +68,41 @@ Read your document:
 ## Documentation
 
 [StAXON Wiki](https://github.com/beckchr/staxon/wiki/)
+
+## Download
+
+You can get StAXON artifacts from our [maven repositories](http://beckchr.github.com/staxon/maven/) at github: 
+
+	<repositories>
+		<repository>
+			<id>staxon</id>
+			<url>http://beckchr.github.com/staxon/maven/releases</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>de.odysseus.staxon</groupId>
+			<artifactId>staxon</artifactId>
+			<version>0.4.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-core-asl</artifactId>
+			<version>1.8.4</version>
+		</dependency>
+	</dependencies>
+
+Manually download the latest release: StAXON 0.4.0 (2011/08/10):
+
+- [staxon-0.4.0.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon/0.4.0/staxon-0.4.0.jar)
+- [staxon-0.4.0-sources.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon/0.4.0/staxon-0.4.0-sources.jar)
+
+Make sure you have the `jackson-core` (and/or `gson`) jars on your classpath ([jackson download](http://wiki.fasterxml.com/JacksonDownload)).
+
+## Development
+
+[Github project](http://github.com/beckchr/staxon/)
 
 ## License
 
