@@ -3,7 +3,7 @@
 	<groupId>de.odysseus.staxon</groupId>
 	<artifactId>staxon</artifactId>
 	<packaging>jar</packaging>
-	<version>0.4.1-SNAPSHOT</version>
+	<version>0.4.1</version>
 	<name>StAXON</name>
 	<description>JSON via StAX</description>
 
