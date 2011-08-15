@@ -28,8 +28,10 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.Result;
 
 import de.odysseus.staxon.json.io.JsonStreamFactory;
+import de.odysseus.staxon.json.io.JsonStreamTarget;
 import de.odysseus.staxon.json.io.gson.GsonStreamFactory;
 import de.odysseus.staxon.json.io.jackson.JacksonStreamFactory;
+import de.odysseus.staxon.json.io.util.AutoArrayTarget;
 
 public class JsonXMLOutputFactory extends XMLOutputFactory {
 	/**
@@ -92,11 +94,18 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 		}
 		return streamFactory;
 	}
+	
+	private JsonStreamTarget decorate(JsonStreamTarget target) {
+		if (autoArray) {
+			target = new AutoArrayTarget(target);
+		}
+		return target;
+	}
 
 	@Override
 	public JsonXMLStreamWriter createXMLStreamWriter(Writer stream) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamWriter(streamFactory().createJsonStreamTarget(stream, prettyPrint), multiplePI);
+			return new JsonXMLStreamWriter(decorate(streamFactory().createJsonStreamTarget(stream, prettyPrint)), multiplePI);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -105,7 +114,7 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 	@Override
 	public JsonXMLStreamWriter createXMLStreamWriter(OutputStream stream) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamWriter(streamFactory().createJsonStreamTarget(stream, prettyPrint), multiplePI);
+			return new JsonXMLStreamWriter(decorate(streamFactory().createJsonStreamTarget(stream, prettyPrint)), multiplePI);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
