@@ -26,8 +26,8 @@ import junit.framework.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import de.odysseus.staxon.util.StreamWriterDelegate;
 import de.odysseus.staxon.xml.SimpleXMLStreamWriter;
-import de.odysseus.staxon.xml.util.StreamWriterDelegate;
 
 public class AbstractXMLStreamWriterTest {
 	boolean jdkStreamWriter = false;
