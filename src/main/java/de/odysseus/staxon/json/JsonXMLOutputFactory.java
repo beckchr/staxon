@@ -28,9 +28,9 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.Result;
 
-import de.odysseus.staxon.json.io.JsonStreamFactory;
-import de.odysseus.staxon.json.io.JsonStreamTarget;
-import de.odysseus.staxon.json.io.util.AutoArrayTarget;
+import de.odysseus.staxon.json.stream.JsonStreamFactory;
+import de.odysseus.staxon.json.stream.JsonStreamTarget;
+import de.odysseus.staxon.json.stream.util.AutoArrayTarget;
 
 public class JsonXMLOutputFactory extends XMLOutputFactory {
 	/**

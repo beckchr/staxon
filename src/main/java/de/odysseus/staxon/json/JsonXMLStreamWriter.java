@@ -21,9 +21,9 @@ import javax.xml.XMLConstants;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 
-import de.odysseus.staxon.core.AbstractXMLStreamWriter;
-import de.odysseus.staxon.core.XMLStreamWriterScope;
-import de.odysseus.staxon.json.io.JsonStreamTarget;
+import de.odysseus.staxon.AbstractXMLStreamWriter;
+import de.odysseus.staxon.XMLStreamWriterScope;
+import de.odysseus.staxon.json.stream.JsonStreamTarget;
 
 /**
  * JSON XML stream writer.

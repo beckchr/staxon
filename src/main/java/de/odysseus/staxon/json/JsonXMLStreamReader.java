@@ -21,10 +21,10 @@ import javax.xml.XMLConstants;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 
-import de.odysseus.staxon.core.AbstractXMLStreamReader;
-import de.odysseus.staxon.core.XMLStreamReaderScope;
-import de.odysseus.staxon.json.io.JsonStreamSource;
-import de.odysseus.staxon.json.io.JsonStreamToken;
+import de.odysseus.staxon.AbstractXMLStreamReader;
+import de.odysseus.staxon.XMLStreamReaderScope;
+import de.odysseus.staxon.json.stream.JsonStreamSource;
+import de.odysseus.staxon.json.stream.JsonStreamToken;
 
 /**
  * JSON XML stream reader.

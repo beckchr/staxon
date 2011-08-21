@@ -25,9 +25,9 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
-import de.odysseus.staxon.json.io.JsonStreamFactory;
-import de.odysseus.staxon.json.io.gson.GsonStreamFactory;
-import de.odysseus.staxon.json.io.jackson.JacksonStreamFactory;
+import de.odysseus.staxon.json.stream.JsonStreamFactory;
+import de.odysseus.staxon.json.stream.gson.GsonStreamFactory;
+import de.odysseus.staxon.json.stream.jackson.JacksonStreamFactory;
 
 /**
  * Create JSON StAX readers and writers.
