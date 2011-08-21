@@ -30,7 +30,7 @@ import de.odysseus.staxon.json.io.JsonStreamFactory;
 import de.odysseus.staxon.json.io.JsonStreamSource;
 import de.odysseus.staxon.json.io.JsonStreamTarget;
 
-public class JacksonStreamFactory implements JsonStreamFactory {
+public class JacksonStreamFactory extends JsonStreamFactory {
 	private final JsonFactory jsonFactory;
 
 	public JacksonStreamFactory() {

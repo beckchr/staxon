@@ -23,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
 import javax.xml.stream.EventFilter;
+import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.StreamFilter;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -34,8 +35,6 @@ import javax.xml.stream.util.XMLEventAllocator;
 import javax.xml.transform.Source;
 
 import de.odysseus.staxon.json.io.JsonStreamFactory;
-import de.odysseus.staxon.json.io.gson.GsonStreamFactory;
-import de.odysseus.staxon.json.io.jackson.JacksonStreamFactory;
 
 public class JsonXMLInputFactory extends XMLInputFactory {
 	/**
@@ -58,27 +57,17 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 	 */
 	public static final String PROP_MULTIPLE_PI = "JsonXMLInputFactory.multiplePI";
 
-	private static JsonStreamFactory getDefaultFactory() {
-		try {
-			return JacksonStreamFactory.class.newInstance();
-		} catch (NoClassDefFoundError e) {
-			try {
-				return GsonStreamFactory.class.newInstance();
-			} catch (Exception e2) {
-				throw new RuntimeException("Failed to create GsonStreamFactory", e);
-			}
-		} catch (Exception e) {
-			throw new RuntimeException("Failed to create JacksonStreamFactory", e);
-		}
-	}
-	
 	private JsonStreamFactory streamFactory = null;
 	private boolean multiplePI = true;
 	private boolean coalescing;
 	
-	private JsonStreamFactory streamFactory() {
+	private JsonStreamFactory streamFactory() throws XMLStreamException {
 		if (streamFactory == null) {
-			streamFactory = getDefaultFactory();
+			try {
+				streamFactory = JsonStreamFactory.newFactory();
+			} catch (FactoryConfigurationError e) {
+				throw new XMLStreamException("Failed to create JsonStreamFactory", e);
+			}
 		}
 		return streamFactory;
 	}

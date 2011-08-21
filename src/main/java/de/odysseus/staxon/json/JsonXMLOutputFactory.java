@@ -22,6 +22,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.Arrays;
 
+import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -29,8 +30,6 @@ import javax.xml.transform.Result;
 
 import de.odysseus.staxon.json.io.JsonStreamFactory;
 import de.odysseus.staxon.json.io.JsonStreamTarget;
-import de.odysseus.staxon.json.io.gson.GsonStreamFactory;
-import de.odysseus.staxon.json.io.jackson.JacksonStreamFactory;
 import de.odysseus.staxon.json.io.util.AutoArrayTarget;
 
 public class JsonXMLOutputFactory extends XMLOutputFactory {
@@ -69,28 +68,18 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 	 */
 	public static final String PROP_PRETTY_PRINT = "JsonXMLOutputFactory.prettyPrint";
 
-	private static JsonStreamFactory getDefaultFactory() {
-		try {
-			return JacksonStreamFactory.class.newInstance();
-		} catch (NoClassDefFoundError e) {
-			try {
-				return GsonStreamFactory.class.newInstance();
-			} catch (Exception e2) {
-				throw new RuntimeException("Failed to create GsonStreamFactory", e);
-			}
-		} catch (Exception e) {
-			throw new RuntimeException("Failed to create JacksonStreamFactory", e);
-		}
-	}
-	
 	private JsonStreamFactory streamFactory = null;
 	private boolean multiplePI = true;
 	private boolean autoArray = false;
 	private boolean prettyPrint = false;
 
-	private JsonStreamFactory streamFactory() {
+	private JsonStreamFactory streamFactory() throws XMLStreamException {
 		if (streamFactory == null) {
-			streamFactory = getDefaultFactory();
+			try {
+				streamFactory = JsonStreamFactory.newFactory();
+			} catch (FactoryConfigurationError e) {
+				throw new XMLStreamException("Failed to create JsonStreamFactory", e);
+			}
 		}
 		return streamFactory;
 	}

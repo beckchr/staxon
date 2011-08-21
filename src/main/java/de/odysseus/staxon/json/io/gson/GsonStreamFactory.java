@@ -31,7 +31,7 @@ import de.odysseus.staxon.json.io.JsonStreamFactory;
 import de.odysseus.staxon.json.io.JsonStreamSource;
 import de.odysseus.staxon.json.io.JsonStreamTarget;
 
-public class GsonStreamFactory implements JsonStreamFactory {
+public class GsonStreamFactory extends JsonStreamFactory {
 	@Override
 	public JsonStreamSource createJsonStreamSource(InputStream input) throws IOException {
 		return createJsonStreamSource(new InputStreamReader(input));
