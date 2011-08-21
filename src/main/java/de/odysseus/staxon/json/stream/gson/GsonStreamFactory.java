@@ -15,7 +15,8 @@
  */
 package de.odysseus.staxon.json.stream.gson;
 
-import java.io.BufferedWriter;
+import java.io.FilterReader;
+import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -39,7 +40,12 @@ public class GsonStreamFactory extends JsonStreamFactory {
 	
 	@Override
 	public JsonStreamSource createJsonStreamSource(Reader reader) {
-		JsonReader jsonReader = new JsonReader(reader);
+		JsonReader jsonReader = new JsonReader(new FilterReader(reader) {
+			@Override
+			public void close() throws IOException {
+				// avoid closing underlying stream
+			}
+		});
 		jsonReader.setLenient(false);
 		return new GsonStreamSource(jsonReader);
 	}
@@ -51,7 +57,12 @@ public class GsonStreamFactory extends JsonStreamFactory {
 	
 	@Override
 	public JsonStreamTarget createJsonStreamTarget(Writer writer, boolean pretty) {
-		JsonWriter jsonWriter = new JsonWriter(new BufferedWriter(writer));
+		JsonWriter jsonWriter = new JsonWriter(new FilterWriter(writer) {
+			@Override
+			public void close() throws IOException {
+				flush(); // avoid closing underlying stream
+			}
+		});
 		jsonWriter.setLenient(false);
 		jsonWriter.setIndent(pretty ? "\t" : "");
 		return new GsonStreamTarget(jsonWriter);
