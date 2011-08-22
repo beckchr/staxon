@@ -43,7 +43,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 	protected abstract void writeElementTagEnd() throws XMLStreamException;
 	protected abstract void writeEndElementTag() throws XMLStreamException;
 	protected abstract void writeProperty(String name, String value) throws XMLStreamException;
-	protected abstract void writeData(String text, int type) throws XMLStreamException;
+	protected abstract void writeText(String text, int type) throws XMLStreamException;
 	protected abstract void writePI(String target, String data) throws XMLStreamException;
 
 	private void ensureStartTagClosed() throws XMLStreamException {
@@ -188,7 +188,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 	@Override
 	public void writeCharacters(String text) throws XMLStreamException {
 		ensureStartTagClosed();
-		writeData(text, XMLStreamConstants.CHARACTERS);
+		writeText(text, XMLStreamConstants.CHARACTERS);
 	}
 	
 	@Override
@@ -199,7 +199,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 	@Override
 	public void writeCData(String data) throws XMLStreamException {
 		ensureStartTagClosed();
-		writeData(data, XMLStreamConstants.CDATA);
+		writeText(data, XMLStreamConstants.CDATA);
 	}
 
 	@Override
@@ -290,7 +290,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 	@Override
 	public void writeComment(String data) throws XMLStreamException {
 		ensureStartTagClosed();
-		writeData(data, XMLStreamConstants.COMMENT);
+		writeText(data, XMLStreamConstants.COMMENT);
 	}
 
 	@Override
@@ -308,13 +308,13 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 	@Override
 	public void writeDTD(String dtd) throws XMLStreamException {
 		ensureStartTagClosed();
-		writeData(dtd, XMLStreamConstants.DTD);
+		writeText(dtd, XMLStreamConstants.DTD);
 	}
 
 	@Override
 	public void writeEntityRef(String name) throws XMLStreamException {
 		ensureStartTagClosed();
-		writeData(name, XMLStreamConstants.ENTITY_REFERENCE);
+		writeText(name, XMLStreamConstants.ENTITY_REFERENCE);
 	}
 
 	@Override

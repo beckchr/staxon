@@ -76,19 +76,24 @@ public class SimpleXMLStreamReader extends AbstractXMLStreamReader<String> {
 				} else {
 					readPI(target, data);
 				}
-			} else if (ch == '!') { // COMMENT
-				StringBuilder comment = new StringBuilder();
-				int breakstep = 0;
-				do {
-					nextChar();
-					comment.append(ch);
-					if ((ch == '-' && breakstep != 2) || (ch == '>' && breakstep == 2)) {
-						breakstep++;
-					} else {
-						breakstep = 0;
+			} else if (ch == '!') { // COMMENT | CDATA
+				nextChar();
+				switch (ch) {
+				case '-': // COMMENT
+					String comment = readData('-');
+					if (!comment.startsWith("-")) {
+						throw new XMLStreamException("expected comment");
 					}
-				} while (breakstep < 3);
-				readData(comment.substring(0, comment.length() - 3), XMLStreamConstants.COMMENT);
+					readText(comment.substring(1, comment.length() - 3), XMLStreamConstants.COMMENT);
+					break;
+				case '[': // CDATA
+					String cdata = readData(']');
+					if (!cdata.startsWith("CDATA[")) {
+						throw new XMLStreamException("expected cdata");
+					}
+					readText(cdata.substring(6, cdata.length() - 3), XMLStreamConstants.CHARACTERS);
+					break;
+				}
 			} else { // START_ELEMENT
 				String tagName = readName(' ');
 				scope = readStartElementTag(tagName);
@@ -115,7 +120,7 @@ public class SimpleXMLStreamReader extends AbstractXMLStreamReader<String> {
 			nextChar();
 		} else {
 			String text = readText('<');
-			readData(text, XMLStreamConstants.CHARACTERS);
+			readText(text, XMLStreamConstants.CHARACTERS);
 		}
 		return true;
 	}
@@ -131,6 +136,21 @@ public class SimpleXMLStreamReader extends AbstractXMLStreamReader<String> {
 				nextChar();
 			} while (Character.isWhitespace(ch));
 		}
+	}
+	
+	private String readData(final int end) throws IOException {
+		StringBuilder data = new StringBuilder();
+		int state = 0;
+		do {
+			nextChar();
+			data.append((char)ch);
+			if ((ch == end && state != 2) || (ch == '>' && state == 2)) {
+				state++;
+			} else {
+				state = 0;
+			}
+		} while (state < 3);
+		return data.toString();
 	}
 	
 	private String readText(final int end) throws IOException {

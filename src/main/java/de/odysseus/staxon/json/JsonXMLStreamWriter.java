@@ -141,7 +141,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	}
 	
 	@Override
-	protected void writeData(String data, int type) throws XMLStreamException {
+	protected void writeText(String data, int type) throws XMLStreamException {
 		try {
 			switch(type) {
 			case XMLStreamConstants.CHARACTERS:

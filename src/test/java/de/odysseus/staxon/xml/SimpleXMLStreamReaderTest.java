@@ -38,7 +38,7 @@ public class SimpleXMLStreamReaderTest {
 	 * <code>&lt;alice&gt;bob&lt;/alice&gt;</code>
 	 */
 	@Test
-	public void test1() throws XMLStreamException {
+	public void testTextContent() throws XMLStreamException {
 		String input = "<?xml version=\"1.0\"?><alice>bob</alice>";
 		XMLStreamReader reader = new SimpleXMLStreamReader(new StringReader(input));
 		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
@@ -46,6 +46,81 @@ public class SimpleXMLStreamReaderTest {
 		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
 		reader.next();
 		verify(reader, XMLStreamConstants.CHARACTERS, null, "bob");
+		reader.next();
+		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
+		reader.close();
+	}
+
+	/**
+	 * <code>&lt;alice&gt;bob&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testComment() throws XMLStreamException {
+		String input = "<?xml version=\"1.0\"?><alice><!--bob--></alice>";
+		XMLStreamReader reader = new SimpleXMLStreamReader(new StringReader(input));
+		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.COMMENT, null, "bob");
+		reader.next();
+		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
+		reader.close();
+	}
+
+	/**
+	 * <code>&lt;alice&gt;&amp;lt;&amp;gt;&amp;amp;"'&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testEscapeCharacters() throws XMLStreamException {
+		String input = "<?xml version=\"1.0\"?><alice>&lt;&gt;&amp;\"'</alice>";
+		XMLStreamReader reader = new SimpleXMLStreamReader(new StringReader(input));
+		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.CHARACTERS, null, "<>&\"'");
+		reader.next();
+		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
+		reader.close();
+	}
+
+	/**
+	 * <code>&lt;alice&gt;&lt;![CDATA[&lt;&gt;&amp;"']]&gt;&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testEscapeCData() throws XMLStreamException {
+		String input = "<?xml version=\"1.0\"?><alice><![CDATA[<>&\"']]></alice>";
+		XMLStreamReader reader = new SimpleXMLStreamReader(new StringReader(input));
+		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.CHARACTERS, null, "<>&\"'");
+		reader.next();
+		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
+		reader.close();
+	}
+
+	/**
+	 * <code>&lt;alice escape="&amp;lt;&amp;gt;&amp;amp;&amp;quot;'"&gt;&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testEscapeAttribute() throws XMLStreamException {
+		String input = "<?xml version=\"1.0\"?><alice escape=\"&lt;&gt;&amp;&quot;'\"></alice>";
+		XMLStreamReader reader = new SimpleXMLStreamReader(new StringReader(input));
+		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
+		Assert.assertEquals("<>&\"'", reader.getAttributeValue(XMLConstants.NULL_NS_URI, "escape"));
 		reader.next();
 		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
 		reader.next();
@@ -110,7 +185,7 @@ public class SimpleXMLStreamReaderTest {
 		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
 		reader.close();
 	}
-
+	
 	/**
 	 * <code>&lt;alice charlie="david"&gt;bob&lt;/alice&gt;</code>
 	 */
@@ -157,7 +232,7 @@ public class SimpleXMLStreamReaderTest {
 
 	@Test
 	public void testOther() throws Exception {
-		String input = "<?xml version=\"1.0\"?><alice><bar:bob xmlns:bar=\"http://bar\" jane=\"do&quot;'&lt;&gt;lly\"/>hel\"'&lt;&gt;lo</alice>";
+		String input = "<?xml version=\"1.0\"?><alice><bar:bob xmlns:bar=\"http://bar\" jane=\"dolly\"/>hello</alice>";
 		XMLStreamReader reader = new SimpleXMLStreamReader(new StringReader(input));
 		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
 		reader.next();
@@ -166,11 +241,11 @@ public class SimpleXMLStreamReaderTest {
 		verify(reader, XMLStreamConstants.START_ELEMENT, "bob", null);
 		Assert.assertEquals("http://bar", reader.getNamespaceURI());
 		Assert.assertEquals(1, reader.getAttributeCount());
-		Assert.assertEquals("do\"'<>lly", reader.getAttributeValue(null, "jane"));
+		Assert.assertEquals("dolly", reader.getAttributeValue(null, "jane"));
 		reader.next();
 		verify(reader, XMLStreamConstants.END_ELEMENT, "bob", null);
 		reader.next();
-		verify(reader, XMLStreamConstants.CHARACTERS, null, "hel\"'<>lo");
+		verify(reader, XMLStreamConstants.CHARACTERS, null, "hello");
 		reader.next();
 		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
 		reader.next();
