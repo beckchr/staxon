@@ -35,15 +35,9 @@ import javax.xml.stream.util.XMLEventAllocator;
 import javax.xml.transform.Source;
 
 import de.odysseus.staxon.json.stream.JsonStreamFactory;
+import de.odysseus.staxon.json.stream.JsonStreamSource;
 
 public class JsonXMLInputFactory extends XMLInputFactory {
-	/**
-	 * <p>JSON stream factory.</p>
-	 * 
-	 * <p>The default is to try <em>Jackson</em> first, the <em>Gson</em>.</p>
-	 */
-	public static final String PROP_STREAM_FACTORY = "JsonXMLInputFactory.streamFactory";
-	
 	/**
 	 * <p>Whether to use the {@link JsonXMLStreamConstants#MULTIPLE_PI_TARGET}
 	 * processing instruction to indicate an array start.
@@ -57,25 +51,27 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 	 */
 	public static final String PROP_MULTIPLE_PI = "JsonXMLInputFactory.multiplePI";
 
-	private JsonStreamFactory streamFactory = null;
+	private final JsonStreamFactory streamFactory;
+
 	private boolean multiplePI = true;
 	private boolean coalescing;
 	
-	private JsonStreamFactory streamFactory() throws XMLStreamException {
-		if (streamFactory == null) {
-			try {
-				streamFactory = JsonStreamFactory.newFactory();
-			} catch (FactoryConfigurationError e) {
-				throw new XMLStreamException("Failed to create JsonStreamFactory", e);
-			}
-		}
-		return streamFactory;
+	public JsonXMLInputFactory() throws FactoryConfigurationError {
+		this(JsonStreamFactory.newFactory());
+	}
+
+	public JsonXMLInputFactory(JsonStreamFactory streamFactory) {
+		this.streamFactory = streamFactory;
+	}
+	
+	private JsonStreamSource decorate(JsonStreamSource source) {
+		return source;
 	}
 	
 	@Override
 	public JsonXMLStreamReader createXMLStreamReader(Reader reader) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamReader(streamFactory().createJsonStreamSource(reader), multiplePI);
+			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(reader)), multiplePI);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -84,7 +80,7 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 	@Override
 	public JsonXMLStreamReader createXMLStreamReader(InputStream stream) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamReader(streamFactory().createJsonStreamSource(stream), multiplePI);
+			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(stream)), multiplePI);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -202,8 +198,6 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 		} else { // proprietary properties
 			if (PROP_MULTIPLE_PI.equals(name)) {
 				multiplePI = Boolean.valueOf(value.toString());
-			} else if (PROP_STREAM_FACTORY.equals(name)) {
-				streamFactory = (JsonStreamFactory)value;
 			} else {
 				throw new IllegalArgumentException("Unsupported input property: " + name);
 			}
@@ -225,8 +219,6 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 		} else { // proprietary properties
 			 if (PROP_MULTIPLE_PI.equals(name)) {
 				return multiplePI;
-			} else if (PROP_STREAM_FACTORY.equals(name)) {
-				return streamFactory;
 			} else {
 				throw new IllegalArgumentException("Unsupported input property: " + name);
 			}
@@ -246,7 +238,7 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 		} else if (XMLInputFactory.IS_VALIDATING.equals(name)) {
 			return true;
 		} else { // proprietary properties
-			return Arrays.asList(PROP_MULTIPLE_PI, PROP_STREAM_FACTORY).contains(name);
+			return Arrays.asList(PROP_MULTIPLE_PI).contains(name);
 		}
 	}
 

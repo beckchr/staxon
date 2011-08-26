@@ -34,13 +34,6 @@ import de.odysseus.staxon.json.stream.util.AutoArrayTarget;
 
 public class JsonXMLOutputFactory extends XMLOutputFactory {
 	/**
-	 * <p>JSON stream factory.</p>
-	 * 
-	 * <p>The default is to try <em>Jackson</em> first, the <em>Gson</em>.</p>
-	 */
-	public static final String PROP_STREAM_FACTORY = "JsonXMLOutputFactory.streamFactory";
-	
-	/**
 	 * <p>Start/end arrays automatically?</p>
 	 * 
 	 * <p>The default value is <code>false</code>.</p>
@@ -73,17 +66,14 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 	private boolean autoArray = false;
 	private boolean prettyPrint = false;
 
-	private JsonStreamFactory streamFactory() throws XMLStreamException {
-		if (streamFactory == null) {
-			try {
-				streamFactory = JsonStreamFactory.newFactory();
-			} catch (FactoryConfigurationError e) {
-				throw new XMLStreamException("Failed to create JsonStreamFactory", e);
-			}
-		}
-		return streamFactory;
+	public JsonXMLOutputFactory() throws FactoryConfigurationError {
+		this(JsonStreamFactory.newFactory());
 	}
-	
+
+	public JsonXMLOutputFactory(JsonStreamFactory streamFactory) {
+		this.streamFactory = streamFactory;
+	}
+		
 	private JsonStreamTarget decorate(JsonStreamTarget target) {
 		if (autoArray) {
 			target = new AutoArrayTarget(target);
@@ -94,7 +84,7 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 	@Override
 	public JsonXMLStreamWriter createXMLStreamWriter(Writer stream) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamWriter(decorate(streamFactory().createJsonStreamTarget(stream, prettyPrint)), multiplePI);
+			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), multiplePI);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -103,7 +93,7 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 	@Override
 	public JsonXMLStreamWriter createXMLStreamWriter(OutputStream stream) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamWriter(decorate(streamFactory().createJsonStreamTarget(stream, prettyPrint)), multiplePI);
+			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), multiplePI);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -156,8 +146,6 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 				multiplePI = Boolean.valueOf(value.toString());;
 			} else if (PROP_PRETTY_PRINT.equals(name)) {
 				prettyPrint = Boolean.valueOf(value.toString());
-			} else if (PROP_STREAM_FACTORY.equals(name)) {
-				streamFactory = (JsonStreamFactory)value;
 			} else {
 				throw new IllegalArgumentException("Unsupported output property: " + name);
 			}
@@ -175,8 +163,6 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 				return multiplePI;
 			} else if (PROP_PRETTY_PRINT.equals(name)) {
 				return prettyPrint;
-			} else if (PROP_STREAM_FACTORY.equals(name)) {
-				return streamFactory;
 			} else {
 				throw new IllegalArgumentException("Unsupported output property: " + name);
 			}
@@ -188,7 +174,7 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 		if (XMLOutputFactory.IS_REPAIRING_NAMESPACES.equals(name)) {
 			return true;
 		} else { // proprietary properties
-			return Arrays.asList(PROP_AUTO_ARRAY, PROP_MULTIPLE_PI, PROP_PRETTY_PRINT, PROP_STREAM_FACTORY).contains(name);
+			return Arrays.asList(PROP_AUTO_ARRAY, PROP_MULTIPLE_PI, PROP_PRETTY_PRINT).contains(name);
 		}
 	}
 }
