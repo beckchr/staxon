@@ -8,7 +8,7 @@
 - Full XML namespace support
 - Start JSON arrays via XML processing instruction
 - Memory efficient, even for very large documents
-- It's pretty fast…
+- It's pretty fast ([benchmark](https://github.com/beckchr/staxon/wiki/Benchmark))…
 
 StAXON provides implementations of `javax.xml.stream.XMLStreamReader` and  `javax.xml.stream.XMLStreamWriter`.
 
