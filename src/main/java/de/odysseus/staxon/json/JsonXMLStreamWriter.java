@@ -52,11 +52,16 @@ import de.odysseus.staxon.json.stream.JsonStreamTarget;
  *   }
  *   ...
  * </pre>
+ * <p>The element name passed as processing instruction data is optional.
+ * If omitted, the next element within the current scope will start an array. Note, that this method
+ * does not allow to create empty arrays (in fact, the above code sample could create unexpected results,
+ * if the name would have been omitted and collection were empty).</p>
  */
 public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWriter.ScopeInfo> {
 	static class ScopeInfo extends JsonXMLStreamScopeInfo {
 		boolean startObjectWritten = false;
 		boolean contentDataWritten = false;
+		boolean pendingStartArray = false;
 	}
 
 	private final JsonStreamTarget target;
@@ -83,6 +88,9 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	protected void writeElementTagStart(XMLStreamWriterScope<ScopeInfo> newScope) throws XMLStreamException {
 		ScopeInfo parentInfo = getScope().getInfo();
 		String fieldName = getFieldName(newScope.getPrefix(), newScope.getLocalName());
+		if (parentInfo.pendingStartArray) {
+			writeStartArray(fieldName);
+		}
 		try {
 			if (parentInfo.getArrayName() == null) {
 				if (!parentInfo.startObjectWritten) {
@@ -190,6 +198,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 			writeEndArray();
 		}
 		getScope().getInfo().startArray(fieldName);
+		getScope().getInfo().pendingStartArray = false;
 		try {
 			if (!getScope().getInfo().startObjectWritten) {
 				target.startObject();
@@ -233,7 +242,11 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	@Override
 	protected void writePI(String target, String data) throws XMLStreamException {
 		if (multiplePI && JsonXMLStreamConstants.MULTIPLE_PI_TARGET.equals(target)) {
-			writeStartArray(data);
+			if (data == null || data.trim().isEmpty()) {
+				getScope().getInfo().pendingStartArray = true;
+			} else {
+				writeStartArray(data.trim());
+			}
 		}
 	}
 }

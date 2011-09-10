@@ -92,7 +92,7 @@ public class JsonXMLStreamWriterTest {
 		XMLStreamWriter writer = new JsonXMLOutputFactory().createXMLStreamWriter(result);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
-		writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET, "bob");
+		writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET);
 		writer.writeStartElement("bob");
 		writer.writeCharacters("charlie");
 		writer.writeEndElement();
@@ -104,6 +104,22 @@ public class JsonXMLStreamWriterTest {
 		writer.writeEndDocument();
 		writer.close();
 		Assert.assertEquals("{\"alice\":{\"bob\":[\"charlie\",\"david\"],\"edgar\":null}}", result.toString());
+	}
+
+	/**
+	 * <code>&lt;alice&gt;&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testArray3() throws Exception {
+		StringWriter result = new StringWriter();
+		XMLStreamWriter writer = new JsonXMLOutputFactory().createXMLStreamWriter(result);
+		writer.writeStartDocument();
+		writer.writeStartElement("alice");
+		writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET, "bob");
+		writer.writeEndElement();
+		writer.writeEndDocument();
+		writer.close();
+		Assert.assertEquals("{\"alice\":{\"bob\":[]}}", result.toString());
 	}
 
 	/**

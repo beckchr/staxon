@@ -16,6 +16,11 @@
  *   }
  *   ...
  * </pre>
+ * <p>The element name passed as processing instruction data is optional.
+ * If omitted, the next element within the current scope will start an array. Note, that this method
+ * does not allow to create empty arrays (in fact, the above code sample could create unexpected results,
+ * if the name would have been omitted and collection were empty).</p>
+ * 
  * <p>Likewise, the reader produces the processing instruction as XML events.</p>
  * 
  * <p>The purpose of the used mapping convention is to generate a more compact <code>JSON</code>.
