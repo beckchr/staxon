@@ -102,7 +102,7 @@ public class SimpleXMLStreamReaderTest {
 		reader.next();
 		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
 		reader.next();
-		verify(reader, XMLStreamConstants.CHARACTERS, null, "<>&\"'");
+		verify(reader, XMLStreamConstants.CDATA, null, "<>&\"'");
 		reader.next();
 		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
 		reader.next();

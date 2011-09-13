@@ -91,7 +91,7 @@ public class SimpleXMLStreamReader extends AbstractXMLStreamReader<String> {
 					if (!cdata.startsWith("CDATA[")) {
 						throw new XMLStreamException("expected cdata");
 					}
-					readText(cdata.substring(6, cdata.length() - 3), XMLStreamConstants.CHARACTERS);
+					readText(cdata.substring(6, cdata.length() - 3), XMLStreamConstants.CDATA);
 					break;
 				}
 			} else { // START_ELEMENT
