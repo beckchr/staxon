@@ -181,6 +181,7 @@ public class SimpleXMLStreamReader extends AbstractXMLStreamReader<String> {
 	}
 
 	private String readName(final int end) throws IOException {
+		skipWhitespace();
 		final StringBuilder builder = new StringBuilder();
 		do {
 			builder.append((char)ch);
