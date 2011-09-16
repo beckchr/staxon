@@ -94,6 +94,29 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 				|| type == XMLStreamConstants.ENTITY_REFERENCE
 				|| type == XMLStreamConstants.SPACE;
 	}
+	
+	private static final Location UNKNOWN_LOCATION = new Location() {
+		@Override
+		public int getCharacterOffset() {
+			return -1;
+		}
+		@Override
+		public int getColumnNumber() {
+			return -1;
+		}
+		@Override
+		public int getLineNumber() {
+			return -1;
+		}
+		@Override
+		public String getPublicId() {
+			return null;
+		}
+		@Override
+		public String getSystemId() {
+			return null;
+		}
+	};
 
 	private final Queue<Event> queue = new LinkedList<Event>();
 
@@ -420,28 +443,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	
 	@Override
 	public Location getLocation() {
-		return new Location() {
-			@Override
-			public int getCharacterOffset() {
-				return -1;
-			}
-			@Override
-			public int getColumnNumber() {
-				return -1;
-			}
-			@Override
-			public int getLineNumber() {
-				return -1;
-			}
-			@Override
-			public String getPublicId() {
-				return null;
-			}
-			@Override
-			public String getSystemId() {
-				return null;
-			}
-		};
+		return UNKNOWN_LOCATION;
 	}
 
 	@Override
