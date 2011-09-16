@@ -108,7 +108,7 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 		case START_OBJECT:
 			source.startObject();
 			if (scope.isRoot() && scope.getInfo().currentTagName == null) {
-				readStartDocument();
+				readStartDocument(null, null, null);
 			} else {
 				if (scope.getInfo().getArrayName() != null) {
 					scope.getInfo().incArraySize();

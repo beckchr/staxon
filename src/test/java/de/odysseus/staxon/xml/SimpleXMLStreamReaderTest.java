@@ -25,8 +25,6 @@ import javax.xml.stream.XMLStreamReader;
 import org.junit.Assert;
 import org.junit.Test;
 
-import de.odysseus.staxon.xml.SimpleXMLStreamReader;
-
 public class SimpleXMLStreamReaderTest {
 	void verify(XMLStreamReader reader, int expectedEventType, String expectedLocalName, String expectedText) {
 		Assert.assertEquals(expectedEventType, reader.getEventType());
@@ -252,4 +250,26 @@ public class SimpleXMLStreamReaderTest {
 		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
 		reader.close();
 	}
+	
+	/**
+	 * <code>&lt;alice&gt;bob&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testVersionEncodingStandalone() throws XMLStreamException {
+		XMLStreamReader reader = new SimpleXMLStreamReader(new StringReader("<?xml?>"));
+		Assert.assertNull(reader.getVersion());
+		Assert.assertNull(reader.getCharacterEncodingScheme());
+		Assert.assertFalse(reader.isStandalone());
+		Assert.assertFalse(reader.standaloneSet());
+
+		String input = "<?xml version=\"1.1\" encoding=\"US-ASCII\" standalone=\"yes\"?>";
+		reader = new SimpleXMLStreamReader(new StringReader(input));
+		Assert.assertEquals("1.1", reader.getVersion());
+		Assert.assertEquals("US-ASCII", reader.getCharacterEncodingScheme());
+		Assert.assertTrue(reader.isStandalone());
+		Assert.assertTrue(reader.standaloneSet());
+		
+		reader.close();
+	}
+
 }

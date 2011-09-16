@@ -17,6 +17,8 @@ package de.odysseus.staxon.xml;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -72,7 +74,32 @@ public class SimpleXMLStreamReader extends AbstractXMLStreamReader<String> {
 				}
 				nextChar(); // please, let it be '>'
 				if ("xml".equals(target)) {
-					readStartDocument();
+					String version = null;
+					String encoding = null;
+					Boolean standalone = null;
+					if (data != null) {
+						Matcher matcher = Pattern.compile("(\\w+)\\s*=\\s*\"(\\S+)\"").matcher(data);
+						while (matcher.find()) {
+							String name = matcher.group(1);
+							String value = matcher.group(2);
+							if ("version".equals(name)) {
+								if (!"1.0".equals(value) && !"1.1".equals(value)) {
+									throw new XMLStreamException("Bad XML version: " + value);
+								}
+								version = value;
+							} else if ("encoding".equals(name)) {
+								encoding = value;
+							} else if ("standalone".equals(name)) {
+								if (!"yes".equals(value) && !"no".equals(value)) {
+									throw new XMLStreamException("Bad XML version: " + value);
+								}
+								standalone = value.equals("yes");
+							} else {
+								throw new XMLStreamException("Bad xml XML declaration attribute: " + name);
+							}
+						}
+					}
+					readStartDocument(version, encoding, standalone);
 				} else {
 					readPI(target, data);
 				}

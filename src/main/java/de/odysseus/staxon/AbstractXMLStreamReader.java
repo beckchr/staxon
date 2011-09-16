@@ -102,6 +102,10 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	private Event event;
 	private List<Pair<String, String>> pendingAttributes = new ArrayList<Pair<String,String>>(16);
 	
+	private String encodingScheme;
+	private String version;
+	private Boolean standalone;
+	
 	public AbstractXMLStreamReader(T rootInfo) {
 		scope = new XMLStreamReaderScope<T>(XMLConstants.NULL_NS_URI, rootInfo);
 	}
@@ -126,8 +130,11 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		}
 	}
 	
-	protected void readStartDocument() {
+	protected void readStartDocument(String version, String encodingScheme, Boolean standalone) {
 		queue.add(new Event(XMLStreamConstants.START_DOCUMENT, scope, null));
+		this.version = version;
+		this.encodingScheme = encodingScheme;
+		this.standalone = standalone;
 	}
 	
 	protected XMLStreamReaderScope<T> readStartElementTag(String name) throws XMLStreamException {
@@ -498,7 +505,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 
 	@Override
 	public String getVersion() {
-		return null;
+		return version;
 	}
 
 	@Override
@@ -508,17 +515,17 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 
 	@Override
 	public boolean isStandalone() {
-		return false;
+		return standaloneSet() ? standalone.booleanValue() : false;
 	}
 
 	@Override
 	public boolean standaloneSet() {
-		return false;
+		return standalone != null;
 	}
 
 	@Override
 	public String getCharacterEncodingScheme() {
-		return null;
+		return encodingScheme;
 	}
 
 	@Override
