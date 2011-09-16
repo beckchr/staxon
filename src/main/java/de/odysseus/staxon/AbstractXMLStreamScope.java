@@ -114,7 +114,7 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 	@Override
 	public String getPrefix(String namespaceURI) {
 		if (namespaceURI == null) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Namespace URI must not be null");
 		} else if (namespaceURI.equals(defaultNamespace)) {
 			return XMLConstants.DEFAULT_NS_PREFIX;
 		} else if (XMLConstants.XML_NS_URI.equals(namespaceURI)) {
@@ -137,9 +137,9 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 		if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
 			defaultNamespace = namespaceURI;
 		} else if (XMLConstants.XML_NS_PREFIX.equals(namespaceURI)) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Cannot redifine prefix: " + prefix);
 		} else if (XMLConstants.XMLNS_ATTRIBUTE.equals(namespaceURI)) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Cannot redifine prefix: " + prefix);
 		} else {
 			if (prefixes == null) {
 				prefixes = new LinkedList<Pair<String, String>>();
@@ -158,7 +158,7 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 	@Override
 	public Iterator<String> getPrefixes(final String namespaceURI) {
 		if (namespaceURI == null) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Namespace URI must not be null");
 		} else if (XMLConstants.XML_NS_URI.equals(namespaceURI)) {
 			return Arrays.asList(XMLConstants.XML_NS_PREFIX).iterator();
 		} else if (XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(namespaceURI)) {
@@ -236,7 +236,7 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 	@Override
 	public String getNamespaceURI(String prefix) {
 		if (prefix == null) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Prefix must not be null");
 		} else if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
 			return defaultNamespace;
 		} else if (XMLConstants.XML_NS_PREFIX.equals(prefix)) {

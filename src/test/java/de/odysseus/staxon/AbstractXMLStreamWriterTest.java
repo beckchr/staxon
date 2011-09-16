@@ -105,6 +105,7 @@ public class AbstractXMLStreamWriterTest {
 		writer.flush();
 //		Assert.assertEquals("<foo xmlns:p=\"http://p\" p:bar=\"foobar\"", writer.toString()); // according to XMLStreamWriter javadoc
 		Assert.assertEquals("<foo p:bar=\"foobar\"", writer.toString()); // according to implementations
+		Assert.assertEquals("p", writer.getPrefix("http://p"));
 	}
 
 	@Test
@@ -116,6 +117,8 @@ public class AbstractXMLStreamWriterTest {
 //		Assert.fail("expected exception: bound to another prefix"); // according to XMLStreamWriter javadoc
 		writer.flush();
 		Assert.assertEquals("<foo pp:bar=\"foobar\"", writer.toString()); // according to implementations
+		Assert.assertEquals("http://p", writer.getNamespaceContext().getNamespaceURI("p"));
+		Assert.assertEquals("http://p", writer.getNamespaceContext().getNamespaceURI("pp"));
 	}
 
 	@Test

@@ -149,7 +149,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 
 	@Override
 	public void writeAttribute(String localName, String value) throws XMLStreamException {
-		writeAttribute(null, null, localName, value);
+		writeAttribute(null, XMLConstants.NULL_NS_URI, localName, value);
 	}
 
 	@Override
@@ -163,24 +163,35 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 			throw new XMLStreamException("Cannot write attribute: element has children or text");
 		}
 		String name;
-		if (prefix == null && namespaceURI == null) {
-			name = localName;
-		} else if (namespaceURI != null) { // need a non-empty prefix
-			if (prefix == null) {
+		if (XMLConstants.NULL_NS_URI.equals(namespaceURI)) { // no namespace -> no prefix
+			if (prefix == null || XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+				name = localName;
+			} else {
+				throw new XMLStreamException("Cannot write attribute without a namespace URI and prefix: " + prefix);
+			}
+		} else { // namespace -> prefixed attribute
+			if (prefix == null) { // lookup prefix
 				prefix = scope.getPrefix(namespaceURI);
-				if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+				if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) { // need a non-empty prefix
 					Iterator<String> prefixes = scope.getPrefixes(namespaceURI);
 					while (prefixes.hasNext() && XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
 						prefix = prefixes.next();
 					}
-				}
-				if (prefix == null || XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+				} else if (prefix == null) {
 					throw new XMLStreamException("Namespace URI has not been bound to a prefix: " + namespaceURI);
 				}
+			} else if (!XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+				String boundNamespaceURI = scope.getNamespaceURI(prefix);
+				if (XMLConstants.NULL_NS_URI.equals(boundNamespaceURI)) {
+					getScope().setPrefix(prefix, namespaceURI);
+				} else if (!namespaceURI.equals(boundNamespaceURI)) {
+					throw new XMLStreamException("Another namespace URI has been bound to the given prefix: " + prefix);
+				}
+			}
+			if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+				throw new XMLStreamException("Cannot write attribute without prefix for namespace URI: " + namespaceURI);
 			}
 			name = prefix + ':' + localName;
-		} else {
-			throw new XMLStreamException("Cannot write attribute: non-null prefix, but namespaceURI is null");
 		}
 		writeProperty(name, value);
 	}
@@ -204,12 +215,12 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 
 	@Override
 	public void writeStartDocument() throws XMLStreamException {
-		writeStartDocument("1.0");
+		writeStartDocument("UTF-8", null);
 	}
 
 	@Override
 	public void writeStartDocument(String version) throws XMLStreamException {
-		writeStartDocument("UTF-8", version);
+		writeStartDocument(null, version);
 	}
 
 	@Override
@@ -217,7 +228,14 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		if (startDocumentWritten || !scope.isRoot()) {
 			throw new XMLStreamException("Cannot start document");
 		}
-		writePI("xml", String.format("version=\"%s\" encoding=\"%s\"", version, encoding));
+		if (version == null) {
+			version = "1.0";
+		}
+		if (encoding == null) {
+			writePI("xml", String.format("version=\"%s\"", version, encoding));
+		} else {
+			writePI("xml", String.format("version=\"%s\" encoding=\"%s\"", version, encoding));
+		}
 		startDocumentWritten = true;
 	}
 
