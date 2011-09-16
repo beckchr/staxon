@@ -34,6 +34,8 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.util.XMLEventAllocator;
 import javax.xml.transform.Source;
 
+import de.odysseus.staxon.event.SimpleXMLEventAllocator;
+import de.odysseus.staxon.event.SimpleXMLEventReader;
 import de.odysseus.staxon.json.stream.JsonStreamFactory;
 import de.odysseus.staxon.json.stream.JsonStreamSource;
 
@@ -55,6 +57,7 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 
 	private boolean multiplePI = true;
 	private boolean coalescing;
+	private XMLEventAllocator allocator = new SimpleXMLEventAllocator();
 	
 	public JsonXMLInputFactory() throws FactoryConfigurationError {
 		this(JsonStreamFactory.newFactory());
@@ -112,37 +115,37 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 
 	@Override
 	public XMLEventReader createXMLEventReader(Reader reader) throws XMLStreamException {
-		throw new UnsupportedOperationException();
+		return createXMLEventReader(createXMLStreamReader(reader));
 	}
 
 	@Override
 	public XMLEventReader createXMLEventReader(String systemId, Reader reader) throws XMLStreamException {
-		throw new UnsupportedOperationException();
+		return createXMLEventReader(createXMLStreamReader(systemId, reader));
 	}
 
 	@Override
 	public XMLEventReader createXMLEventReader(XMLStreamReader reader) throws XMLStreamException {
-		throw new UnsupportedOperationException();
+		return new SimpleXMLEventReader(getEventAllocator().newInstance(), reader);
 	}
 
 	@Override
 	public XMLEventReader createXMLEventReader(Source source) throws XMLStreamException {
-		throw new UnsupportedOperationException();
+		return createXMLEventReader(createXMLStreamReader(source));
 	}
 
 	@Override
 	public XMLEventReader createXMLEventReader(InputStream stream) throws XMLStreamException {
-		throw new UnsupportedOperationException();
+		return createXMLEventReader(createXMLStreamReader(stream));
 	}
 
 	@Override
 	public XMLEventReader createXMLEventReader(InputStream stream, String encoding) throws XMLStreamException {
-		throw new UnsupportedOperationException();
+		return createXMLEventReader(createXMLStreamReader(stream, encoding));
 	}
 
 	@Override
 	public XMLEventReader createXMLEventReader(String systemId, InputStream stream) throws XMLStreamException {
-		throw new UnsupportedOperationException();
+		return createXMLEventReader(createXMLStreamReader(systemId, stream));
 	}
 
 	@Override
@@ -244,11 +247,11 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 
 	@Override
 	public void setEventAllocator(XMLEventAllocator allocator) {
-		throw new UnsupportedOperationException();
+		this.allocator = allocator;
 	}
 
 	@Override
 	public XMLEventAllocator getEventAllocator() {
-		throw new UnsupportedOperationException();
+		return allocator;
 	}
 }

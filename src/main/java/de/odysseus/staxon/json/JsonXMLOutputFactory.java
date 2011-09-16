@@ -26,8 +26,10 @@ import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Result;
 
+import de.odysseus.staxon.event.SimpleXMLEventWriter;
 import de.odysseus.staxon.json.stream.JsonStreamFactory;
 import de.odysseus.staxon.json.stream.JsonStreamTarget;
 import de.odysseus.staxon.json.stream.util.AutoArrayTarget;
@@ -115,22 +117,26 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 
 	@Override
 	public XMLEventWriter createXMLEventWriter(Result result) throws XMLStreamException {
-		throw new UnsupportedOperationException();
+		return createXMLEventWriter(createXMLStreamWriter(result));
 	}
 
 	@Override
 	public XMLEventWriter createXMLEventWriter(OutputStream stream) throws XMLStreamException {
-		throw new UnsupportedOperationException();
+		return createXMLEventWriter(createXMLStreamWriter(stream));
 	}
 
 	@Override
 	public XMLEventWriter createXMLEventWriter(OutputStream stream, String encoding) throws XMLStreamException {
-		throw new UnsupportedOperationException();
+		return createXMLEventWriter(createXMLStreamWriter(stream, encoding));
 	}
 
 	@Override
 	public XMLEventWriter createXMLEventWriter(Writer stream) throws XMLStreamException {
-		throw new UnsupportedOperationException();
+		return createXMLEventWriter(createXMLStreamWriter(stream));
+	}
+
+	public XMLEventWriter createXMLEventWriter(XMLStreamWriter writer) throws XMLStreamException {
+		return new SimpleXMLEventWriter(writer);
 	}
 
 	@Override
