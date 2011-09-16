@@ -320,7 +320,15 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	}
 
 	@Override
-	public boolean isWhiteSpace() {
+	public boolean isWhiteSpace() {	
+		if (getEventType() == XMLStreamConstants.CHARACTERS || getEventType() == XMLStreamConstants.CDATA) {
+			for (char ch : getText().toCharArray()) {
+				if (!Character.isWhitespace(ch)) {
+					return false;
+				}
+			}
+			return true;
+		}
 		return false;
 	}
 
