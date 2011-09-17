@@ -2,6 +2,19 @@
 
 [StAXON](http://beckchr.github.com/staxon/) lets you read and write JSON using the Java Streaming API for XML.
 
+More specifically, StAXON provides implementations of the
+
+- StAX Cursor API (`javax.xml.stream.XMLStreamReader` and  `javax.xml.stream.XMLStreamWriter`)
+- StAX Event API (`javax.xml.stream.XMLEventReader` and  `javax.xml.stream.XMLEventWriter`)
+
+for JSON.
+
+The availability of a StAX implementation acts as a door opener for JSON to powerful XML related technologies like
+
+- XSL transformations (XSLT)
+- XML binding API (JAXB)
+- XML Schema Definition (XSD)
+
 ## Main Features
 
 - Supports [Jackson](http://jackson.codehaus.org/) and [Gson](http://code.google.com/p/google-gson/) as JSON backends
@@ -10,15 +23,13 @@
 - Memory efficient, even for very large documents
 - It's pretty fast ([benchmark](https://github.com/beckchr/staxon/wiki/Benchmark))…
 
-StAXON provides implementations of `javax.xml.stream.XMLStreamReader` and  `javax.xml.stream.XMLStreamWriter`.
-
 The XML-to-JSON [Mapping Convention](https://github.com/beckchr/staxon/wiki/Mapping-Convention) used by StAXON is
 similar to the [Badgerfish](http://www.sklar.com/badgerfish/) convention but attempts to avoid needless text-only
 JSON objects to generate a more compact JSON.
 
 ## Basic Usage
 
-If you know StAX, you'll notice that there's little new: just obtain an `XMLStreamReader` or `XMLStreamWriter`
+If you know StAX, you'll notice that there's little new: just obtain a reader or writer
 from StAXON and you're ready to go.
 
 ### Writing JSON
@@ -38,7 +49,7 @@ Write your document:
 
 With an XML-based writer, this would have produced something like
 
-	<?xml version="1.0" ?>
+	<?xml version="1.0"?>
 	<alice>charlie</alice>
 
 However, with our JSON-based writer, the output is
@@ -84,7 +95,7 @@ You can get StAXON artifacts from our [maven repositories](http://beckchr.github
 		<dependency>
 			<groupId>de.odysseus.staxon</groupId>
 			<artifactId>staxon</artifactId>
-			<version>0.5.0</version>
+			<version>0.6.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
@@ -93,10 +104,10 @@ You can get StAXON artifacts from our [maven repositories](http://beckchr.github
 		</dependency>
 	</dependencies>
 
-Manually download the latest release: StAXON 0.5.0 (2011/08/26):
+Manually download the latest release: StAXON 0.6.0 (2011/09/16):
 
-- [staxon-0.5.0.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon/0.5.0/staxon-0.5.0.jar)
-- [staxon-0.5.0-sources.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon/0.5.0/staxon-0.5.0-sources.jar)
+- [staxon-0.6.0.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon/0.6.0/staxon-0.6.0.jar)
+- [staxon-0.6.0-sources.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon/0.6.0/staxon-0.6.0-sources.jar)
 
 Make sure you have the `jackson-core` (and/or `gson`) jars on your classpath ([jackson download](http://wiki.fasterxml.com/JacksonDownload)).
 
