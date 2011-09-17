@@ -33,6 +33,7 @@ import de.odysseus.staxon.event.SimpleXMLEventWriter;
 import de.odysseus.staxon.json.stream.JsonStreamFactory;
 import de.odysseus.staxon.json.stream.JsonStreamTarget;
 import de.odysseus.staxon.json.stream.util.AutoArrayTarget;
+import de.odysseus.staxon.json.stream.util.RemoveRootTarget;
 
 public class JsonXMLOutputFactory extends XMLOutputFactory {
 	/**
@@ -57,6 +58,14 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 	public static final String PROP_MULTIPLE_PI = "JsonXMLOutputFactory.multiplePI";
 
 	/**
+	 * <p>JSON documents may have have multiple root properties. However,
+	 * XML requires a single root element. This property takes the name
+	 * of a "virtual" root element, which will be removed from the stream
+	 * when writing.</p>
+	 */
+	public static final String PROP_VIRTUAL_ROOT = "JsonXMLOutputFactory.virtualRoot";
+
+	/**
 	 * Format output for better readability?
 	 * 
 	 * <p>The default value is <code>false</code>.</p>
@@ -65,6 +74,7 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 
 	private JsonStreamFactory streamFactory = null;
 	private boolean multiplePI = true;
+	private String virtualRoot = null;
 	private boolean autoArray = false;
 	private boolean prettyPrint = false;
 
@@ -79,6 +89,9 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 	private JsonStreamTarget decorate(JsonStreamTarget target) {
 		if (autoArray) {
 			target = new AutoArrayTarget(target);
+		}
+		if (virtualRoot != null) {
+			target = new RemoveRootTarget(target, virtualRoot);
 		}
 		return target;
 	}
@@ -150,6 +163,8 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 				autoArray = Boolean.valueOf(value.toString());
 			} else if (PROP_MULTIPLE_PI.equals(name)) {
 				multiplePI = Boolean.valueOf(value.toString());;
+			} else if (PROP_VIRTUAL_ROOT.equals(name)) {
+				virtualRoot = (String)value;
 			} else if (PROP_PRETTY_PRINT.equals(name)) {
 				prettyPrint = Boolean.valueOf(value.toString());
 			} else {
@@ -167,6 +182,8 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 				return autoArray;
 			} else if (PROP_MULTIPLE_PI.equals(name)) {
 				return multiplePI;
+			} else if (PROP_VIRTUAL_ROOT.equals(name)) {
+				return virtualRoot;
 			} else if (PROP_PRETTY_PRINT.equals(name)) {
 				return prettyPrint;
 			} else {
@@ -180,7 +197,7 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 		if (XMLOutputFactory.IS_REPAIRING_NAMESPACES.equals(name)) {
 			return true;
 		} else { // proprietary properties
-			return Arrays.asList(PROP_AUTO_ARRAY, PROP_MULTIPLE_PI, PROP_PRETTY_PRINT).contains(name);
+			return Arrays.asList(PROP_AUTO_ARRAY, PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT, PROP_PRETTY_PRINT).contains(name);
 		}
 	}
 }

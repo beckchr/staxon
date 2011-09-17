@@ -38,6 +38,7 @@ import de.odysseus.staxon.event.SimpleXMLEventAllocator;
 import de.odysseus.staxon.event.SimpleXMLEventReader;
 import de.odysseus.staxon.json.stream.JsonStreamFactory;
 import de.odysseus.staxon.json.stream.JsonStreamSource;
+import de.odysseus.staxon.json.stream.util.AddRootSource;
 
 public class JsonXMLInputFactory extends XMLInputFactory {
 	/**
@@ -53,9 +54,18 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 	 */
 	public static final String PROP_MULTIPLE_PI = "JsonXMLInputFactory.multiplePI";
 
+	/**
+	 * <p>JSON documents may have have multiple root properties. However,
+	 * XML requires a single root element. This property takes the name
+	 * of a "virtual" root element, which will be added to the stream
+	 * when reading.</p>
+	 */
+	public static final String PROP_VIRTUAL_ROOT = "JsonXMLInputFactory.virtualRoot";
+
 	private final JsonStreamFactory streamFactory;
 
 	private boolean multiplePI = true;
+	private String virtualRoot = null;
 	private boolean coalescing;
 	private XMLEventAllocator allocator = new SimpleXMLEventAllocator();
 	
@@ -68,6 +78,9 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 	}
 	
 	private JsonStreamSource decorate(JsonStreamSource source) {
+		if (virtualRoot != null) {
+			source = new AddRootSource(source, virtualRoot);
+		}
 		return source;
 	}
 	
@@ -201,6 +214,8 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 		} else { // proprietary properties
 			if (PROP_MULTIPLE_PI.equals(name)) {
 				multiplePI = Boolean.valueOf(value.toString());
+			} else if (PROP_VIRTUAL_ROOT.equals(name)) {
+				virtualRoot = (String)value;
 			} else {
 				throw new IllegalArgumentException("Unsupported input property: " + name);
 			}
@@ -222,6 +237,8 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 		} else { // proprietary properties
 			 if (PROP_MULTIPLE_PI.equals(name)) {
 				return multiplePI;
+			} else if (PROP_VIRTUAL_ROOT.equals(name)) {
+				return virtualRoot;
 			} else {
 				throw new IllegalArgumentException("Unsupported input property: " + name);
 			}
@@ -241,7 +258,7 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 		} else if (XMLInputFactory.IS_VALIDATING.equals(name)) {
 			return true;
 		} else { // proprietary properties
-			return Arrays.asList(PROP_MULTIPLE_PI).contains(name);
+			return Arrays.asList(PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT).contains(name);
 		}
 	}
 

@@ -21,17 +21,21 @@ import de.odysseus.staxon.json.stream.JsonStreamTarget;
 
 public class RemoveRootTarget implements JsonStreamTarget {
 	private final JsonStreamTarget delegate;
+	private final String root;
 	
 	private int depth;
 
-	public RemoveRootTarget(JsonStreamTarget delegate) {
+	public RemoveRootTarget(JsonStreamTarget delegate, String root) {
 		this.delegate = delegate;
+		this.root = root;
 	}
 
 	@Override
 	public void name(String name) throws IOException {
 		if (depth > 1) {
 			delegate.name(name);
+		} else if (!name.equals(root)) {
+			throw new IOException("Unexpected root: " + name);
 		}
 	}
 
