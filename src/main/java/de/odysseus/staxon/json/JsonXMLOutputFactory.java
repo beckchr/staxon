@@ -28,6 +28,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Result;
+import javax.xml.transform.stream.StreamResult;
 
 import de.odysseus.staxon.event.SimpleXMLEventWriter;
 import de.odysseus.staxon.json.stream.JsonStreamFactory;
@@ -125,7 +126,23 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 
 	@Override
 	public JsonXMLStreamWriter createXMLStreamWriter(Result result) throws XMLStreamException {
-		throw new UnsupportedOperationException();
+		if (result instanceof StreamResult) {
+			StreamResult streamResult = (StreamResult) result;
+			OutputStream output = streamResult.getOutputStream();
+			if (output != null) {
+				return createXMLStreamWriter(output);
+			}
+			Writer writer = streamResult.getWriter();
+			if (writer != null) {
+				return createXMLStreamWriter(writer);
+			}
+			if (result.getSystemId() != null) {
+				throw new XMLStreamException("Cannot open system id as URL for writing: " + result.getSystemId());
+			} else {
+				throw new XMLStreamException("Invalid stream result: none of output, writer, systemId set");
+			}
+		}
+		throw new XMLStreamException("Unsupported result type: " + result.getClass());
 	}
 
 	@Override

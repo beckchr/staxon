@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.util.Arrays;
 
 import javax.xml.stream.EventFilter;
@@ -33,6 +34,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.util.XMLEventAllocator;
 import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
 
 import de.odysseus.staxon.event.SimpleXMLEventAllocator;
 import de.odysseus.staxon.event.SimpleXMLEventReader;
@@ -113,7 +115,36 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 
 	@Override
 	public JsonXMLStreamReader createXMLStreamReader(Source source) throws XMLStreamException {
-		throw new UnsupportedOperationException();
+		if (source instanceof StreamSource) {
+			StreamSource streamSource = (StreamSource) source;
+			InputStream input = streamSource.getInputStream();
+			if (input != null) {
+				if (streamSource.getSystemId() != null) {
+					return createXMLStreamReader(streamSource.getSystemId(), input);
+				} else {
+					return createXMLStreamReader(input);
+				}
+			}
+			Reader reader = streamSource.getReader();
+			if (reader != null) {
+				if (streamSource.getSystemId() != null) {
+					return createXMLStreamReader(streamSource.getSystemId(), reader);
+				} else {
+					return createXMLStreamReader(reader);
+				}
+			}
+			if (streamSource.getSystemId() != null) {
+				// TODO this stream will never be closed!
+				try {
+					return createXMLStreamReader(streamSource.getSystemId(), new URI(source.getSystemId()).toURL().openStream());
+				} catch (Exception e) {
+					throw new XMLStreamException("Cannot open system id as URL for reading: " + source.getSystemId(), e);
+				}
+			} else {
+				throw new XMLStreamException("Invalid stream source: none of input, reader, systemId set");
+			}
+		}
+		throw new XMLStreamException("Unsupported source type: " + source.getClass());
 	}
 
 	@Override
