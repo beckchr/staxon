@@ -16,6 +16,7 @@
 package de.odysseus.staxon.event;
 
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.Iterator;
 
 import javax.xml.XMLConstants;
@@ -47,24 +48,27 @@ public class SimpleXMLEventAllocatorTest {
 		return new SimpleXMLInputFactory().createXMLStreamReader(new StringReader(xml));
 	}
 	
-	private void verify(XMLEvent event, int expectedEventType) {
+	private void verify(XMLEvent event, int expectedEventType, String expectedWriteAsEncodedUnicode) throws XMLStreamException {
 		Assert.assertEquals(expectedEventType, event.getEventType());
 		Assert.assertNull(event.getSchemaType());
 		Assert.assertNotNull(event.getLocation());
+		StringWriter stringWriter = new StringWriter();
+		event.writeAsEncodedUnicode(stringWriter);
+		Assert.assertEquals(expectedWriteAsEncodedUnicode, stringWriter.toString());
 	}
 	
 	@Test
 	public void testStartEndDocument() throws XMLStreamException {
 		XMLStreamReader reader = createXmlStreamReader("<? xml ?>");
 		StartDocument startDocument = (StartDocument)eventAllocator.allocate(reader);
-		verify(startDocument, XMLStreamConstants.START_DOCUMENT);
+		verify(startDocument, XMLStreamConstants.START_DOCUMENT, "<?xml version=\"1.0\"?>");
 		Assert.assertEquals("UTF-8", startDocument.getCharacterEncodingScheme());
 		Assert.assertFalse(startDocument.encodingSet());
 		Assert.assertEquals("1.0", startDocument.getVersion());
 		Assert.assertFalse(startDocument.isStandalone());
 		Assert.assertFalse(startDocument.standaloneSet());
 		reader.next();
-		verify((EndDocument)eventAllocator.allocate(reader), XMLStreamConstants.END_DOCUMENT);
+		verify((EndDocument)eventAllocator.allocate(reader), XMLStreamConstants.END_DOCUMENT, "");
 
 		reader = createXmlStreamReader("<? xml version=\"1.1\" ?>");
 		startDocument = (StartDocument)eventAllocator.allocate(reader);
@@ -80,7 +84,7 @@ public class SimpleXMLEventAllocatorTest {
 	public void testStartEndElement() throws XMLStreamException {
 		XMLStreamReader reader = createXmlStreamReader("<alice/>");
 		StartElement startElement = eventAllocator.allocate(reader).asStartElement();
-		verify(startElement, XMLStreamConstants.START_ELEMENT);
+		verify(startElement, XMLStreamConstants.START_ELEMENT, "<alice>");
 		Assert.assertEquals(new QName("alice"), startElement.getName());
 		Assert.assertNotNull(startElement.getNamespaceContext());
 		Assert.assertFalse(startElement.getAttributes().hasNext());
@@ -88,7 +92,7 @@ public class SimpleXMLEventAllocatorTest {
 		Assert.assertNull(startElement.getNamespaceURI("foo"));
 		reader.next();
 		EndElement endElement = eventAllocator.allocate(reader).asEndElement();
-		verify(endElement, XMLStreamConstants.END_ELEMENT);
+		verify(endElement, XMLStreamConstants.END_ELEMENT, "</alice>");
 		Assert.assertEquals(new QName("alice"), endElement.getName());
 		Assert.assertFalse(endElement.getNamespaces().hasNext());
 	}
@@ -98,7 +102,7 @@ public class SimpleXMLEventAllocatorTest {
 		XMLStreamReader reader = createXmlStreamReader("<alice>bob</alice>");
 		reader.next();
 		Characters characters = eventAllocator.allocate(reader).asCharacters();
-		verify(characters, XMLStreamConstants.CHARACTERS);
+		verify(characters, XMLStreamConstants.CHARACTERS, "bob");
 		Assert.assertEquals("bob", characters.getData());
 		Assert.assertFalse(characters.isCData());
 		Assert.assertFalse(characters.isWhiteSpace());
@@ -107,14 +111,14 @@ public class SimpleXMLEventAllocatorTest {
 		reader = createXmlStreamReader("<alice><![CDATA[bob]]></alice>");
 		reader.next();
 		characters = eventAllocator.allocate(reader).asCharacters();
-		verify(characters, XMLStreamConstants.CDATA);
+		verify(characters, XMLStreamConstants.CDATA, "<![CDATA[bob]]>");
 		Assert.assertEquals("bob", characters.getData());
 		Assert.assertTrue(characters.isCData());
 
 		reader = createXmlStreamReader("<alice><![CDATA[ ]]></alice>");
 		reader.next();
 		characters = eventAllocator.allocate(reader).asCharacters();
-		verify(characters, XMLStreamConstants.CDATA);
+		verify(characters, XMLStreamConstants.CDATA, "<![CDATA[ ]]>");
 		Assert.assertEquals(" ", characters.getData());
 		Assert.assertTrue(characters.isWhiteSpace());
 		Assert.assertFalse(characters.isIgnorableWhiteSpace());
@@ -124,11 +128,12 @@ public class SimpleXMLEventAllocatorTest {
 	public void testAttributeNamespace() throws XMLStreamException {
 		XMLStreamReader reader = createXmlStreamReader("<alice david=\"edgar\" xmlns=\"http://foo\"/>");
 		StartElement startElement = eventAllocator.allocate(reader).asStartElement();
+		verify(startElement, XMLStreamConstants.START_ELEMENT, "<alice xmlns=\"http://foo\" david=\"edgar\">");
 
 		Iterator<?> attributes = startElement.getAttributes();
 		Assert.assertTrue(attributes.hasNext());
 		Attribute attribute = (Attribute)attributes.next();
-		verify(attribute, XMLStreamConstants.ATTRIBUTE);
+		verify(attribute, XMLStreamConstants.ATTRIBUTE, "david=\"edgar\"");
 		Assert.assertEquals(new QName("david"), attribute.getName());
 		Assert.assertEquals("edgar", attribute.getValue());
 		Assert.assertFalse(attributes.hasNext());
@@ -136,7 +141,7 @@ public class SimpleXMLEventAllocatorTest {
 		Iterator<?> namespaces = startElement.getNamespaces();
 		Assert.assertTrue(namespaces.hasNext());
 		Namespace namespace = (Namespace)namespaces.next();
-		verify(namespace, XMLStreamConstants.NAMESPACE);
+		verify(namespace, XMLStreamConstants.NAMESPACE, "xmlns=\"http://foo\"");
 		Assert.assertEquals(new QName(XMLConstants.XMLNS_ATTRIBUTE_NS_URI, "xmlns"), namespace.getName());
 		Assert.assertEquals("http://foo", namespace.getValue());
 		Assert.assertEquals(XMLConstants.DEFAULT_NS_PREFIX, namespace.getPrefix());
@@ -145,11 +150,12 @@ public class SimpleXMLEventAllocatorTest {
 
 		reader = createXmlStreamReader("<alice p:david=\"edgar\" xmlns:p=\"http://foo\"/>");
 		startElement = eventAllocator.allocate(reader).asStartElement();
+		verify(startElement, XMLStreamConstants.START_ELEMENT, "<alice xmlns:p=\"http://foo\" p:david=\"edgar\">");
 
 		attributes = startElement.getAttributes();
 		Assert.assertTrue(attributes.hasNext());
 		attribute = (Attribute)attributes.next();
-		verify(attribute, XMLStreamConstants.ATTRIBUTE);
+		verify(attribute, XMLStreamConstants.ATTRIBUTE, "p:david=\"edgar\"");
 		Assert.assertEquals(new QName("http://foo", "david", "p"), attribute.getName());
 		Assert.assertEquals("edgar", attribute.getValue());
 		Assert.assertFalse(attributes.hasNext());
@@ -157,7 +163,7 @@ public class SimpleXMLEventAllocatorTest {
 		namespaces = startElement.getNamespaces();
 		Assert.assertTrue(namespaces.hasNext());
 		namespace = (Namespace)namespaces.next();
-		verify(namespace, XMLStreamConstants.NAMESPACE);
+		verify(namespace, XMLStreamConstants.NAMESPACE, "xmlns:p=\"http://foo\"");
 		Assert.assertEquals(new QName(XMLConstants.XMLNS_ATTRIBUTE_NS_URI, "p", "xmlns"), namespace.getName());
 		Assert.assertEquals("http://foo", namespace.getValue());
 		Assert.assertEquals("p", namespace.getPrefix());
@@ -167,17 +173,17 @@ public class SimpleXMLEventAllocatorTest {
 
 	@Test
 	public void testComment() throws XMLStreamException {
-		XMLStreamReader reader = createXmlStreamReader("<!--james-->");
+		XMLStreamReader reader = createXmlStreamReader("<!-- james -->");
 		Comment comment = (Comment)eventAllocator.allocate(reader);
-		verify(comment, XMLStreamConstants.COMMENT);
-		Assert.assertEquals("james", comment.getText());
+		verify(comment, XMLStreamConstants.COMMENT, "<!-- james -->");
+		Assert.assertEquals(" james ", comment.getText());
 	}
 
 	@Test
 	public void testProcessingInstruction() throws XMLStreamException {
-		XMLStreamReader reader = createXmlStreamReader("<?joe?>");
+		XMLStreamReader reader = createXmlStreamReader("<? joe ?>");
 		ProcessingInstruction processingInstruction = (ProcessingInstruction)eventAllocator.allocate(reader);
-		verify(processingInstruction, XMLStreamConstants.PROCESSING_INSTRUCTION);
+		verify(processingInstruction, XMLStreamConstants.PROCESSING_INSTRUCTION, "<?joe?>");
 		Assert.assertEquals("joe", processingInstruction.getTarget());
 		Assert.assertNull(processingInstruction.getData());
 
