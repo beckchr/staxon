@@ -1,11 +1,11 @@
 # StAXON - JSON via StAX
 
-[StAXON](http://beckchr.github.com/staxon/) lets you read and write JSON using the Java Streaming API for XML.
+[StAXON](http://beckchr.github.com/staxon/) lets you read and write JSON using the Java Streaming API for XML (`javax.xml.stream`).
 
 More specifically, StAXON provides implementations of the
 
-- StAX Cursor API (`javax.xml.stream.XMLStreamReader` and  `javax.xml.stream.XMLStreamWriter`)
-- StAX Event API (`javax.xml.stream.XMLEventReader` and  `javax.xml.stream.XMLEventWriter`)
+- StAX Cursor API (`XMLStreamReader` and `XMLStreamWriter`)
+- StAX Event API (`XMLEventReader` and `XMLEventWriter`)
 
 for JSON.
 
