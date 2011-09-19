@@ -17,26 +17,21 @@ package de.odysseus.staxon.json;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.Arrays;
 
 import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.transform.Result;
-import javax.xml.transform.stream.StreamResult;
 
-import de.odysseus.staxon.event.SimpleXMLEventWriter;
+import de.odysseus.staxon.AbstractXMLOutputFactory;
 import de.odysseus.staxon.json.stream.JsonStreamFactory;
 import de.odysseus.staxon.json.stream.JsonStreamTarget;
 import de.odysseus.staxon.json.stream.util.AutoArrayTarget;
 import de.odysseus.staxon.json.stream.util.RemoveRootTarget;
 
-public class JsonXMLOutputFactory extends XMLOutputFactory {
+public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	/**
 	 * <p>Start/end arrays automatically?</p>
 	 * 
@@ -98,7 +93,7 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 	}
 
 	@Override
-	public JsonXMLStreamWriter createXMLStreamWriter(Writer stream) throws XMLStreamException {
+	public XMLStreamWriter createXMLStreamWriter(Writer stream) throws XMLStreamException {
 		try {
 			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), multiplePI);
 		} catch (IOException e) {
@@ -107,85 +102,31 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 	}
 
 	@Override
-	public JsonXMLStreamWriter createXMLStreamWriter(OutputStream stream) throws XMLStreamException {
+	public XMLStreamWriter createXMLStreamWriter(OutputStream stream) throws XMLStreamException {
 		try {
 			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), multiplePI);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
-	}
-
-	@Override
-	public JsonXMLStreamWriter createXMLStreamWriter(OutputStream stream, String encoding) throws XMLStreamException {
-		try {
-			return createXMLStreamWriter(new OutputStreamWriter(stream, encoding));
-		} catch (UnsupportedEncodingException e) {
-			throw new XMLStreamException(e);
-		}
-	}
-
-	@Override
-	public JsonXMLStreamWriter createXMLStreamWriter(Result result) throws XMLStreamException {
-		if (result instanceof StreamResult) {
-			StreamResult streamResult = (StreamResult) result;
-			OutputStream output = streamResult.getOutputStream();
-			if (output != null) {
-				return createXMLStreamWriter(output);
-			}
-			Writer writer = streamResult.getWriter();
-			if (writer != null) {
-				return createXMLStreamWriter(writer);
-			}
-			if (result.getSystemId() != null) {
-				throw new XMLStreamException("Cannot open system id as URL for writing: " + result.getSystemId());
-			} else {
-				throw new XMLStreamException("Invalid stream result: none of output, writer, systemId set");
-			}
-		}
-		throw new XMLStreamException("Unsupported result type: " + result.getClass());
-	}
-
-	@Override
-	public XMLEventWriter createXMLEventWriter(Result result) throws XMLStreamException {
-		return createXMLEventWriter(createXMLStreamWriter(result));
-	}
-
-	@Override
-	public XMLEventWriter createXMLEventWriter(OutputStream stream) throws XMLStreamException {
-		return createXMLEventWriter(createXMLStreamWriter(stream));
-	}
-
-	@Override
-	public XMLEventWriter createXMLEventWriter(OutputStream stream, String encoding) throws XMLStreamException {
-		return createXMLEventWriter(createXMLStreamWriter(stream, encoding));
-	}
-
-	@Override
-	public XMLEventWriter createXMLEventWriter(Writer stream) throws XMLStreamException {
-		return createXMLEventWriter(createXMLStreamWriter(stream));
-	}
-
-	public XMLEventWriter createXMLEventWriter(XMLStreamWriter writer) throws XMLStreamException {
-		return new SimpleXMLEventWriter(writer);
 	}
 
 	@Override
 	public void setProperty(String name, Object value) throws IllegalArgumentException {
 		if (XMLOutputFactory.IS_REPAIRING_NAMESPACES.equals(name)) {
-			if (Boolean.valueOf(value.toString())) {
-				throw new IllegalArgumentException();
+			if (!getProperty(name).equals(value)) {
+				throw new IllegalArgumentException("Cannot change property: " + name);
 			}
 		} else { // proprietary properties
 			if (PROP_AUTO_ARRAY.equals(name)) {
-				autoArray = Boolean.valueOf(value.toString());
+				autoArray = ((Boolean)value).booleanValue();
 			} else if (PROP_MULTIPLE_PI.equals(name)) {
-				multiplePI = Boolean.valueOf(value.toString());;
+				multiplePI = ((Boolean)value).booleanValue();
 			} else if (PROP_VIRTUAL_ROOT.equals(name)) {
 				virtualRoot = (String)value;
 			} else if (PROP_PRETTY_PRINT.equals(name)) {
-				prettyPrint = Boolean.valueOf(value.toString());
+				prettyPrint = ((Boolean)value).booleanValue();
 			} else {
-				throw new IllegalArgumentException("Unsupported output property: " + name);
+				throw new IllegalArgumentException("Unsupported property: " + name);
 			}
 		}
 	}
@@ -193,18 +134,18 @@ public class JsonXMLOutputFactory extends XMLOutputFactory {
 	@Override
 	public Object getProperty(String name) throws IllegalArgumentException {
 		if (XMLOutputFactory.IS_REPAIRING_NAMESPACES.equals(name)) {
-			return false;
+			return Boolean.FALSE;
 		} else { // proprietary properties
 			 if (PROP_AUTO_ARRAY.equals(name)) {
-				return autoArray;
+				return Boolean.valueOf(autoArray);
 			} else if (PROP_MULTIPLE_PI.equals(name)) {
-				return multiplePI;
+				return Boolean.valueOf(multiplePI);
 			} else if (PROP_VIRTUAL_ROOT.equals(name)) {
 				return virtualRoot;
 			} else if (PROP_PRETTY_PRINT.equals(name)) {
-				return prettyPrint;
+				return Boolean.valueOf(prettyPrint);
 			} else {
-				throw new IllegalArgumentException("Unsupported output property: " + name);
+				throw new IllegalArgumentException("Unsupported property: " + name);
 			}
 		}
 	}

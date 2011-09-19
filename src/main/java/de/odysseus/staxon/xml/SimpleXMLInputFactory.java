@@ -16,9 +16,7 @@
 package de.odysseus.staxon.xml;
 
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 
 import javax.xml.stream.EventFilter;
 import javax.xml.stream.StreamFilter;
@@ -28,15 +26,11 @@ import javax.xml.stream.XMLReporter;
 import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.util.XMLEventAllocator;
-import javax.xml.transform.Source;
 
-import de.odysseus.staxon.event.SimpleXMLEventAllocator;
-import de.odysseus.staxon.event.SimpleXMLEventReader;
+import de.odysseus.staxon.AbstractXMLInputFactory;
 
-public class SimpleXMLInputFactory extends XMLInputFactory {
-	private boolean coalescing;
-	private XMLEventAllocator allocator = new SimpleXMLEventAllocator();
+public class SimpleXMLInputFactory extends AbstractXMLInputFactory {
+	private boolean coalescing = false;
 	
 	@Override
 	public XMLStreamReader createXMLStreamReader(Reader reader) throws XMLStreamException {
@@ -46,65 +40,6 @@ public class SimpleXMLInputFactory extends XMLInputFactory {
 	@Override
 	public XMLStreamReader createXMLStreamReader(InputStream stream) throws XMLStreamException {
 		return createXMLStreamReader(stream, "UTF-8");
-	}
-
-	@Override
-	public XMLStreamReader createXMLStreamReader(InputStream stream, String encoding) throws XMLStreamException {
-		try {
-			return createXMLStreamReader(new InputStreamReader(stream, encoding));
-		} catch (UnsupportedEncodingException e) {
-			throw new XMLStreamException(e);
-		}
-	}
-
-	@Override
-	public XMLStreamReader createXMLStreamReader(Source source) throws XMLStreamException {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public XMLStreamReader createXMLStreamReader(String systemId, InputStream stream) throws XMLStreamException {
-		return createXMLStreamReader(stream);
-	}
-
-	@Override
-	public XMLStreamReader createXMLStreamReader(String systemId, Reader reader) throws XMLStreamException {
-		return createXMLStreamReader(reader);
-	}
-
-	@Override
-	public XMLEventReader createXMLEventReader(Reader reader) throws XMLStreamException {
-		return createXMLEventReader(createXMLStreamReader(reader));
-	}
-
-	@Override
-	public XMLEventReader createXMLEventReader(String systemId, Reader reader) throws XMLStreamException {
-		return createXMLEventReader(createXMLStreamReader(systemId, reader));
-	}
-
-	@Override
-	public XMLEventReader createXMLEventReader(XMLStreamReader reader) throws XMLStreamException {
-		return new SimpleXMLEventReader(getEventAllocator().newInstance(), reader);
-	}
-
-	@Override
-	public XMLEventReader createXMLEventReader(Source source) throws XMLStreamException {
-		return createXMLEventReader(createXMLStreamReader(source));
-	}
-
-	@Override
-	public XMLEventReader createXMLEventReader(InputStream stream) throws XMLStreamException {
-		return createXMLEventReader(createXMLStreamReader(stream));
-	}
-
-	@Override
-	public XMLEventReader createXMLEventReader(InputStream stream, String encoding) throws XMLStreamException {
-		return createXMLEventReader(createXMLStreamReader(stream, encoding));
-	}
-
-	@Override
-	public XMLEventReader createXMLEventReader(String systemId, InputStream stream) throws XMLStreamException {
-		return createXMLEventReader(createXMLStreamReader(systemId, stream));
 	}
 
 	@Override
@@ -140,42 +75,42 @@ public class SimpleXMLInputFactory extends XMLInputFactory {
 	@Override
 	public void setProperty(String name, Object value) throws IllegalArgumentException {
 		if (XMLInputFactory.IS_COALESCING.equals(name)) {
-			coalescing = Boolean.valueOf(value.toString());
+			coalescing = ((Boolean)value).booleanValue();
 		} else if (XMLInputFactory.IS_NAMESPACE_AWARE.equals(name)) {
-			if (!Boolean.valueOf(value.toString())) {
-				throw new IllegalArgumentException();
+			if (!getProperty(name).equals(value)) {
+				throw new IllegalArgumentException("Cannot change property: " + name);
 			}
 		} else if (XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES.equals(name)) {
-			if (!Boolean.valueOf(value.toString())) {
-				throw new IllegalArgumentException();
+			if (!getProperty(name).equals(value)) {
+				throw new IllegalArgumentException("Cannot change property: " + name);
 			}
 		} else if (XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES.equals(name)) {
-			if (Boolean.valueOf(value.toString())) {
-				throw new IllegalArgumentException();
+			if (!getProperty(name).equals(value)) {
+				throw new IllegalArgumentException("Cannot change property: " + name);
 			}
 		} else if (XMLInputFactory.IS_VALIDATING.equals(name)) {
-			if (Boolean.valueOf(value.toString())) {
-				throw new IllegalArgumentException();
+			if (!getProperty(name).equals(value)) {
+				throw new IllegalArgumentException("Cannot change property: " + name);
 			}
 		} else {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Unsupported property: " + name);
 		}
 	}
 
 	@Override
 	public Object getProperty(String name) throws IllegalArgumentException {
 		if (XMLInputFactory.IS_COALESCING.equals(name)) {
-			return coalescing;
+			return Boolean.valueOf(coalescing);
 		} else if (XMLInputFactory.IS_NAMESPACE_AWARE.equals(name)) {
-			return true;
+			return Boolean.TRUE;
 		} else if (XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES.equals(name)) {
-			return true;
+			return Boolean.TRUE;
 		} else if (XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES.equals(name)) {
-			return false;
+			return Boolean.FALSE;
 		} else if (XMLInputFactory.IS_VALIDATING.equals(name)) {
-			return false;
+			return Boolean.FALSE;
 		} else {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Unsupported property: " + name);
 		}
 	}
 
@@ -194,15 +129,5 @@ public class SimpleXMLInputFactory extends XMLInputFactory {
 		} else {
 			return false;
 		}
-	}
-
-	@Override
-	public void setEventAllocator(XMLEventAllocator allocator) {
-		this.allocator = allocator;
-	}
-
-	@Override
-	public XMLEventAllocator getEventAllocator() {
-		return allocator;
 	}
 }

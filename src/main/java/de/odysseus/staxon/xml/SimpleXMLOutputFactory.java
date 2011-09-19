@@ -16,20 +16,15 @@
 package de.odysseus.staxon.xml;
 
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 
-import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.transform.Result;
 
-import de.odysseus.staxon.event.SimpleXMLEventWriter;
+import de.odysseus.staxon.AbstractXMLOutputFactory;
 
-
-public class SimpleXMLOutputFactory extends XMLOutputFactory {
+public class SimpleXMLOutputFactory extends AbstractXMLOutputFactory {
 	@Override
 	public XMLStreamWriter createXMLStreamWriter(Writer stream) throws XMLStreamException {
 		return new SimpleXMLStreamWriter(stream);
@@ -41,60 +36,22 @@ public class SimpleXMLOutputFactory extends XMLOutputFactory {
 	}
 
 	@Override
-	public XMLStreamWriter createXMLStreamWriter(OutputStream stream, String encoding) throws XMLStreamException {
-		try {
-			return new SimpleXMLStreamWriter(new OutputStreamWriter(stream, encoding));
-		} catch (UnsupportedEncodingException e) {
-			throw new XMLStreamException(e);
-		}
-	}
-
-	@Override
-	public XMLStreamWriter createXMLStreamWriter(Result result) throws XMLStreamException {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public XMLEventWriter createXMLEventWriter(Result result) throws XMLStreamException {
-		return createXMLEventWriter(createXMLStreamWriter(result));
-	}
-
-	@Override
-	public XMLEventWriter createXMLEventWriter(OutputStream stream) throws XMLStreamException {
-		return createXMLEventWriter(createXMLStreamWriter(stream));
-	}
-
-	@Override
-	public XMLEventWriter createXMLEventWriter(OutputStream stream, String encoding) throws XMLStreamException {
-		return createXMLEventWriter(createXMLStreamWriter(stream, encoding));
-	}
-
-	@Override
-	public XMLEventWriter createXMLEventWriter(Writer stream) throws XMLStreamException {
-		return createXMLEventWriter(createXMLStreamWriter(stream));
-	}
-
-	public XMLEventWriter createXMLEventWriter(XMLStreamWriter writer) throws XMLStreamException {
-		return new SimpleXMLEventWriter(writer);
-	}
-
-	@Override
 	public void setProperty(String name, Object value) throws IllegalArgumentException {
 		if (XMLOutputFactory.IS_REPAIRING_NAMESPACES.equals(name)) {
-			if (Boolean.valueOf(value.toString())) {
-				throw new IllegalArgumentException();
+			if (!getProperty(name).equals(value)) {
+				throw new IllegalArgumentException("Cannot change property: " + name);
 			}
 		} else {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Unsupported property: " + name);
 		}
 	}
 
 	@Override
 	public Object getProperty(String name) throws IllegalArgumentException {
 		if (XMLOutputFactory.IS_REPAIRING_NAMESPACES.equals(name)) {
-			return false;
+			return Boolean.FALSE;
 		} else {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Unsupported property: " + name);
 		}
 	}
 

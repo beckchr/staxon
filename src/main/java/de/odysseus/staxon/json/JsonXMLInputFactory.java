@@ -17,10 +17,7 @@ package de.odysseus.staxon.json;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.util.Arrays;
 
 import javax.xml.stream.EventFilter;
@@ -32,17 +29,13 @@ import javax.xml.stream.XMLReporter;
 import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.util.XMLEventAllocator;
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
 
-import de.odysseus.staxon.event.SimpleXMLEventAllocator;
-import de.odysseus.staxon.event.SimpleXMLEventReader;
+import de.odysseus.staxon.AbstractXMLInputFactory;
 import de.odysseus.staxon.json.stream.JsonStreamFactory;
 import de.odysseus.staxon.json.stream.JsonStreamSource;
 import de.odysseus.staxon.json.stream.util.AddRootSource;
 
-public class JsonXMLInputFactory extends XMLInputFactory {
+public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	/**
 	 * <p>Whether to use the {@link JsonXMLStreamConstants#MULTIPLE_PI_TARGET}
 	 * processing instruction to indicate an array start.
@@ -68,8 +61,7 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 
 	private boolean multiplePI = true;
 	private String virtualRoot = null;
-	private boolean coalescing;
-	private XMLEventAllocator allocator = new SimpleXMLEventAllocator();
+	private boolean coalescing = true;
 	
 	public JsonXMLInputFactory() throws FactoryConfigurationError {
 		this(JsonStreamFactory.newFactory());
@@ -87,7 +79,7 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 	}
 	
 	@Override
-	public JsonXMLStreamReader createXMLStreamReader(Reader reader) throws XMLStreamException {
+	public XMLStreamReader createXMLStreamReader(Reader reader) throws XMLStreamException {
 		try {
 			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(reader)), multiplePI);
 		} catch (IOException e) {
@@ -96,100 +88,12 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 	}
 
 	@Override
-	public JsonXMLStreamReader createXMLStreamReader(InputStream stream) throws XMLStreamException {
+	public XMLStreamReader createXMLStreamReader(InputStream stream) throws XMLStreamException {
 		try {
 			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(stream)), multiplePI);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
-	}
-
-	@Override
-	public JsonXMLStreamReader createXMLStreamReader(InputStream stream, String encoding) throws XMLStreamException {
-		try {
-			return createXMLStreamReader(new InputStreamReader(stream, encoding));
-		} catch (UnsupportedEncodingException e) {
-			throw new XMLStreamException(e);
-		}
-	}
-
-	@Override
-	public JsonXMLStreamReader createXMLStreamReader(Source source) throws XMLStreamException {
-		if (source instanceof StreamSource) {
-			StreamSource streamSource = (StreamSource) source;
-			InputStream input = streamSource.getInputStream();
-			if (input != null) {
-				if (streamSource.getSystemId() != null) {
-					return createXMLStreamReader(streamSource.getSystemId(), input);
-				} else {
-					return createXMLStreamReader(input);
-				}
-			}
-			Reader reader = streamSource.getReader();
-			if (reader != null) {
-				if (streamSource.getSystemId() != null) {
-					return createXMLStreamReader(streamSource.getSystemId(), reader);
-				} else {
-					return createXMLStreamReader(reader);
-				}
-			}
-			if (streamSource.getSystemId() != null) {
-				// TODO this stream will never be closed!
-				try {
-					return createXMLStreamReader(streamSource.getSystemId(), new URI(source.getSystemId()).toURL().openStream());
-				} catch (Exception e) {
-					throw new XMLStreamException("Cannot open system id as URL for reading: " + source.getSystemId(), e);
-				}
-			} else {
-				throw new XMLStreamException("Invalid stream source: none of input, reader, systemId set");
-			}
-		}
-		throw new XMLStreamException("Unsupported source type: " + source.getClass());
-	}
-
-	@Override
-	public JsonXMLStreamReader createXMLStreamReader(String systemId, InputStream stream) throws XMLStreamException {
-		return createXMLStreamReader(stream);
-	}
-
-	@Override
-	public JsonXMLStreamReader createXMLStreamReader(String systemId, Reader reader) throws XMLStreamException {
-		return createXMLStreamReader(reader);
-	}
-
-	@Override
-	public XMLEventReader createXMLEventReader(Reader reader) throws XMLStreamException {
-		return createXMLEventReader(createXMLStreamReader(reader));
-	}
-
-	@Override
-	public XMLEventReader createXMLEventReader(String systemId, Reader reader) throws XMLStreamException {
-		return createXMLEventReader(createXMLStreamReader(systemId, reader));
-	}
-
-	@Override
-	public XMLEventReader createXMLEventReader(XMLStreamReader reader) throws XMLStreamException {
-		return new SimpleXMLEventReader(getEventAllocator().newInstance(), reader);
-	}
-
-	@Override
-	public XMLEventReader createXMLEventReader(Source source) throws XMLStreamException {
-		return createXMLEventReader(createXMLStreamReader(source));
-	}
-
-	@Override
-	public XMLEventReader createXMLEventReader(InputStream stream) throws XMLStreamException {
-		return createXMLEventReader(createXMLStreamReader(stream));
-	}
-
-	@Override
-	public XMLEventReader createXMLEventReader(InputStream stream, String encoding) throws XMLStreamException {
-		return createXMLEventReader(createXMLStreamReader(stream, encoding));
-	}
-
-	@Override
-	public XMLEventReader createXMLEventReader(String systemId, InputStream stream) throws XMLStreamException {
-		return createXMLEventReader(createXMLStreamReader(systemId, stream));
 	}
 
 	@Override
@@ -225,30 +129,30 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 	@Override
 	public void setProperty(String name, Object value) throws IllegalArgumentException {
 		if (XMLInputFactory.IS_COALESCING.equals(name)) {
-			coalescing = Boolean.valueOf(value.toString());
+			coalescing = ((Boolean)value).booleanValue();
 		} else if (XMLInputFactory.IS_NAMESPACE_AWARE.equals(name)) {
-			if (!Boolean.valueOf(value.toString())) {
-				throw new IllegalArgumentException();
+			if (!getProperty(name).equals(value)) {
+				throw new IllegalArgumentException("Cannot change property: " + name);
 			}
 		} else if (XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES.equals(name)) {
-			if (!Boolean.valueOf(value.toString())) {
-				throw new IllegalArgumentException();
+			if (!getProperty(name).equals(value)) {
+				throw new IllegalArgumentException("Cannot change property: " + name);
 			}
 		} else if (XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES.equals(name)) {
-			if (Boolean.valueOf(value.toString())) {
-				throw new IllegalArgumentException();
+			if (!getProperty(name).equals(value)) {
+				throw new IllegalArgumentException("Cannot change property: " + name);
 			}
 		} else if (XMLInputFactory.IS_VALIDATING.equals(name)) {
-			if (Boolean.valueOf(value.toString())) {
-				throw new IllegalArgumentException();
+			if (!getProperty(name).equals(value)) {
+				throw new IllegalArgumentException("Cannot change property: " + name);
 			}
 		} else { // proprietary properties
 			if (PROP_MULTIPLE_PI.equals(name)) {
-				multiplePI = Boolean.valueOf(value.toString());
+				multiplePI = ((Boolean)value).booleanValue();
 			} else if (PROP_VIRTUAL_ROOT.equals(name)) {
 				virtualRoot = (String)value;
 			} else {
-				throw new IllegalArgumentException("Unsupported input property: " + name);
+				throw new IllegalArgumentException("Unsupported property: " + name);
 			}
 		}
 	}
@@ -256,22 +160,22 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 	@Override
 	public Object getProperty(String name) throws IllegalArgumentException {
 		if (XMLInputFactory.IS_COALESCING.equals(name)) {
-			return coalescing;
+			return Boolean.valueOf(coalescing);
 		} else if (XMLInputFactory.IS_NAMESPACE_AWARE.equals(name)) {
-			return true;
+			return Boolean.TRUE;
 		} else if (XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES.equals(name)) {
-			return true;
+			return Boolean.TRUE;
 		} else if (XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES.equals(name)) {
-			return false;
+			return Boolean.FALSE;
 		} else if (XMLInputFactory.IS_VALIDATING.equals(name)) {
-			return false;
+			return Boolean.FALSE;
 		} else { // proprietary properties
 			 if (PROP_MULTIPLE_PI.equals(name)) {
-				return multiplePI;
+				return Boolean.valueOf(multiplePI);
 			} else if (PROP_VIRTUAL_ROOT.equals(name)) {
 				return virtualRoot;
 			} else {
-				throw new IllegalArgumentException("Unsupported input property: " + name);
+				throw new IllegalArgumentException("Unsupported property: " + name);
 			}
 		}
 	}
@@ -291,15 +195,5 @@ public class JsonXMLInputFactory extends XMLInputFactory {
 		} else { // proprietary properties
 			return Arrays.asList(PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT).contains(name);
 		}
-	}
-
-	@Override
-	public void setEventAllocator(XMLEventAllocator allocator) {
-		this.allocator = allocator;
-	}
-
-	@Override
-	public XMLEventAllocator getEventAllocator() {
-		return allocator;
 	}
 }
