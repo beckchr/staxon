@@ -23,20 +23,21 @@ import java.net.URI;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLReporter;
+import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.util.XMLEventAllocator;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
-import de.odysseus.staxon.event.SimpleXMLEventAllocator;
-import de.odysseus.staxon.event.SimpleXMLEventReader;
-
 /**
  * Abstract XML input factory.
  */
 public abstract class AbstractXMLInputFactory extends XMLInputFactory {
-	private XMLEventAllocator allocator = new SimpleXMLEventAllocator();
+	private XMLEventAllocator allocator;
+	private XMLResolver resolver;
+	private XMLReporter reporter;
 	
 	@Override
 	public XMLStreamReader createXMLStreamReader(InputStream stream, String encoding) throws XMLStreamException {
@@ -102,11 +103,6 @@ public abstract class AbstractXMLInputFactory extends XMLInputFactory {
 	}
 
 	@Override
-	public XMLEventReader createXMLEventReader(XMLStreamReader reader) throws XMLStreamException {
-		return new SimpleXMLEventReader(getEventAllocator().newInstance(), reader);
-	}
-
-	@Override
 	public XMLEventReader createXMLEventReader(Source source) throws XMLStreamException {
 		return createXMLEventReader(createXMLStreamReader(source));
 	}
@@ -127,12 +123,33 @@ public abstract class AbstractXMLInputFactory extends XMLInputFactory {
 	}
 
 	@Override
+	public XMLEventAllocator getEventAllocator() {
+		return allocator;
+	}
+	
+	@Override
 	public void setEventAllocator(XMLEventAllocator allocator) {
 		this.allocator = allocator;
 	}
 
 	@Override
-	public XMLEventAllocator getEventAllocator() {
-		return allocator;
+	public XMLResolver getXMLResolver() {
+		return resolver;
 	}
+
+	@Override
+	public void setXMLResolver(XMLResolver resolver) {
+		this.resolver = resolver;
+	}
+
+	@Override
+	public XMLReporter getXMLReporter() {
+		return reporter;
+	}
+
+	@Override
+	public void setXMLReporter(XMLReporter reporter) {
+		this.reporter = reporter;
+	}
+
 }

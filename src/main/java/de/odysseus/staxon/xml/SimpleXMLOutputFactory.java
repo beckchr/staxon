@@ -18,11 +18,13 @@ package de.odysseus.staxon.xml;
 import java.io.OutputStream;
 import java.io.Writer;
 
+import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import de.odysseus.staxon.AbstractXMLOutputFactory;
+import de.odysseus.staxon.event.SimpleXMLEventWriter;
 
 public class SimpleXMLOutputFactory extends AbstractXMLOutputFactory {
 	@Override
@@ -33,6 +35,11 @@ public class SimpleXMLOutputFactory extends AbstractXMLOutputFactory {
 	@Override
 	public XMLStreamWriter createXMLStreamWriter(OutputStream stream) throws XMLStreamException {
 		return createXMLStreamWriter(stream, "UTF-8");
+	}
+
+	@Override
+	public XMLEventWriter createXMLEventWriter(XMLStreamWriter writer) throws XMLStreamException {
+		return new SimpleXMLEventWriter(writer);
 	}
 
 	@Override

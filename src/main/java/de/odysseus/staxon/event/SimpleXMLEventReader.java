@@ -32,9 +32,13 @@ public class SimpleXMLEventReader implements XMLEventReader {
 	private int currentEventType = -1;
 	private XMLEvent peekedEvent = null;
 
-	public SimpleXMLEventReader(XMLEventAllocator allocatior, XMLStreamReader delegate) {
-		this.allocator = allocatior;
+	public SimpleXMLEventReader(XMLStreamReader delegate) {
+		this(delegate, new SimpleXMLEventAllocator());
+	}
+
+	public SimpleXMLEventReader(XMLStreamReader delegate, XMLEventAllocator allocator) {
 		this.delegate = delegate;
+		this.allocator = allocator;
 	}
 
 	protected XMLEvent allocate() throws XMLStreamException {

@@ -28,6 +28,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import de.odysseus.staxon.AbstractXMLInputFactory;
+import de.odysseus.staxon.event.SimpleXMLEventReader;
 
 public class SimpleXMLInputFactory extends AbstractXMLInputFactory {
 	private boolean coalescing = false;
@@ -43,6 +44,15 @@ public class SimpleXMLInputFactory extends AbstractXMLInputFactory {
 	}
 
 	@Override
+	public XMLEventReader createXMLEventReader(XMLStreamReader reader) throws XMLStreamException {
+		if (getEventAllocator() == null) {
+			return new SimpleXMLEventReader(reader);
+		} else {
+			return new SimpleXMLEventReader(reader, getEventAllocator().newInstance());
+		}
+	}
+
+	@Override
 	public XMLStreamReader createFilteredReader(XMLStreamReader reader, StreamFilter filter) throws XMLStreamException {
 		throw new UnsupportedOperationException();
 	}
@@ -53,25 +63,15 @@ public class SimpleXMLInputFactory extends AbstractXMLInputFactory {
 	}
 
 	@Override
-	public XMLResolver getXMLResolver() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public void setXMLResolver(XMLResolver resolver) {
 		throw new UnsupportedOperationException();
 	}
-
-	@Override
-	public XMLReporter getXMLReporter() {
-		throw new UnsupportedOperationException();
-	}
-
+	
 	@Override
 	public void setXMLReporter(XMLReporter reporter) {
 		throw new UnsupportedOperationException();
 	}
-
+	
 	@Override
 	public void setProperty(String name, Object value) throws IllegalArgumentException {
 		if (XMLInputFactory.IS_COALESCING.equals(name)) {

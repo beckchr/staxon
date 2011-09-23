@@ -21,11 +21,13 @@ import java.io.Writer;
 import java.util.Arrays;
 
 import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import de.odysseus.staxon.AbstractXMLOutputFactory;
+import de.odysseus.staxon.event.SimpleXMLEventWriter;
 import de.odysseus.staxon.json.stream.JsonStreamFactory;
 import de.odysseus.staxon.json.stream.JsonStreamTarget;
 import de.odysseus.staxon.json.stream.util.AutoArrayTarget;
@@ -108,6 +110,11 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
+	}
+
+	@Override
+	public XMLEventWriter createXMLEventWriter(XMLStreamWriter writer) throws XMLStreamException {
+		return new SimpleXMLEventWriter(writer);
 	}
 
 	@Override

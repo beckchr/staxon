@@ -27,8 +27,6 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
 
-import de.odysseus.staxon.event.SimpleXMLEventWriter;
-
 /**
  * Abstract XML output factory.
  */
@@ -83,7 +81,5 @@ public abstract class AbstractXMLOutputFactory extends XMLOutputFactory {
 		return createXMLEventWriter(createXMLStreamWriter(stream));
 	}
 
-	public XMLEventWriter createXMLEventWriter(XMLStreamWriter writer) throws XMLStreamException {
-		return new SimpleXMLEventWriter(writer);
-	}
+	public abstract XMLEventWriter createXMLEventWriter(XMLStreamWriter writer) throws XMLStreamException;
 }
