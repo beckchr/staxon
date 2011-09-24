@@ -95,7 +95,7 @@ You can get StAXON artifacts from our [maven repositories](http://beckchr.github
 		<dependency>
 			<groupId>de.odysseus.staxon</groupId>
 			<artifactId>staxon</artifactId>
-			<version>0.6.1</version>
+			<version>0.6.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
@@ -104,10 +104,10 @@ You can get StAXON artifacts from our [maven repositories](http://beckchr.github
 		</dependency>
 	</dependencies>
 
-Manually download the latest release: StAXON 0.6.1 (2011/09/17):
+Manually download the latest release: StAXON 0.6.2 (2011/09/24):
 
-- [staxon-0.6.1.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon/0.6.1/staxon-0.6.1.jar)
-- [staxon-0.6.1-sources.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon/0.6.1/staxon-0.6.1-sources.jar)
+- [staxon-0.6.2.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon/0.6.2/staxon-0.6.2.jar)
+- [staxon-0.6.2-sources.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon/0.6.2/staxon-0.6.2-sources.jar)
 
 Make sure you have the `jackson-core` (or `gson`) jar on your classpath ([jackson download](http://wiki.fasterxml.com/JacksonDownload)).
 
