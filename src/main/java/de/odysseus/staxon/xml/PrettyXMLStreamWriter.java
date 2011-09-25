@@ -88,7 +88,7 @@ public class PrettyXMLStreamWriter extends StreamWriterDelegate {
 		leaf = false;
 	}
 
-	private void preEmptyElement_Comment_PI() throws XMLStreamException {
+	private void preSimpleStructure() throws XMLStreamException {
 		if (text) {
 			text = false;
 		} else if (depth > 0) {
@@ -151,19 +151,19 @@ public class PrettyXMLStreamWriter extends StreamWriterDelegate {
 
 	@Override
 	public void writeEmptyElement(String namespaceURI, String localName) throws XMLStreamException {
-		preEmptyElement_Comment_PI();
+		preSimpleStructure();
 		super.writeEmptyElement(namespaceURI, localName);
 	}
 
 	@Override
 	public void writeEmptyElement(String prefix, String localName, String namespaceURI) throws XMLStreamException {
-		preEmptyElement_Comment_PI();
+		preSimpleStructure();
 		super.writeEmptyElement(prefix, localName, namespaceURI);
 	}
 
 	@Override
 	public void writeEmptyElement(String localName) throws XMLStreamException {
-		preEmptyElement_Comment_PI();
+		preSimpleStructure();
 		super.writeEmptyElement(localName);
 	}
 
@@ -193,19 +193,19 @@ public class PrettyXMLStreamWriter extends StreamWriterDelegate {
 	
 	@Override
 	public void writeComment(String data) throws XMLStreamException {
-		preEmptyElement_Comment_PI();
+		preSimpleStructure();
 		super.writeComment(data);
 	}
 	
 	@Override
 	public void writeProcessingInstruction(String target) throws XMLStreamException {
-		preEmptyElement_Comment_PI();
+		preSimpleStructure();
 		super.writeProcessingInstruction(target);
 	}
 	
 	@Override
 	public void writeProcessingInstruction(String target, String data) throws XMLStreamException {
-		preEmptyElement_Comment_PI();
+		preSimpleStructure();
 		super.writeProcessingInstruction(target, data);
 	}
 }
