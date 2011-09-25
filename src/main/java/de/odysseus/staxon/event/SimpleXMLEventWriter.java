@@ -86,6 +86,7 @@ public class SimpleXMLEventWriter implements XMLEventWriter {
 			break;
 		case XMLStreamConstants.CHARACTERS:
 		case XMLStreamConstants.CDATA:
+		case XMLStreamConstants.SPACE:
 			Characters characters = event.asCharacters();
 			if (characters.isCData()) {
 				delegate.writeCData(characters.getData());
