@@ -198,7 +198,7 @@ class PrettyXMLWhitespaceHandler {
 		}
 	}
 
-	private void preSimpleStructure() throws XMLStreamException {
+	private void preStructure() throws XMLStreamException {
 		if (text) {
 			text = false;
 		} else if (depth > 0) {
@@ -207,7 +207,7 @@ class PrettyXMLWhitespaceHandler {
 		}
 	}
 
-	private void postSimpleStructure() throws XMLStreamException {
+	private void postComment_PI() throws XMLStreamException {
 		leaf = false;
 		if (depth == 0) {
 			writer.add(newline);
@@ -215,36 +215,31 @@ class PrettyXMLWhitespaceHandler {
 	}
 
 	void preStartDocument() throws XMLStreamException {
-		preSimpleStructure();
+		preStructure();
 	}
 
 	void postStartDocument() throws XMLStreamException {
-		postSimpleStructure();
+		postComment_PI();
 	}
 
 	void preComment() throws XMLStreamException {
-		preSimpleStructure();
+		preStructure();
 	}
 
 	void postComment() throws XMLStreamException {
-		postSimpleStructure();
+		postComment_PI();
 	}
 
 	void preProcessingInstruction() throws XMLStreamException {
-		preSimpleStructure();
+		preStructure();
 	}
 
 	void postProcessingInstruction() throws XMLStreamException {
-		postSimpleStructure();
+		postComment_PI();
 	}
 
 	void preStartElement() throws XMLStreamException {
-		if (text) {
-			text = false;
-		} else if (depth > 0) {
-			writer.add(newline);
-			writer.add(indent[depth]);
-		}
+		preStructure();
 	}
 
 	void postStartElement() throws XMLStreamException {
@@ -269,11 +264,11 @@ class PrettyXMLWhitespaceHandler {
 	}
 
 	void preEmptyELement() throws XMLStreamException {
-		preStartElement();
+		preStructure();
 	}
 
 	void postEmptyELement() throws XMLStreamException {
-		postStartElement();
+		leaf = false;
 	}
 
 	void preCharacters() {
