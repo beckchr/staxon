@@ -24,12 +24,7 @@ import de.odysseus.staxon.util.StreamWriterDelegate;
  * Pretty printing XML stream writer.
  */
 public class PrettyXMLStreamWriter extends StreamWriterDelegate {
-	private final String newline;
-	private final String[] indent = new String[64];
-
-	private int depth = 0;
-	private boolean text = false;
-	private boolean leaf = false;
+	private final PrettyXMLWhitespaceHandler handler;
 
 	/**
 	 * Create instance using default indentation (\t) and line separator (\n).
@@ -38,12 +33,11 @@ public class PrettyXMLStreamWriter extends StreamWriterDelegate {
 	 *            parent writer
 	 */
 	public PrettyXMLStreamWriter(XMLStreamWriter writer) {
-		// this(writer, "  ", System.getProperty("line.separator"));
 		this(writer, "\t", "\n");
 	}
 
 	/**
-	 * Create instance
+	 * Create instance.
 	 * 
 	 * @param writer
 	 *            parent writer
@@ -54,52 +48,7 @@ public class PrettyXMLStreamWriter extends StreamWriterDelegate {
 	 */
 	public PrettyXMLStreamWriter(XMLStreamWriter writer, String indentation, String newline) {
 		super(writer);
-		this.newline = newline;
-
-		/*
-		 * initialize indentation strings
-		 */
-		StringBuilder builder = new StringBuilder();
-		for (int i = 1; i < indent.length; i++) {
-			indent[i] = builder.append(indentation).toString();
-		}
-		indent[0] = "";
-	}
-
-	private void preStartElement() throws XMLStreamException {
-		if (text) {
-			text = false;
-		} else if (depth > 0) {
-			super.writeCharacters(newline);
-			super.writeCharacters(indent[depth]);
-		}
-		depth++;
-		leaf = true;
-	}
-
-	private void preEndElement() throws XMLStreamException {
-		depth--;
-		if (text) {
-			text = false;
-		} else if (!leaf) {
-			super.writeCharacters(newline);
-			super.writeCharacters(indent[depth]);
-		}
-		leaf = false;
-	}
-
-	private void preSimpleStructure() throws XMLStreamException {
-		if (text) {
-			text = false;
-		} else if (depth > 0) {
-			super.writeCharacters(newline);
-			super.writeCharacters(indent[depth]);
-		}
-		leaf = false;
-	}
-
-	private void preCharacters() {
-		text = true;
+		this.handler = new PrettyXMLWhitespaceHandler(writer, indentation, newline);
 	}
 
 	@Override
@@ -109,103 +58,120 @@ public class PrettyXMLStreamWriter extends StreamWriterDelegate {
 
 	@Override
 	public void writeStartDocument() throws XMLStreamException {
+		handler.preStartDocument();
 		super.writeStartDocument();
-		super.writeCharacters(newline);
+		handler.postStartDocument();
 	}
 
 	@Override
 	public void writeStartDocument(String version) throws XMLStreamException {
+		handler.preStartDocument();
 		super.writeStartDocument(version);
-		super.writeCharacters(newline);
+		handler.postStartDocument();
 	}
 
 	@Override
 	public void writeStartDocument(String encoding, String version) throws XMLStreamException {
+		handler.preStartDocument();
 		super.writeStartDocument(encoding, version);
-		super.writeCharacters(newline);
+		handler.postStartDocument();
 	}
 
 	@Override
 	public void writeEndDocument() throws XMLStreamException {
-		super.writeCharacters(newline);
+		handler.preEndDocument();
 		super.writeEndDocument();
+		handler.postEndDocument();
 	}
-
+	
 	@Override
 	public void writeStartElement(String localName) throws XMLStreamException {
-		preStartElement();
+		handler.preStartElement();
 		super.writeStartElement(localName);
+		handler.postStartElement();
 	}
 
 	@Override
 	public void writeStartElement(String namespaceURI, String localName) throws XMLStreamException {
-		preStartElement();
+		handler.preStartElement();
 		super.writeStartElement(namespaceURI, localName);
+		handler.postStartElement();
 	}
 
 	@Override
 	public void writeStartElement(String prefix, String localName, String namespaceURI) throws XMLStreamException {
-		preStartElement();
+		handler.preStartElement();
 		super.writeStartElement(prefix, localName, namespaceURI);
+		handler.postStartElement();
 	}
 
 	@Override
 	public void writeEmptyElement(String namespaceURI, String localName) throws XMLStreamException {
-		preSimpleStructure();
+		handler.preEmptyELement();
 		super.writeEmptyElement(namespaceURI, localName);
+		handler.postEmptyELement();
 	}
 
 	@Override
 	public void writeEmptyElement(String prefix, String localName, String namespaceURI) throws XMLStreamException {
-		preSimpleStructure();
+		handler.preEmptyELement();
 		super.writeEmptyElement(prefix, localName, namespaceURI);
+		handler.postEmptyELement();
 	}
 
 	@Override
 	public void writeEmptyElement(String localName) throws XMLStreamException {
-		preSimpleStructure();
+		handler.preEmptyELement();
 		super.writeEmptyElement(localName);
+		handler.postEmptyELement();
 	}
 
 	@Override
 	public void writeEndElement() throws XMLStreamException {
-		preEndElement();
+		handler.preEndElement();
 		super.writeEndElement();
+		handler.postEndElement();
 	}
 
 	@Override
 	public void writeCData(String data) throws XMLStreamException {
-		preCharacters();
+		handler.preCharacters();
 		super.writeCData(data);
+		handler.postCharacters();
 	}
 
 	@Override
 	public void writeCharacters(String text) throws XMLStreamException {
-		preCharacters();
+		handler.preCharacters();
 		super.writeCharacters(text);
+		handler.postCharacters();
 	}
 
 	@Override
 	public void writeCharacters(char[] text, int start, int len) throws XMLStreamException {
-		preCharacters();
+		handler.preCharacters();
 		super.writeCharacters(text, start, len);
+		handler.postCharacters();
 	}
 	
 	@Override
 	public void writeComment(String data) throws XMLStreamException {
-		preSimpleStructure();
+		handler.preComment();
 		super.writeComment(data);
+		handler.postComment();
 	}
 	
 	@Override
 	public void writeProcessingInstruction(String target) throws XMLStreamException {
-		preSimpleStructure();
+		handler.preProcessingInstruction();
 		super.writeProcessingInstruction(target);
+		handler.postProcessingInstruction();
 	}
 	
 	@Override
 	public void writeProcessingInstruction(String target, String data) throws XMLStreamException {
-		preSimpleStructure();
+		handler.preProcessingInstruction();
 		super.writeProcessingInstruction(target, data);
+		handler.postProcessingInstruction();
 	}
 }
