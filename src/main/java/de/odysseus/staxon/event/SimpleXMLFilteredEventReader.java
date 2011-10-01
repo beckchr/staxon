@@ -104,13 +104,15 @@ public class SimpleXMLFilteredEventReader extends EventReaderDelegate {
 			default:
 				throw new XMLStreamException("Unexpected event type " + currentEventType, event.getLocation());
 			}
-			if (leadText == null) { // first event?
-				leadText = data;
-			} else {
-				if (builder == null) { // second event?
-					builder = new StringBuilder(leadText);
+			if (data != null) {
+				if (leadText == null) { // first event?
+					leadText = data;
+				} else {
+					if (builder == null) { // second event?
+						builder = new StringBuilder(leadText);
+					}
+					builder.append(data);
 				}
-				builder.append(data);
 			}
 		}
 	}
