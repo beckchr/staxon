@@ -77,7 +77,7 @@ public class SimpleXMLEventReaderTest {
 		Assert.assertFalse(attributes.hasNext());
 		Iterator<?> namespaces = event.asStartElement().getNamespaces();
 		Assert.assertEquals(XMLStreamConstants.NAMESPACE, ((Namespace)namespaces.next()).getEventType());
-		Assert.assertFalse(attributes.hasNext());
+		Assert.assertFalse(namespaces.hasNext());
 	}
 
 	@Test
