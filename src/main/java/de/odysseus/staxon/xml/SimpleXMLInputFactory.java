@@ -19,7 +19,6 @@ import java.io.InputStream;
 import java.io.Reader;
 
 import javax.xml.stream.EventFilter;
-import javax.xml.stream.StreamFilter;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLReporter;
@@ -28,6 +27,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import de.odysseus.staxon.AbstractXMLInputFactory;
+import de.odysseus.staxon.event.SimpleXMLFilteredEventReader;
 import de.odysseus.staxon.event.SimpleXMLEventReader;
 
 public class SimpleXMLInputFactory extends AbstractXMLInputFactory {
@@ -53,13 +53,8 @@ public class SimpleXMLInputFactory extends AbstractXMLInputFactory {
 	}
 
 	@Override
-	public XMLStreamReader createFilteredReader(XMLStreamReader reader, StreamFilter filter) throws XMLStreamException {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public XMLEventReader createFilteredReader(XMLEventReader reader, EventFilter filter) throws XMLStreamException {
-		throw new UnsupportedOperationException();
+		return new SimpleXMLFilteredEventReader(reader, filter);
 	}
 
 	@Override

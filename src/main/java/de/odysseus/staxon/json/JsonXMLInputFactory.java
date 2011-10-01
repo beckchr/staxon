@@ -22,7 +22,6 @@ import java.util.Arrays;
 
 import javax.xml.stream.EventFilter;
 import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.StreamFilter;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLReporter;
@@ -31,6 +30,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import de.odysseus.staxon.AbstractXMLInputFactory;
+import de.odysseus.staxon.event.SimpleXMLFilteredEventReader;
 import de.odysseus.staxon.event.SimpleXMLEventReader;
 import de.odysseus.staxon.json.stream.JsonStreamFactory;
 import de.odysseus.staxon.json.stream.JsonStreamSource;
@@ -107,13 +107,8 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	}
 
 	@Override
-	public XMLStreamReader createFilteredReader(XMLStreamReader reader, StreamFilter filter) throws XMLStreamException {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public XMLEventReader createFilteredReader(XMLEventReader reader, EventFilter filter) throws XMLStreamException {
-		throw new UnsupportedOperationException();
+		return new SimpleXMLFilteredEventReader(reader, filter);
 	}
 
 	@Override
