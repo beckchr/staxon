@@ -21,12 +21,14 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 
+import javax.xml.stream.StreamFilter;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLReporter;
 import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.util.StreamReaderDelegate;
 import javax.xml.stream.util.XMLEventAllocator;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
@@ -123,6 +125,29 @@ public abstract class AbstractXMLInputFactory extends XMLInputFactory {
 	}
 
 	@Override
+	public XMLStreamReader createFilteredReader(XMLStreamReader reader, final StreamFilter filter) throws XMLStreamException {
+		return new StreamReaderDelegate(reader) {
+			@Override
+			public boolean hasNext() throws XMLStreamException {
+				while (super.hasNext()) {
+					if (filter.accept(getParent())) {
+						return true;
+					}
+					super.next();
+				}
+				return false;
+			}
+			@Override
+			public int next() throws XMLStreamException {
+				if (hasNext()) {
+					return getParent().getEventType();
+				}
+				throw new IllegalStateException("No more events");
+			}
+		};
+	}
+
+	@Override
 	public XMLEventAllocator getEventAllocator() {
 		return allocator;
 	}
@@ -151,5 +176,5 @@ public abstract class AbstractXMLInputFactory extends XMLInputFactory {
 	public void setXMLReporter(XMLReporter reporter) {
 		this.reporter = reporter;
 	}
-
 }
+
