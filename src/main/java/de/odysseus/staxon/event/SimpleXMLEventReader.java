@@ -74,11 +74,11 @@ public class SimpleXMLEventReader implements XMLEventReader {
 		case XMLStreamConstants.CDATA:
 		case XMLStreamConstants.CHARACTERS:
 		case XMLStreamConstants.ENTITY_REFERENCE:
-		case XMLStreamConstants.SPACE:
 			leadText = delegate.getText();
 			break;
 		case XMLStreamConstants.COMMENT:
 		case XMLStreamConstants.PROCESSING_INSTRUCTION:
+		case XMLStreamConstants.SPACE:
 			break;
 		case XMLStreamConstants.END_ELEMENT:
 			return "";
@@ -93,7 +93,6 @@ public class SimpleXMLEventReader implements XMLEventReader {
 			case XMLStreamConstants.CDATA:
 			case XMLStreamConstants.CHARACTERS:
 			case XMLStreamConstants.ENTITY_REFERENCE:
-			case XMLStreamConstants.SPACE:
 				if (leadText == null) { // first event?
 					leadText = delegate.getText();
 				} else {
@@ -105,6 +104,7 @@ public class SimpleXMLEventReader implements XMLEventReader {
 				break;
 			case XMLStreamConstants.COMMENT:
 			case XMLStreamConstants.PROCESSING_INSTRUCTION:
+			case XMLStreamConstants.SPACE:
 				break;
 			case XMLStreamConstants.END_ELEMENT:
 				return builder == null ? (leadText == null ? "" : leadText) : builder.toString();
@@ -166,12 +166,11 @@ public class SimpleXMLEventReader implements XMLEventReader {
 		peekedEvent = null;
 
 		switch (event.getEventType()) {
-		case XMLStreamConstants.END_DOCUMENT:
-			return null;
 		case XMLStreamConstants.START_DOCUMENT:
-		case XMLStreamConstants.SPACE:
+			break;
 		case XMLStreamConstants.COMMENT:
 		case XMLStreamConstants.PROCESSING_INSTRUCTION:
+		case XMLStreamConstants.SPACE:
 			break;
 		case XMLStreamConstants.CDATA:
 		case XMLStreamConstants.CHARACTERS:
@@ -189,11 +188,9 @@ public class SimpleXMLEventReader implements XMLEventReader {
 		while (true) {
 			currentEventType = delegate.next();
 			switch (currentEventType) {
-			case XMLStreamConstants.END_DOCUMENT:
-				return null;
-			case XMLStreamConstants.SPACE:
 			case XMLStreamConstants.COMMENT:
 			case XMLStreamConstants.PROCESSING_INSTRUCTION:
+			case XMLStreamConstants.SPACE:
 				continue;
 			case XMLStreamConstants.CDATA:
 			case XMLStreamConstants.CHARACTERS:
