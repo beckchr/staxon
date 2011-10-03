@@ -18,8 +18,8 @@
 	</licenses>
 
 	<scm>
-		<connection>scm:git:git@github.com:beckchr/staxon.git</connection>
-		<developerConnection>scm:git:git@github.com:beckchr/staxon.git</developerConnection>
+		<connection>scm:git:https://github.com/beckchr/staxon.git</connection>
+		<developerConnection>scm:git:git://github.com/beckchr/staxon.git</developerConnection>
 		<url>https://github.com/beckchr/staxon</url>
 	</scm>
 
@@ -67,12 +67,6 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>2.2.1</version>
 			</plugin>
 		</plugins>
 	</build>
