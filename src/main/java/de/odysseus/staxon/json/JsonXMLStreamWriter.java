@@ -59,14 +59,46 @@ import de.odysseus.staxon.json.stream.JsonStreamTarget;
  */
 public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWriter.ScopeInfo> {
 	static class ScopeInfo extends JsonXMLStreamScopeInfo {
+		private String leadText = null;
+		private StringBuilder builder = null;
 		boolean startObjectWritten = false;
-		boolean contentDataWritten = false;
 		boolean pendingStartArray = false;
+
+		void addText(String data) {
+			if (leadText == null) { // first event?
+				leadText = data;
+			} else {
+				if (builder == null) { // second event?
+					builder = new StringBuilder(leadText);
+				}
+				builder.append(data);
+			}
+		}
+		boolean hasText() {
+			return leadText != null;
+		}
+		String getText() {
+			return builder == null ? leadText : builder.toString();
+		}
+		void setText(String data) {
+			leadText = data;
+			builder = null;
+		}
+	}
+
+	static boolean isWhitespace(String text) {
+		for (int i = 0; i < text.length(); i++) {
+			if (!Character.isWhitespace(text.charAt(i))) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private final JsonStreamTarget target;
 	private final boolean multiplePI;
 	private final boolean autoEndArray;
+	private final boolean skipSpace;
 
 	/**
 	 * Create writer instance.
@@ -78,6 +110,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 		this.target = target;
 		this.multiplePI = multiplePI;
 		this.autoEndArray = true;
+		this.skipSpace = true;
 	}
 
 	private String getFieldName(String prefix, String localName) {
@@ -87,6 +120,12 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	@Override
 	protected void writeElementTagStart(XMLStreamWriterScope<ScopeInfo> newScope) throws XMLStreamException {
 		ScopeInfo parentInfo = getScope().getInfo();
+		if (parentInfo.hasText()) {
+			if (!skipSpace || !isWhitespace(parentInfo.getText())) {
+				throw new XMLStreamException("Mixed content is not supported: '" + parentInfo.getText() + "'");
+			}
+			parentInfo.setText(null);
+		}
 		String fieldName = getFieldName(newScope.getPrefix(), newScope.getLocalName());
 		if (parentInfo.pendingStartArray) {
 			writeStartArray(fieldName);
@@ -121,12 +160,18 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	@Override
 	protected void writeEndElementTag() throws XMLStreamException {
 		try {
+			if (getScope().getInfo().hasText()) {
+				if (getScope().getInfo().startObjectWritten) {
+					target.name("$");
+				}
+				target.value(getScope().getInfo().getText());
+			}
 			if (autoEndArray && getScope().getInfo().getArrayName() != null) {
 				writeEndArray();
 			}
 			if (getScope().getInfo().startObjectWritten) {
 				target.endObject();
-			} else if (getScope().isEmptyElement() || !getScope().getInfo().contentDataWritten) {
+			} else if (!getScope().getInfo().hasText()) {
 				target.value(null);
 			}
 		} catch (IOException e) {
@@ -150,24 +195,22 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	
 	@Override
 	protected void writeText(String data, int type) throws XMLStreamException {
-		try {
-			switch(type) {
-			case XMLStreamConstants.CHARACTERS:
-			case XMLStreamConstants.CDATA:
-				if (getScope().getInfo().startObjectWritten) {
-					target.name("$");
+		switch(type) {
+		case XMLStreamConstants.CHARACTERS:
+		case XMLStreamConstants.CDATA:
+			if (getScope().getLastChild() != null) {
+				if (!skipSpace || !isWhitespace(data)) {
+					throw new XMLStreamException("Mixed content is not supported: '" + getScope().getInfo().getText() + "'");
 				}
-				target.value(data);
-				getScope().getInfo().contentDataWritten = true;
-				break;
-			case XMLStreamConstants.COMMENT: // ignore comments
-				break;
-			default:
-				throw new UnsupportedOperationException("Cannot write data of type " + type);
+			} else {
+				getScope().getInfo().addText(data);
 			}
-		} catch (IOException e) {
-			throw new XMLStreamException(e);
-		}		
+			break;
+		case XMLStreamConstants.COMMENT: // ignore comments
+			break;
+		default:
+			throw new UnsupportedOperationException("Cannot write data of type " + type);
+		}
 	}
 
 	@Override
