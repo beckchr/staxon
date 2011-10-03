@@ -19,7 +19,7 @@
 
 	<scm>
 		<connection>scm:git:https://github.com/beckchr/staxon.git</connection>
-		<developerConnection>scm:git:git://github.com/beckchr/staxon.git</developerConnection>
+		<developerConnection>git@github.com:beckchr/staxon.git</developerConnection>
 		<url>https://github.com/beckchr/staxon</url>
 	</scm>
 
