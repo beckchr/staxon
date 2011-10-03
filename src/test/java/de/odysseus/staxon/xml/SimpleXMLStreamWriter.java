@@ -75,7 +75,7 @@ public class SimpleXMLStreamWriter extends AbstractXMLStreamWriter<String> {
  	}
 
 	@Override
-	protected void writeElementTagStart(XMLStreamWriterScope<String> newScope) throws XMLStreamException {
+	protected void writeStartElementTag(XMLStreamWriterScope<String> newScope) throws XMLStreamException {
 		newScope.setInfo(getTagName(newScope.getPrefix(), newScope.getLocalName()));
 		try {
 			writer.write('<');
@@ -86,7 +86,7 @@ public class SimpleXMLStreamWriter extends AbstractXMLStreamWriter<String> {
 	}
 
 	@Override
-	protected void writeElementTagEnd() throws XMLStreamException {
+	protected void writeStartElementTagEnd() throws XMLStreamException {
 		try {
 			if (getScope().isEmptyElement()) {
 				writer.write('/');
@@ -110,7 +110,7 @@ public class SimpleXMLStreamWriter extends AbstractXMLStreamWriter<String> {
 	}
 
 	@Override
-	protected void writeProperty(String name, String value) throws XMLStreamException {
+	protected void writeAttr(String name, String value) throws XMLStreamException {
 		try {
 			writer.write(' ');
 			writer.write(name);

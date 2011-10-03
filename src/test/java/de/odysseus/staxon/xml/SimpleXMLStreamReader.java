@@ -134,7 +134,7 @@ public class SimpleXMLStreamReader extends AbstractXMLStreamReader<String> {
 					String value = readText(quote);
 					nextChar();
 					skipWhitespace();
-					readProperty(name, value);
+					readAttr(name, value);
 				}
 				if (ch == '/') {
 					nextChar(); // please, let it be '>'

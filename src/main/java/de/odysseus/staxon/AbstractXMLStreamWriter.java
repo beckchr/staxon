@@ -39,16 +39,16 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		return scope;
 	}
 
-	protected abstract void writeElementTagStart(XMLStreamWriterScope<T> newScope) throws XMLStreamException;
-	protected abstract void writeElementTagEnd() throws XMLStreamException;
+	protected abstract void writeStartElementTag(XMLStreamWriterScope<T> newScope) throws XMLStreamException;
+	protected abstract void writeStartElementTagEnd() throws XMLStreamException;
 	protected abstract void writeEndElementTag() throws XMLStreamException;
-	protected abstract void writeProperty(String name, String value) throws XMLStreamException;
+	protected abstract void writeAttr(String name, String value) throws XMLStreamException;
 	protected abstract void writeText(String text, int type) throws XMLStreamException;
 	protected abstract void writePI(String target, String data) throws XMLStreamException;
 
 	private void ensureStartTagClosed() throws XMLStreamException {
 		if (!scope.isStartTagClosed()) {
-			writeElementTagEnd();
+			writeStartElementTagEnd();
 			scope.setStartTagClosed(true);
 			if (scope.isEmptyElement()) {
 				scope = scope.getParent();
@@ -99,7 +99,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 			throw new XMLStreamException("Multiple roots within document");
 		}
 		XMLStreamWriterScope<T> newScope = new XMLStreamWriterScope<T>(scope, prefix, localPart, emptyElement);
-		writeElementTagStart(newScope);
+		writeStartElementTag(newScope);
 		scope = newScope;
 	}
 
@@ -193,7 +193,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 			}
 			name = prefix + ':' + localName;
 		}
-		writeProperty(name, value);
+		writeAttr(name, value);
 	}
 
 	@Override

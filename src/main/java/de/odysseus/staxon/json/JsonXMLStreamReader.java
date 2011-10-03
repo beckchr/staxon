@@ -64,15 +64,15 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 		if (fieldName.startsWith("@")) {
 			fieldName = fieldName.substring(1);
 			if (source.peek() == JsonStreamToken.VALUE) {
-				readProperty(fieldName, source.value());
+				readAttr(fieldName, source.value());
 			} else if (XMLConstants.XMLNS_ATTRIBUTE.equals(fieldName)) {
 				source.startObject();
 				while (source.peek() == JsonStreamToken.NAME) {
 					String prefix = source.name();
 					if ("$".equals(prefix)) {
-						readProperty(XMLConstants.XMLNS_ATTRIBUTE, source.value());
+						readAttr(XMLConstants.XMLNS_ATTRIBUTE, source.value());
 					} else {
-						readProperty(XMLConstants.XMLNS_ATTRIBUTE + ':' + prefix, source.value());
+						readAttr(XMLConstants.XMLNS_ATTRIBUTE + ':' + prefix, source.value());
 					}
 				}
 				source.endObject();

@@ -172,7 +172,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		return scope;
 	}
 	
-	protected void readProperty(String name, String value) throws XMLStreamException {
+	protected void readAttr(String name, String value) throws XMLStreamException {
 		if (XMLConstants.XMLNS_ATTRIBUTE.equals(name)) {
 			scope.addNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX, value);
 		} else if (name.startsWith(XMLConstants.XMLNS_ATTRIBUTE)

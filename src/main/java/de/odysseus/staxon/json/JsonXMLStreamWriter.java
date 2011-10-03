@@ -118,7 +118,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	}
 	
 	@Override
-	protected void writeElementTagStart(XMLStreamWriterScope<ScopeInfo> newScope) throws XMLStreamException {
+	protected void writeStartElementTag(XMLStreamWriterScope<ScopeInfo> newScope) throws XMLStreamException {
 		ScopeInfo parentInfo = getScope().getInfo();
 		if (parentInfo.hasText()) {
 			if (!skipSpace || !isWhitespace(parentInfo.getText())) {
@@ -151,7 +151,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	}
 	
 	@Override
-	protected void writeElementTagEnd() throws XMLStreamException {
+	protected void writeStartElementTagEnd() throws XMLStreamException {
 		if (getScope().isEmptyElement()) {
 			writeEndElementTag();
 		}
@@ -180,7 +180,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	}
 
 	@Override
-	protected void writeProperty(String name, String value) throws XMLStreamException {
+	protected void writeAttr(String name, String value) throws XMLStreamException {
 		try {
 			if (!getScope().getInfo().startObjectWritten) {
 				target.startObject();
