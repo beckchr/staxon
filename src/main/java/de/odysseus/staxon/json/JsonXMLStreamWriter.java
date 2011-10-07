@@ -99,22 +99,24 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	private final boolean multiplePI;
 	private final boolean autoEndArray;
 	private final boolean skipSpace;
+	private final char prefixSeparator;
 
 	/**
 	 * Create writer instance.
 	 * @param target stream target
 	 * @param multiplePI whether to use processing instruction to trigger array start
 	 */
-	public JsonXMLStreamWriter(JsonStreamTarget target, boolean multiplePI) {
+	public JsonXMLStreamWriter(JsonStreamTarget target, boolean multiplePI, char prefixSeparator) {
 		super(new ScopeInfo());
 		this.target = target;
 		this.multiplePI = multiplePI;
+		this.prefixSeparator = prefixSeparator;
 		this.autoEndArray = true;
 		this.skipSpace = true;
 	}
 
 	private String getFieldName(String prefix, String localName) {
-		return XMLConstants.DEFAULT_NS_PREFIX.equals(prefix) ? localName : prefix + ':' + localName;
+		return XMLConstants.DEFAULT_NS_PREFIX.equals(prefix) ? localName : prefix + prefixSeparator + localName;
 	}
 	
 	@Override
@@ -180,7 +182,8 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	}
 
 	@Override
-	protected void writeAttr(String name, String value) throws XMLStreamException {
+	protected void writeAttr(String prefix, String localName, String value) throws XMLStreamException {
+		String name = XMLConstants.DEFAULT_NS_PREFIX.equals(prefix) ? localName : prefix + prefixSeparator + localName;
 		try {
 			if (!getScope().getInfo().startObjectWritten) {
 				target.startObject();

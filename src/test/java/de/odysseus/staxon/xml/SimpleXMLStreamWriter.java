@@ -110,10 +110,14 @@ public class SimpleXMLStreamWriter extends AbstractXMLStreamWriter<String> {
 	}
 
 	@Override
-	protected void writeAttr(String name, String value) throws XMLStreamException {
+	protected void writeAttr(String prefix, String localName, String value) throws XMLStreamException {
 		try {
 			writer.write(' ');
-			writer.write(name);
+			if (!XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+				writer.write(prefix);
+				writer.write(':');
+			}
+			writer.write(localName);
 			writer.write('=');
 			writer.write('"');
 			writeEscaped(value, true);

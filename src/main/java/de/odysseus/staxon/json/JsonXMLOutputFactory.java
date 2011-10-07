@@ -64,6 +64,11 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	public static final String PROP_VIRTUAL_ROOT = "JsonXMLOutputFactory.virtualRoot";
 
 	/**
+	 * Namespace prefix separator.
+	 */
+	public static final String PROP_PREFIX_SEPARATOR = "JsonXMLOutputFactory.prefixSeparator";
+
+	/**
 	 * Format output for better readability?
 	 * 
 	 * <p>The default value is <code>false</code>.</p>
@@ -75,6 +80,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	private String virtualRoot = null;
 	private boolean autoArray = false;
 	private boolean prettyPrint = false;
+	private char prefixSeparator = ':';
 
 	public JsonXMLOutputFactory() throws FactoryConfigurationError {
 		this(JsonStreamFactory.newFactory());
@@ -97,7 +103,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	@Override
 	public XMLStreamWriter createXMLStreamWriter(Writer stream) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), multiplePI);
+			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), multiplePI, prefixSeparator);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -106,7 +112,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	@Override
 	public XMLStreamWriter createXMLStreamWriter(OutputStream stream) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), multiplePI);
+			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), multiplePI, prefixSeparator);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -132,6 +138,8 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 				virtualRoot = (String)value;
 			} else if (PROP_PRETTY_PRINT.equals(name)) {
 				prettyPrint = ((Boolean)value).booleanValue();
+			} else if (PROP_PREFIX_SEPARATOR.equals(name)) {
+				prefixSeparator = (Character)value;
 			} else {
 				throw new IllegalArgumentException("Unsupported property: " + name);
 			}
@@ -151,6 +159,8 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 				return virtualRoot;
 			} else if (PROP_PRETTY_PRINT.equals(name)) {
 				return Boolean.valueOf(prettyPrint);
+			} else if (PROP_PREFIX_SEPARATOR.equals(name)) {
+				return prefixSeparator;
 			} else {
 				throw new IllegalArgumentException("Unsupported property: " + name);
 			}
@@ -162,7 +172,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 		if (XMLOutputFactory.IS_REPAIRING_NAMESPACES.equals(name)) {
 			return true;
 		} else { // proprietary properties
-			return Arrays.asList(PROP_AUTO_ARRAY, PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT, PROP_PRETTY_PRINT).contains(name);
+			return Arrays.asList(PROP_AUTO_ARRAY, PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT, PROP_PREFIX_SEPARATOR, PROP_PRETTY_PRINT).contains(name);
 		}
 	}
 }

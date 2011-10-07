@@ -42,7 +42,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 	protected abstract void writeStartElementTag(XMLStreamWriterScope<T> newScope) throws XMLStreamException;
 	protected abstract void writeStartElementTagEnd() throws XMLStreamException;
 	protected abstract void writeEndElementTag() throws XMLStreamException;
-	protected abstract void writeAttr(String name, String value) throws XMLStreamException;
+	protected abstract void writeAttr(String prefix, String localName, String value) throws XMLStreamException;
 	protected abstract void writeText(String text, int type) throws XMLStreamException;
 	protected abstract void writePI(String target, String data) throws XMLStreamException;
 
@@ -162,11 +162,10 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		if (scope.isStartTagClosed()) {
 			throw new XMLStreamException("Cannot write attribute: element has children or text");
 		}
-		String name;
 		if (XMLConstants.NULL_NS_URI.equals(namespaceURI)) { // no namespace -> no prefix
-			if (prefix == null || XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-				name = localName;
-			} else {
+			if (prefix == null) {
+				prefix = XMLConstants.DEFAULT_NS_PREFIX;
+			} else if (!XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
 				throw new XMLStreamException("Cannot write attribute without a namespace URI and prefix: " + prefix);
 			}
 		} else { // namespace -> prefixed attribute
@@ -191,9 +190,8 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 			if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
 				throw new XMLStreamException("Cannot write attribute without prefix for namespace URI: " + namespaceURI);
 			}
-			name = prefix + ':' + localName;
 		}
-		writeAttr(name, value);
+		writeAttr(prefix, localName, value);
 	}
 
 	@Override
@@ -261,13 +259,10 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		if (scope.isStartTagClosed()) {
 			throw new XMLStreamException("Cannot write namespace: element has children or text");
 		}
-		if (prefix == null || XMLConstants.XMLNS_ATTRIBUTE.equals(prefix)) {
-			prefix = XMLConstants.DEFAULT_NS_PREFIX;
-		}
 		if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-			writeAttribute(XMLConstants.XMLNS_ATTRIBUTE, namespaceURI);
+			writeAttr(prefix, XMLConstants.XMLNS_ATTRIBUTE, namespaceURI);
 		} else {
-			writeAttribute(XMLConstants.XMLNS_ATTRIBUTE + ":" + prefix, namespaceURI);
+			writeAttr(XMLConstants.XMLNS_ATTRIBUTE, prefix, namespaceURI);
 		}
 		setPrefix(prefix, namespaceURI);
 	}

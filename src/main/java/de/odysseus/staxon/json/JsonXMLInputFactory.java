@@ -58,11 +58,17 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	 */
 	public static final String PROP_VIRTUAL_ROOT = "JsonXMLInputFactory.virtualRoot";
 
+	/**
+	 * Namespace prefix separator.
+	 */
+	public static final String PROP_PREFIX_SEPARATOR = "JsonXMLInputFactory.prefixSeparator";
+
 	private final JsonStreamFactory streamFactory;
 
 	private boolean multiplePI = true;
 	private String virtualRoot = null;
 	private boolean coalescing = true;
+	private char prefixSeparator = ':';
 	
 	public JsonXMLInputFactory() throws FactoryConfigurationError {
 		this(JsonStreamFactory.newFactory());
@@ -82,7 +88,7 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	@Override
 	public XMLStreamReader createXMLStreamReader(Reader reader) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(reader)), multiplePI);
+			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(reader)), multiplePI, prefixSeparator);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -91,7 +97,7 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	@Override
 	public XMLStreamReader createXMLStreamReader(InputStream stream) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(stream)), multiplePI);
+			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(stream)), multiplePI, prefixSeparator);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -146,6 +152,8 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 				multiplePI = ((Boolean)value).booleanValue();
 			} else if (PROP_VIRTUAL_ROOT.equals(name)) {
 				virtualRoot = (String)value;
+			} else if (PROP_PREFIX_SEPARATOR.equals(name)) {
+				prefixSeparator = (Character)value;
 			} else {
 				throw new IllegalArgumentException("Unsupported property: " + name);
 			}
@@ -169,6 +177,8 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 				return Boolean.valueOf(multiplePI);
 			} else if (PROP_VIRTUAL_ROOT.equals(name)) {
 				return virtualRoot;
+			} else if (PROP_PREFIX_SEPARATOR.equals(name)) {
+				return prefixSeparator;
 			} else {
 				throw new IllegalArgumentException("Unsupported property: " + name);
 			}
@@ -188,7 +198,7 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 		} else if (XMLInputFactory.IS_VALIDATING.equals(name)) {
 			return true;
 		} else { // proprietary properties
-			return Arrays.asList(PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT).contains(name);
+			return Arrays.asList(PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT, PROP_PREFIX_SEPARATOR).contains(name);
 		}
 	}
 }

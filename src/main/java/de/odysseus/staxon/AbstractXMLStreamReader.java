@@ -64,6 +64,18 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 			.toString();
 		}
 	}
+	
+	static class PendingAttribute {
+		final String prefix;
+		final String localName;
+		final String value;
+
+		PendingAttribute(String prefix, String localName, String value) {
+			this.prefix = prefix;
+			this.localName = localName;
+			this.value = value;
+		}
+	}
 
 	static String getEventName(int type) {
 		switch (type) {
@@ -123,7 +135,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	private XMLStreamReaderScope<T> scope;
 	private boolean moreTokens;
 	private Event event;
-	private List<Pair<String, String>> pendingAttributes = new ArrayList<Pair<String,String>>(16);
+	private List<PendingAttribute> pendingAttributes = new ArrayList<PendingAttribute>();
 	
 	private String encodingScheme;
 	private String version;
@@ -136,16 +148,12 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	private void ensureStartTagClosed() throws XMLStreamException {
 		if (!scope.isStartTagClosed()) {
 			if (!pendingAttributes.isEmpty()) {
-				for (Pair<String, String> attribute : pendingAttributes) {
-					String name = attribute.getFirst();
-					int colon = name.indexOf(':');
-					String prefix = name.substring(0, colon);
-					String namespaceURI = scope.getNamespaceURI(prefix);
+				for (PendingAttribute attribute : pendingAttributes) {
+					String namespaceURI = scope.getNamespaceURI(attribute.prefix);
 					if (namespaceURI == null || XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
-						throw new XMLStreamException("Unbound attribute prefix: " + prefix);
+						throw new XMLStreamException("Unbound attribute prefix: " + attribute.prefix);
 					}
-					QName qName = new QName(namespaceURI, name.substring(colon + 1), prefix);
-					scope.addAttribute(qName, attribute.getSecond());
+					scope.addAttribute(new QName(namespaceURI, attribute.localName, attribute.prefix), attribute.value);
 				}
 				pendingAttributes.clear();
 			}
@@ -160,39 +168,33 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		this.standalone = standalone;
 	}
 	
-	protected XMLStreamReaderScope<T> readStartElementTag(String name) throws XMLStreamException {
+	protected XMLStreamReaderScope<T> readStartElementTag(String prefix, String localName) throws XMLStreamException {
 		ensureStartTagClosed();
-		int colon = name.indexOf(':');
-		if (colon < 0) {
-			scope = new XMLStreamReaderScope<T>(scope, XMLConstants.DEFAULT_NS_PREFIX, name);
-		} else {
-			scope = new XMLStreamReaderScope<T>(scope, name.substring(0, colon), name.substring(colon + 1));
-		}
+		scope = new XMLStreamReaderScope<T>(scope, prefix, localName);
 		queue.add(new Event(XMLStreamConstants.START_ELEMENT, scope, null));
 		return scope;
 	}
 	
-	protected void readAttr(String name, String value) throws XMLStreamException {
-		if (XMLConstants.XMLNS_ATTRIBUTE.equals(name)) {
-			scope.addNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX, value);
-		} else if (name.startsWith(XMLConstants.XMLNS_ATTRIBUTE)
-				&& name.charAt(XMLConstants.XMLNS_ATTRIBUTE.length()) == ':') {
-			scope.addNamespaceURI(name.substring(XMLConstants.XMLNS_ATTRIBUTE.length() + 1), value);
-		} else { // normal attribute
-			int colon = name.indexOf(':');
-			if (colon < 0) {
-				scope.addAttribute(new QName(name), value);
+	protected void readAttr(String prefix, String localName, String value) throws XMLStreamException {
+		if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+			if (XMLConstants.XMLNS_ATTRIBUTE.equals(localName)) {
+				scope.addNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX, value);
 			} else {
-				String prefix = name.substring(0, colon);
+				scope.addAttribute(new QName(localName), value);
+			}
+		} else {
+			if (XMLConstants.XMLNS_ATTRIBUTE.equals(prefix)) {
+				scope.addNamespaceURI(localName, value);
+			} else {
 				String namespaceURI = scope.getNamespaceURI(prefix);
+				 // delay attribute addition if URI is not yet known
 				if (namespaceURI == null || XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
-					pendingAttributes.add(new Pair<String, String>(name, value));
+					pendingAttributes.add(new PendingAttribute(prefix, localName, value));
 				} else {
-					QName qName = new QName(namespaceURI, name.substring(colon + 1), prefix);
-					scope.addAttribute(qName, value);
+					scope.addAttribute(new QName(namespaceURI, localName, prefix), value);
 				}
 			}
-		}		
+		}
 	}
 
 	protected void readText(String text, int type) throws XMLStreamException {

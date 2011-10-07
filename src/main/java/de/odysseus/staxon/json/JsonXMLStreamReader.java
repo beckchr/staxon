@@ -45,6 +45,7 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 	
 	private final JsonStreamSource source;
 	private final boolean multiplePI;
+	private final char prefixSeparator;
 
 	/**
 	 * Create reader instance.
@@ -52,11 +53,30 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 	 * @param multiplePI whether to use processing instruction to trigger array start
 	 * @throws XMLStreamException
 	 */
-	public JsonXMLStreamReader(JsonStreamSource source, boolean multiplePI) throws XMLStreamException {
+	public JsonXMLStreamReader(JsonStreamSource source, boolean multiplePI, char prefixSeparator) throws XMLStreamException {
 		super(new ScopeInfo());
 		this.source = source;
 		this.multiplePI = multiplePI;
+		this.prefixSeparator = prefixSeparator;
 		init();
+	}
+
+	private XMLStreamReaderScope<JsonXMLStreamReader.ScopeInfo> readStartElementTag(String name) throws XMLStreamException {
+		int separator = name.indexOf(prefixSeparator);
+		if (separator < 0) {
+			return readStartElementTag(XMLConstants.DEFAULT_NS_PREFIX, name);
+		} else {
+			return readStartElementTag(name.substring(0, separator), name.substring(separator+1));
+		}
+	}
+	
+	private void readAttr(String name, String value) throws XMLStreamException {
+		int separator = name.indexOf(prefixSeparator);
+		if (separator < 0) {
+			readAttr(XMLConstants.DEFAULT_NS_PREFIX, name, value);
+		} else {
+			readAttr(name.substring(0, separator), name.substring(separator+1), value);
+		}
 	}
 
 	private void consumeName(XMLStreamReaderScope<ScopeInfo> scope) throws XMLStreamException, IOException {

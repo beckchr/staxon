@@ -20,6 +20,7 @@ import java.io.Reader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.XMLConstants;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 
@@ -123,10 +124,15 @@ public class SimpleXMLStreamReader extends AbstractXMLStreamReader<String> {
 				}
 			} else { // START_ELEMENT
 				String tagName = readName(' ');
-				scope = readStartElementTag(tagName);
+				int colon = tagName.indexOf(':');
+				if (colon < 0) {
+					scope = readStartElementTag(XMLConstants.DEFAULT_NS_PREFIX, tagName);
+				} else {
+					scope = readStartElementTag(tagName.substring(0, colon), tagName.substring(colon+1));
+				}
 				scope.setInfo(tagName);
 				while (ch != '>' && ch != '/') {
-					String name = readName('=');
+					String attrName = readName('=');
 					nextChar();
 					skipWhitespace();
 					int quote = ch;
@@ -134,7 +140,12 @@ public class SimpleXMLStreamReader extends AbstractXMLStreamReader<String> {
 					String value = readText(quote);
 					nextChar();
 					skipWhitespace();
-					readAttr(name, value);
+					colon = attrName.indexOf(':');
+					if (colon < 0) {
+						readAttr(XMLConstants.DEFAULT_NS_PREFIX, attrName, value);
+					} else {
+						readAttr(attrName.substring(0, colon), attrName.substring(colon+1), value);
+					}
 				}
 				if (ch == '/') {
 					nextChar(); // please, let it be '>'
