@@ -44,11 +44,12 @@ public class SimpleXMLStreamReader extends AbstractXMLStreamReader<String> {
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
-		init();
+		initialize();
 	}
 
 	@Override
-	protected boolean consume(XMLStreamReaderScope<String> scope) throws XMLStreamException, IOException {
+	protected boolean consume() throws XMLStreamException, IOException {
+		XMLStreamReaderScope<String> scope = getScope();
 		skipWhitespace();
 
 		if (ch == -1) {
@@ -126,11 +127,11 @@ public class SimpleXMLStreamReader extends AbstractXMLStreamReader<String> {
 				String tagName = readName(' ');
 				int colon = tagName.indexOf(':');
 				if (colon < 0) {
-					scope = readStartElementTag(XMLConstants.DEFAULT_NS_PREFIX, tagName);
+					readStartElementTag(XMLConstants.DEFAULT_NS_PREFIX, tagName, tagName);
 				} else {
-					scope = readStartElementTag(tagName.substring(0, colon), tagName.substring(colon+1));
+					readStartElementTag(tagName.substring(0, colon), tagName.substring(colon+1), tagName);
 				}
-				scope.setInfo(tagName);
+				scope = getScope();
 				while (ch != '>' && ch != '/') {
 					String attrName = readName('=');
 					nextChar();
@@ -152,7 +153,7 @@ public class SimpleXMLStreamReader extends AbstractXMLStreamReader<String> {
 					readEndElementTag();
 				} else {
 					nextChar();
-					return consume(scope);
+					return consume();
 				}
 			}
 			nextChar();

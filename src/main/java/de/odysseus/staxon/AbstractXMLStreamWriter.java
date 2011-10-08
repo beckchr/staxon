@@ -58,7 +58,8 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 			throw new XMLStreamException("Multiple roots within document");
 		}
 		XMLStreamWriterScope<T> newScope = new XMLStreamWriterScope<T>(scope, prefix, localPart, emptyElement);
-		writeStartElementTag(newScope);
+		T scopeInfo = writeStartElementTag(newScope);
+		newScope.setInfo(scopeInfo);
 		scope = newScope;
 	}
 
@@ -71,10 +72,13 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 
 	/**
 	 * Write open start element tag.
+	 * The returned scope info is stored in the new scope and will be available via
+	 * <code>getScope().getInfo()</code>.
 	 * @param newScope new scope
+	 * @return new scope info
 	 * @throws XMLStreamException
 	 */
-	protected abstract void writeStartElementTag(XMLStreamWriterScope<T> newScope) throws XMLStreamException;
+	protected abstract T writeStartElementTag(XMLStreamWriterScope<T> newScope) throws XMLStreamException;
 	
 	/**
 	 * Write close start element tag.

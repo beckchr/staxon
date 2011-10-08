@@ -46,7 +46,7 @@ public class XMLStreamReaderScope<T> extends AbstractXMLStreamScope {
 		return info;
 	}
 	
-	public void setInfo(T info) {
+	void setInfo(T info) {
 		this.info = info;
 	}
 	

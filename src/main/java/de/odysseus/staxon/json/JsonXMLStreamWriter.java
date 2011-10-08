@@ -120,7 +120,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	}
 	
 	@Override
-	protected void writeStartElementTag(XMLStreamWriterScope<ScopeInfo> newScope) throws XMLStreamException {
+	protected ScopeInfo writeStartElementTag(XMLStreamWriterScope<ScopeInfo> newScope) throws XMLStreamException {
 		ScopeInfo parentInfo = getScope().getInfo();
 		if (parentInfo.hasText()) {
 			if (!skipSpace || !isWhitespace(parentInfo.getText())) {
@@ -149,7 +149,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 		} catch (IOException e) {
 			throw new XMLStreamException("Cannot write start element: " + fieldName, e);
 		}
-		newScope.setInfo(new ScopeInfo());
+		return new ScopeInfo();
 	}
 	
 	@Override

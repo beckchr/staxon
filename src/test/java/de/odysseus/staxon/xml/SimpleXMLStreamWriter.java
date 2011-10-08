@@ -75,14 +75,15 @@ public class SimpleXMLStreamWriter extends AbstractXMLStreamWriter<String> {
  	}
 
 	@Override
-	protected void writeStartElementTag(XMLStreamWriterScope<String> newScope) throws XMLStreamException {
-		newScope.setInfo(getTagName(newScope.getPrefix(), newScope.getLocalName()));
+	protected String writeStartElementTag(XMLStreamWriterScope<String> newScope) throws XMLStreamException {
+		String tagName = getTagName(newScope.getPrefix(), newScope.getLocalName());
 		try {
 			writer.write('<');
-			writer.write(newScope.getInfo());
+			writer.write(tagName);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
+		return tagName;
 	}
 
 	@Override

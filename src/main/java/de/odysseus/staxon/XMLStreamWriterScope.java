@@ -43,7 +43,7 @@ public class XMLStreamWriterScope<T> extends AbstractXMLStreamScope {
 		return info;
 	}
 	
-	public void setInfo(T info) {
+	void setInfo(T info) {
 		this.info = info;
 	}
 	

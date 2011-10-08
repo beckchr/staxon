@@ -58,15 +58,15 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 		this.source = source;
 		this.multiplePI = multiplePI;
 		this.prefixSeparator = prefixSeparator;
-		init();
+		initialize();
 	}
 
-	private XMLStreamReaderScope<JsonXMLStreamReader.ScopeInfo> readStartElementTag(String name) throws XMLStreamException {
+	private void readStartElementTag(String name) throws XMLStreamException {
 		int separator = name.indexOf(prefixSeparator);
 		if (separator < 0) {
-			return readStartElementTag(XMLConstants.DEFAULT_NS_PREFIX, name);
+			readStartElementTag(XMLConstants.DEFAULT_NS_PREFIX, name, new ScopeInfo());
 		} else {
-			return readStartElementTag(name.substring(0, separator), name.substring(separator+1));
+			readStartElementTag(name.substring(0, separator), name.substring(separator+1), new ScopeInfo());
 		}
 	}
 	
@@ -79,7 +79,7 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 		}
 	}
 
-	private void consumeName(XMLStreamReaderScope<ScopeInfo> scope) throws XMLStreamException, IOException {
+	private void consumeName(ScopeInfo info) throws XMLStreamException, IOException {
 		String fieldName = source.name();
 		if (fieldName.startsWith("@")) {
 			fieldName = fieldName.substring(1);
@@ -102,16 +102,17 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 		} else if ("$".equals(fieldName)) {
 			readData(source.value(), XMLStreamConstants.CHARACTERS);
 		} else {
-			scope.getInfo().currentTagName = fieldName;
+			info.currentTagName = fieldName;
 		}
 	}
 	
 	@Override
-	protected boolean consume(XMLStreamReaderScope<ScopeInfo> scope) throws XMLStreamException, IOException {
+	protected boolean consume() throws XMLStreamException, IOException {
+		XMLStreamReaderScope<ScopeInfo> scope = getScope();
 		switch (source.peek()) {
 		case NAME:
-			consumeName(scope);
-			return consume(scope);
+			consumeName(scope.getInfo());
+			return consume();
 		case START_ARRAY:
 			source.startArray();
 			if (scope.getInfo().getArrayName() != null) {
@@ -124,7 +125,7 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 			if (multiplePI) {
 				readPI(JsonXMLStreamConstants.MULTIPLE_PI_TARGET, scope.getInfo().currentTagName);
 			}
-			return consume(scope);
+			return consume();
 		case START_OBJECT:
 			source.startObject();
 			if (scope.isRoot() && scope.getInfo().currentTagName == null) {
@@ -133,10 +134,9 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 				if (scope.getInfo().getArrayName() != null) {
 					scope.getInfo().incArraySize();
 				}
-				scope = readStartElementTag(scope.getInfo().currentTagName);
-				scope.setInfo(new ScopeInfo());
+				readStartElementTag(scope.getInfo().currentTagName);
 			}
-			return consume(scope);
+			return consume();
 		case END_OBJECT:
 			source.endObject();
 			if (scope.isRoot()) {

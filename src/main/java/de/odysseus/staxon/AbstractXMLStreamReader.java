@@ -164,7 +164,45 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 			scope.setStartTagClosed(true);
 		}
 	}
-	
+
+	/**
+	 * @return current scope
+	 */
+	protected XMLStreamReaderScope<T> getScope() {
+		return scope;
+	}
+
+	/**
+	 * Consume initial event.
+	 * This method must be called by subclasses prior to any use of an instance (typically in constructor).
+	 * @throws XMLStreamException
+	 */
+	protected void initialize() throws XMLStreamException {
+		try {
+			moreTokens = consume();
+		} catch (IOException e) {
+			throw new XMLStreamException(e);
+		}
+
+		if (hasNext()) {
+			event = queue.remove();
+		} else {
+			event = new Event(XMLStreamConstants.END_DOCUMENT, scope, null);
+		}
+	}
+
+	/**
+	 * Main method to be implemented by subclasses.
+	 * This method is called by the reader when the event queue runs dry.
+	 * Consume some events and delegate to the various <code>readXXX()</code> methods.
+	 * When encountering an element start event, all attributes and namespace delarations
+	 * must be consumed too, otherwise these won't be available during start element.
+	 * @return <code>true</code> if there's more to read
+	 * @throws XMLStreamException
+	 * @throws IOException
+	 */
+	protected abstract boolean consume() throws XMLStreamException, IOException;
+
 	/**
 	 * Read start document
 	 * @param version XML version
@@ -180,16 +218,18 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	
 	/**
 	 * Read start element.
+	 * A new scope is created and made the current scope. The provided <code>scopeInfo</code> is
+	 * stored in the new scope and will be available via <code>getScope().getInfo()</code>.
 	 * @param prefix element prefix (may be <code>XMLConstants.DEFAULT_NS_PREFIX</code>)
 	 * @param localName local name
-	 * @return scope
+	 * @param scopeInfo new scope info 
 	 * @throws XMLStreamException
 	 */
-	protected XMLStreamReaderScope<T> readStartElementTag(String prefix, String localName) throws XMLStreamException {
+	protected void readStartElementTag(String prefix, String localName, T scopeInfo) throws XMLStreamException {
 		ensureStartTagClosed();
 		scope = new XMLStreamReaderScope<T>(scope, prefix, localName);
+		scope.setInfo(scopeInfo);
 		queue.add(new Event(XMLStreamConstants.START_ELEMENT, scope, null));
-		return scope;
 	}
 	
 	/**
@@ -250,6 +290,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 
 	/**
 	 * Read end element.
+	 * This will pop the current scope and make its parent the new current scope.
 	 * @throws XMLStreamException
 	 */
 	protected void readEndElementTag() throws XMLStreamException {
@@ -264,41 +305,6 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	protected void readEndDocument() {
 		queue.add(new Event(XMLStreamConstants.END_DOCUMENT, scope, null));
 	}
-
-	/**
-	 * @return current scope
-	 */
-	protected XMLStreamReaderScope<T> getScope() {
-		return scope;
-	}
-
-	protected void init() throws XMLStreamException {
-		try {
-			moreTokens = consume(scope);
-		} catch (IOException e) {
-			throw new XMLStreamException(e);
-		}
-
-		if (hasNext()) {
-			event = queue.remove();
-		} else {
-			event = new Event(XMLStreamConstants.END_DOCUMENT, scope, null);
-		}
-	}
-
-	/**
-	 * Main method to be implemented by subclasses.
-	 * This method is called by the reader when the event queue runs dry.
-	 * Consume some events and delegate to the various <code>readXXX()</code> methods.
-	 * When encountering an element start event, all attributes and namespace delarations
-	 * must be consumed too, otherwise these won't be available during start element.
-	 * @param scope current element scope
-	 * @return <code>true</code> if there's more to read
-	 * @throws XMLStreamException
-	 * @throws IOException
-	 */
-	protected abstract boolean consume(XMLStreamReaderScope<T> scope) throws XMLStreamException, IOException;
-
 	@Override
 	public void require(int eventType, String namespaceURI, String localName) throws XMLStreamException {
 		if (eventType != getEventType()) {
@@ -347,7 +353,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	public boolean hasNext() throws XMLStreamException {
 		try {
 			while (queue.isEmpty() && moreTokens) {
-				moreTokens = consume(scope);
+				moreTokens = consume();
 			}
 		} catch (IOException ex) {
 			throw new XMLStreamException(ex);
