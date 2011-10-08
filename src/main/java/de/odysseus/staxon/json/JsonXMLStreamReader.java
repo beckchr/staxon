@@ -100,7 +100,7 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 				throw new IllegalStateException("Expected attribute value");
 			}
 		} else if ("$".equals(fieldName)) {
-			readText(source.value(), XMLStreamConstants.CHARACTERS);
+			readData(source.value(), XMLStreamConstants.CHARACTERS);
 		} else {
 			scope.getInfo().currentTagName = fieldName;
 		}
@@ -155,7 +155,7 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 			}
 			readStartElementTag(name);
 			if (text != null) {
-				readText(text, XMLStreamConstants.CHARACTERS);
+				readData(text, XMLStreamConstants.CHARACTERS);
 			}
 			readEndElementTag();
 			return true;

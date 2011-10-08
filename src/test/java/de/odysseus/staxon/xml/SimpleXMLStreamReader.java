@@ -112,14 +112,14 @@ public class SimpleXMLStreamReader extends AbstractXMLStreamReader<String> {
 					if (!comment.startsWith("-")) {
 						throw new XMLStreamException("expected comment");
 					}
-					readText(comment.substring(1, comment.length() - 3), XMLStreamConstants.COMMENT);
+					readData(comment.substring(1, comment.length() - 3), XMLStreamConstants.COMMENT);
 					break;
 				case '[': // CDATA
 					String cdata = readData(']');
 					if (!cdata.startsWith("CDATA[")) {
 						throw new XMLStreamException("expected cdata");
 					}
-					readText(cdata.substring(6, cdata.length() - 3), XMLStreamConstants.CDATA);
+					readData(cdata.substring(6, cdata.length() - 3), XMLStreamConstants.CDATA);
 					break;
 				}
 			} else { // START_ELEMENT
@@ -158,7 +158,7 @@ public class SimpleXMLStreamReader extends AbstractXMLStreamReader<String> {
 			nextChar();
 		} else {
 			String text = readText('<');
-			readText(text, XMLStreamConstants.CHARACTERS);
+			readData(text, XMLStreamConstants.CHARACTERS);
 		}
 		return true;
 	}

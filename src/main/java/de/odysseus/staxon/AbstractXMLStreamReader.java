@@ -98,7 +98,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		}
 	}
 	
-	static boolean hasText(int type) {
+	static boolean hasData(int type) {
 		return type == XMLStreamConstants.CHARACTERS
 				|| type == XMLStreamConstants.COMMENT
 				|| type == XMLStreamConstants.CDATA
@@ -197,10 +197,10 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		}
 	}
 
-	protected void readText(String text, int type) throws XMLStreamException {
-		if (hasText(type)) {
+	protected void readData(String data, int type) throws XMLStreamException {
+		if (hasData(type)) {
 			ensureStartTagClosed();
-			queue.add(new Event(type, scope, text));
+			queue.add(new Event(type, scope, data));
 		} else {
 			throw new XMLStreamException("Unexpected event type " + getEventName(), getLocation());
 		}
@@ -450,7 +450,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 
 	@Override
 	public boolean hasText() {
-		return hasText(getEventType());
+		return hasData(getEventType());
 	}
 
 	@Override
