@@ -30,22 +30,15 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 	private XMLStreamWriterScope<T> scope;
 	private boolean startDocumentWritten;
 	
+	/**
+	 * Create writer instance.
+	 * @param rootInfo root scope information
+	 */
 	public AbstractXMLStreamWriter(T rootInfo) {
 		scope = new XMLStreamWriterScope<T>(XMLConstants.NULL_NS_URI, rootInfo);
 		startDocumentWritten = false;
 	}
 	
-	protected XMLStreamWriterScope<T> getScope() {
-		return scope;
-	}
-
-	protected abstract void writeStartElementTag(XMLStreamWriterScope<T> newScope) throws XMLStreamException;
-	protected abstract void writeStartElementTagEnd() throws XMLStreamException;
-	protected abstract void writeEndElementTag() throws XMLStreamException;
-	protected abstract void writeAttr(String prefix, String localName, String value) throws XMLStreamException;
-	protected abstract void writeData(String data, int type) throws XMLStreamException;
-	protected abstract void writePI(String target, String data) throws XMLStreamException;
-
 	private void ensureStartTagClosed() throws XMLStreamException {
 		if (!scope.isStartTagClosed()) {
 			writeStartElementTagEnd();
@@ -55,6 +48,70 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 			}
 		}
 	}
+
+	private void writeStartElement(String prefix, String localPart, boolean emptyElement) throws XMLStreamException {
+		if (localPart == null) {
+			throw new XMLStreamException("Local name must not be null");
+		}
+		ensureStartTagClosed();
+		if (startDocumentWritten && scope.isRoot() && scope.getLastChild() != null) {
+			throw new XMLStreamException("Multiple roots within document");
+		}
+		XMLStreamWriterScope<T> newScope = new XMLStreamWriterScope<T>(scope, prefix, localPart, emptyElement);
+		writeStartElementTag(newScope);
+		scope = newScope;
+	}
+
+	/**
+	 * @return current scope
+	 */
+	protected XMLStreamWriterScope<T> getScope() {
+		return scope;
+	}
+
+	/**
+	 * Write open start element tag.
+	 * @param newScope new scope
+	 * @throws XMLStreamException
+	 */
+	protected abstract void writeStartElementTag(XMLStreamWriterScope<T> newScope) throws XMLStreamException;
+	
+	/**
+	 * Write close start element tag.
+	 * @throws XMLStreamException
+	 */
+	protected abstract void writeStartElementTagEnd() throws XMLStreamException;
+	
+	/**
+	 * Write end element tag.
+	 * @throws XMLStreamException
+	 */
+	protected abstract void writeEndElementTag() throws XMLStreamException;
+	
+	/**
+	 * Write attribute (or namespace declaration).
+	 * @param prefix attribute prefix (may be <code>XMLConstants.DEFAULT_NS_PREFIX</code>)
+	 * @param localName local name
+	 * @param value attribute value
+	 * @throws XMLStreamException
+	 */
+	protected abstract void writeAttr(String prefix, String localName, String value) throws XMLStreamException;
+	
+	/**
+	 * Write characters/comment/dtd/entity data.
+	 * @param data text/data
+	 * @param type one of <code>CHARACTERS, COMMENT, CDATA, DTD, ENTITY_REFERENCE, SPACE</code>
+	 * @throws XMLStreamException
+	 */
+	protected abstract void writeData(String data, int type) throws XMLStreamException;
+	
+	/**
+	 * Read processing instruction.
+	 * @param target PI target
+	 * @param data PI data (may be <code>null</code>)
+	 * @throws XMLStreamException
+	 */
+	protected abstract void writePI(String target, String data) throws XMLStreamException;
 
 	@Override
 	public void writeStartElement(String localName) throws XMLStreamException {
@@ -88,19 +145,6 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 			scope.setPrefix(prefix, namespaceURI);
 		}
 		writeStartElement(prefix, localName, false);
-	}
-
-	private void writeStartElement(String prefix, String localPart, boolean emptyElement) throws XMLStreamException {
-		if (localPart == null) {
-			throw new XMLStreamException("Local name must not be null");
-		}
-		ensureStartTagClosed();
-		if (startDocumentWritten && scope.isRoot() && scope.getLastChild() != null) {
-			throw new XMLStreamException("Multiple roots within document");
-		}
-		XMLStreamWriterScope<T> newScope = new XMLStreamWriterScope<T>(scope, prefix, localPart, emptyElement);
-		writeStartElementTag(newScope);
-		scope = newScope;
 	}
 
 	@Override

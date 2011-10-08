@@ -141,6 +141,10 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	private String version;
 	private Boolean standalone;
 	
+	/**
+	 * Create new reader instance.
+	 * @param rootInfo root scope information
+	 */
 	public AbstractXMLStreamReader(T rootInfo) {
 		scope = new XMLStreamReaderScope<T>(XMLConstants.NULL_NS_URI, rootInfo);
 	}
@@ -161,6 +165,12 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		}
 	}
 	
+	/**
+	 * Read start document
+	 * @param version XML version
+	 * @param encodingScheme encoding scheme (may be <code>null</code>)
+	 * @param standalone standalone flag (may be <code>null</code>)
+	 */
 	protected void readStartDocument(String version, String encodingScheme, Boolean standalone) {
 		queue.add(new Event(XMLStreamConstants.START_DOCUMENT, scope, null));
 		this.version = version;
@@ -168,6 +178,13 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		this.standalone = standalone;
 	}
 	
+	/**
+	 * Read start element.
+	 * @param prefix element prefix (may be <code>XMLConstants.DEFAULT_NS_PREFIX</code>)
+	 * @param localName local name
+	 * @return scope
+	 * @throws XMLStreamException
+	 */
 	protected XMLStreamReaderScope<T> readStartElementTag(String prefix, String localName) throws XMLStreamException {
 		ensureStartTagClosed();
 		scope = new XMLStreamReaderScope<T>(scope, prefix, localName);
@@ -175,6 +192,13 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		return scope;
 	}
 	
+	/**
+	 * Read attribute (or namespace declaration).
+	 * @param prefix attribute prefix (may be <code>XMLConstants.DEFAULT_NS_PREFIX</code>)
+	 * @param localName local name
+	 * @param value attribute value
+	 * @throws XMLStreamException
+	 */
 	protected void readAttr(String prefix, String localName, String value) throws XMLStreamException {
 		if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
 			if (XMLConstants.XMLNS_ATTRIBUTE.equals(localName)) {
@@ -197,6 +221,12 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		}
 	}
 
+	/**
+	 * Read characters/comment/dtd/entity data.
+	 * @param data text/data
+	 * @param type one of <code>CHARACTERS, COMMENT, CDATA, DTD, ENTITY_REFERENCE, SPACE</code>
+	 * @throws XMLStreamException
+	 */
 	protected void readData(String data, int type) throws XMLStreamException {
 		if (hasData(type)) {
 			ensureStartTagClosed();
@@ -206,25 +236,41 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		}
 	}
 
+	/**
+	 * Read processing instruction.
+	 * @param target PI target
+	 * @param data PI data (may be <code>null</code>)
+	 * @throws XMLStreamException
+	 */
 	protected void readPI(String target, String data) throws XMLStreamException {
 		ensureStartTagClosed();
 		String text = data == null ? target : target + ':' + data;
 		queue.add(new Event(XMLStreamConstants.PROCESSING_INSTRUCTION, scope, text));
 	}
 
+	/**
+	 * Read end element.
+	 * @throws XMLStreamException
+	 */
 	protected void readEndElementTag() throws XMLStreamException {
 		ensureStartTagClosed();
 		queue.add(new Event(XMLStreamConstants.END_ELEMENT, scope, null));
 		scope = scope.getParent();
 	}
 
+	/**
+	 * Read end document.
+	 */
 	protected void readEndDocument() {
 		queue.add(new Event(XMLStreamConstants.END_DOCUMENT, scope, null));
 	}
 
-//	protected XMLStreamReaderScope<T> getScope() {
-//		return scope;
-//	}
+	/**
+	 * @return current scope
+	 */
+	protected XMLStreamReaderScope<T> getScope() {
+		return scope;
+	}
 
 	protected void init() throws XMLStreamException {
 		try {
@@ -242,6 +288,10 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 
 	/**
 	 * Main method to be implemented by subclasses.
+	 * This method is called by the reader when the event queue runs dry.
+	 * Consume some events and delegate to the various <code>readXXX()</code> methods.
+	 * When encountering an element start event, all attributes and namespace delarations
+	 * must be consumed too, otherwise these won't be available during start element.
 	 * @param scope current element scope
 	 * @return <code>true</code> if there's more to read
 	 * @throws XMLStreamException
