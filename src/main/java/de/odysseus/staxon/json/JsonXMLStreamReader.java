@@ -85,14 +85,14 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 			fieldName = fieldName.substring(1);
 			if (source.peek() == JsonStreamToken.VALUE) {
 				readAttr(fieldName, source.value());
-			} else if (XMLConstants.XMLNS_ATTRIBUTE.equals(fieldName)) {
+			} else if (XMLConstants.XMLNS_ATTRIBUTE.equals(fieldName)) { // badgerfish
 				source.startObject();
 				while (source.peek() == JsonStreamToken.NAME) {
 					String prefix = source.name();
 					if ("$".equals(prefix)) {
-						readAttr(XMLConstants.XMLNS_ATTRIBUTE, source.value());
+						readAttr(XMLConstants.DEFAULT_NS_PREFIX, XMLConstants.XMLNS_ATTRIBUTE, source.value());
 					} else {
-						readAttr(XMLConstants.XMLNS_ATTRIBUTE + ':' + prefix, source.value());
+						readAttr(XMLConstants.XMLNS_ATTRIBUTE, prefix, source.value());
 					}
 				}
 				source.endObject();

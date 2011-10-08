@@ -155,4 +155,29 @@ public class JsonXMLStreamReaderTest {
 		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
 		reader.close();
 	}
+
+	/**
+	 * <code>&lt;alice xmlns="http://foo" xmlns:bar="http://bar"&gt;bob&lt;/alice&gt;</code>
+	 * with badgerfish notation
+	 */
+	@Test
+	public void testNamespacesBadgerfish() throws Exception {
+		String input = "{\"alice\":{\"@xmlns\":{\"$\":\"http://foo\",\"bar\":\"http://bar\"},\"$\":\"bob\"}}";
+		XMLStreamReader reader = new JsonXMLInputFactory().createXMLStreamReader(new StringReader(input));
+		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
+		Assert.assertEquals("http://foo", reader.getNamespaceURI());
+		Assert.assertEquals("http://bar", reader.getNamespaceURI("bar"));
+		Assert.assertEquals(0, reader.getAttributeCount());
+		reader.next();
+		verify(reader, XMLStreamConstants.CHARACTERS, null, "bob");
+		reader.next();
+		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
+		Assert.assertEquals("http://foo", reader.getNamespaceURI());
+		Assert.assertEquals("http://bar", reader.getNamespaceURI("bar"));
+		reader.next();
+		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
+		reader.close();
+	}
 }
