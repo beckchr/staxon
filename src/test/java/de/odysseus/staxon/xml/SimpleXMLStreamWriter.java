@@ -128,7 +128,7 @@ public class SimpleXMLStreamWriter extends AbstractXMLStreamWriter<String> {
 	}
 
 	@Override
-	protected void writeText(String data, int type) throws XMLStreamException {
+	protected void writeData(String data, int type) throws XMLStreamException {
 		try {
 			switch(type) {
 			case XMLStreamConstants.CHARACTERS:
