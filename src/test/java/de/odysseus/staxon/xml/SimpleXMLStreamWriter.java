@@ -23,7 +23,6 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 
 import de.odysseus.staxon.AbstractXMLStreamWriter;
-import de.odysseus.staxon.XMLStreamWriterScope;
 
 /**
  * Simple XML Stream Writer.
@@ -75,8 +74,8 @@ public class SimpleXMLStreamWriter extends AbstractXMLStreamWriter<String> {
  	}
 
 	@Override
-	protected String writeStartElementTag(XMLStreamWriterScope<String> newScope) throws XMLStreamException {
-		String tagName = getTagName(newScope.getPrefix(), newScope.getLocalName());
+	protected String writeStartElementTag(String prefix, String localName, String namespaceURI) throws XMLStreamException {
+		String tagName = getTagName(prefix, localName);
 		try {
 			writer.write('<');
 			writer.write(tagName);
@@ -111,7 +110,7 @@ public class SimpleXMLStreamWriter extends AbstractXMLStreamWriter<String> {
 	}
 
 	@Override
-	protected void writeAttr(String prefix, String localName, String value) throws XMLStreamException {
+	protected void writeAttr(String prefix, String localName, String namespaceURI, String value) throws XMLStreamException {
 		try {
 			writer.write(' ');
 			if (!XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
@@ -122,6 +121,24 @@ public class SimpleXMLStreamWriter extends AbstractXMLStreamWriter<String> {
 			writer.write('=');
 			writer.write('"');
 			writeEscaped(value, true);
+			writer.write('"');
+		} catch (IOException e) {
+			throw new XMLStreamException(e);
+		}
+	}
+	
+	@Override
+	protected void writeNsDecl(String prefix, String namespaceURI) throws XMLStreamException {
+		try {
+			writer.write(' ');
+			writer.write(XMLConstants.XMLNS_ATTRIBUTE);
+			if (!XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+				writer.write(':');
+				writer.write(prefix);
+			}
+			writer.write('=');
+			writer.write('"');
+			writer.write(namespaceURI);
 			writer.write('"');
 		} catch (IOException e) {
 			throw new XMLStreamException(e);

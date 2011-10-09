@@ -49,7 +49,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		}
 	}
 
-	private void writeStartElement(String prefix, String localPart, boolean emptyElement) throws XMLStreamException {
+	private void writeStartElement(String prefix, String localPart, String namespaceURI, boolean emptyElement) throws XMLStreamException {
 		if (localPart == null) {
 			throw new XMLStreamException("Local name must not be null");
 		}
@@ -57,10 +57,9 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		if (startDocumentWritten && scope.isRoot() && scope.getLastChild() != null) {
 			throw new XMLStreamException("Multiple roots within document");
 		}
-		XMLStreamWriterScope<T> newScope = new XMLStreamWriterScope<T>(scope, prefix, localPart, emptyElement);
-		T scopeInfo = writeStartElementTag(newScope);
-		newScope.setInfo(scopeInfo);
-		scope = newScope;
+		T scopeInfo = writeStartElementTag(prefix, localPart, namespaceURI);
+		scope = new XMLStreamWriterScope<T>(scope, prefix, localPart, namespaceURI, emptyElement);
+		scope.setInfo(scopeInfo);
 	}
 
 	/**
@@ -74,11 +73,13 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 	 * Write open start element tag.
 	 * The returned scope info is stored in the new scope and will be available via
 	 * <code>getScope().getInfo()</code>.
-	 * @param newScope new scope
+	 * @param prefix element prefix (may be <code>XMLConstants.DEFAULT_NS_PREFIX</code>)
+	 * @param localName local name
+	 * @param namespaceURI namespace URI
 	 * @return new scope info
 	 * @throws XMLStreamException
 	 */
-	protected abstract T writeStartElementTag(XMLStreamWriterScope<T> newScope) throws XMLStreamException;
+	protected abstract T writeStartElementTag(String prefix, String localPart, String namespaceURI) throws XMLStreamException;
 	
 	/**
 	 * Write close start element tag.
@@ -93,14 +94,23 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 	protected abstract void writeEndElementTag() throws XMLStreamException;
 	
 	/**
-	 * Write attribute (or namespace declaration).
+	 * Write attribute.
 	 * @param prefix attribute prefix (may be <code>XMLConstants.DEFAULT_NS_PREFIX</code>)
 	 * @param localName local name
+	 * @param namespaceURI namespace URI
 	 * @param value attribute value
 	 * @throws XMLStreamException
 	 */
-	protected abstract void writeAttr(String prefix, String localName, String value) throws XMLStreamException;
-	
+	protected abstract void writeAttr(String prefix, String localName, String namespaceURI, String value) throws XMLStreamException;
+
+	/**
+	 * Write namespace declaration.
+	 * @param prefix namespace prefix
+	 * @param namespaceURI namespace URI
+	 * @throws XMLStreamException
+	 */
+	protected abstract void writeNsDecl(String prefix, String namespaceURI) throws XMLStreamException;
+
 	/**
 	 * Write characters/comment/dtd/entity data.
 	 * @param data text/data
@@ -119,10 +129,11 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 
 	@Override
 	public void writeStartElement(String localName) throws XMLStreamException {
-		if (scope.getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX) == null) {
+		String namespaceURI = scope.getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX);
+		if (namespaceURI == null) {
 			throw new XMLStreamException("Default namespace URI has not been set");
 		}
-		writeStartElement(XMLConstants.DEFAULT_NS_PREFIX, localName, false);
+		writeStartElement(XMLConstants.DEFAULT_NS_PREFIX, localName, namespaceURI, false);
 	}
 
 	@Override
@@ -134,7 +145,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		if (prefix == null) {
 			throw new XMLStreamException("Namespace URI has not been bound to a prefix: " + namespaceURI);
 		}
-		writeStartElement(prefix, localName, false);
+		writeStartElement(prefix, localName, namespaceURI, false);
 	}
 
 	@Override
@@ -145,10 +156,10 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		if (namespaceURI == null) {
 			throw new XMLStreamException("Namespace URI must not be null");
 		}
-		if (scope.getPrefix(namespaceURI) == null) {
+		writeStartElement(prefix, localName, namespaceURI, false);
+		if (!scope.getNamespaceURI(prefix).equals(namespaceURI)) {
 			scope.setPrefix(prefix, namespaceURI);
 		}
-		writeStartElement(prefix, localName, false);
 	}
 
 	@Override
@@ -163,10 +174,11 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 
 	@Override
 	public void writeEmptyElement(String localName) throws XMLStreamException {
-		if (scope.getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX) == null) {
+		String namespaceURI = scope.getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX);
+		if (namespaceURI == null) {
 			throw new XMLStreamException("Default namespace URI has not been set");
 		}
-		writeStartElement(XMLConstants.DEFAULT_NS_PREFIX, localName, true);
+		writeStartElement(XMLConstants.DEFAULT_NS_PREFIX, localName, namespaceURI, true);
 	}
 
 	@Override
@@ -178,7 +190,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		if (prefix == null) {
 			throw new XMLStreamException("Namespace URI has not been bound to a prefix: " + namespaceURI);
 		}
-		writeStartElement(prefix, localName, true);
+		writeStartElement(prefix, localName, namespaceURI, true);
 	}
 
 	@Override
@@ -189,10 +201,10 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		if (namespaceURI == null) {
 			throw new XMLStreamException("Namespace URI must not be null");
 		}
-		if (scope.getPrefix(namespaceURI) == null) {
+		writeStartElement(prefix, localName, namespaceURI, true);
+		if (!scope.getNamespaceURI(prefix).equals(namespaceURI)) {
 			scope.setPrefix(prefix, namespaceURI);
 		}
-		writeStartElement(prefix, localName, true);
 	}
 
 	@Override
@@ -239,7 +251,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 				throw new XMLStreamException("Cannot write attribute without prefix for namespace URI: " + namespaceURI);
 			}
 		}
-		writeAttr(prefix, localName, value);
+		writeAttr(prefix, localName, namespaceURI, value);
 	}
 
 	@Override
@@ -307,11 +319,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		if (scope.isStartTagClosed()) {
 			throw new XMLStreamException("Cannot write namespace: element has children or text");
 		}
-		if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-			writeAttr(prefix, XMLConstants.XMLNS_ATTRIBUTE, namespaceURI);
-		} else {
-			writeAttr(XMLConstants.XMLNS_ATTRIBUTE, prefix, namespaceURI);
-		}
+		writeNsDecl(prefix, namespaceURI);
 		setPrefix(prefix, namespaceURI);
 	}
 

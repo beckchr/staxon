@@ -38,8 +38,8 @@ public class XMLStreamReaderScope<T> extends AbstractXMLStreamScope {
 		this.info = info;
 	}
 
-	public XMLStreamReaderScope(XMLStreamReaderScope<T> parent, String prefix, String localName) {
-		super(parent, prefix, localName);
+	public XMLStreamReaderScope(XMLStreamReaderScope<T> parent, String prefix, String localName, String namespaceURI) {
+		super(parent, prefix, localName, namespaceURI);
 	}
 
 	public T getInfo() {
@@ -76,11 +76,11 @@ public class XMLStreamReaderScope<T> extends AbstractXMLStreamScope {
 		setPrefix(prefix, namespaceURI);
 	}
 
-	void addAttribute(QName name, String value) {
+	void addAttribute(String prefix, String localName, String namespaceURI, String value) {
 		if (attributes == null) {
 			attributes = new LinkedList<Pair<QName, String>>();
 		}
-		attributes.add(new Pair<QName, String>(name, value));
+		attributes.add(new Pair<QName, String>(new QName(namespaceURI, localName, prefix), value));
 	}
 
 	public int getAttributeCount() {

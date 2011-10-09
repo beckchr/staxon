@@ -23,6 +23,7 @@ import java.util.NoSuchElementException;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
+import javax.xml.stream.XMLStreamException;
 
 /**
  * Represent document/element scope. Used to store namespace declarations and
@@ -32,6 +33,7 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 	private final NamespaceContext parent;
 	private final String prefix;
 	private final String localName;
+	private final String namespaceURI;
 
 	private String defaultNamespace;
 	private List<Pair<String, String>> prefixes;
@@ -47,6 +49,7 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 		this.parent = null;
 		this.prefix = null;
 		this.localName = null;
+		this.namespaceURI = null;
 		this.defaultNamespace = defaultNamespace;
 		this.startTagClosed = true;
 	}
@@ -61,7 +64,8 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 		this.parent = parent;
 		this.prefix = null;
 		this.localName = null;
-		this.defaultNamespace = parent.getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX);
+		this.namespaceURI = null;
+		this.defaultNamespace = parent.getNamespaceURI(XMLConstants.NULL_NS_URI);
 		this.startTagClosed = true;
 	}
 
@@ -72,23 +76,28 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 	 * @param prefix
 	 * @param localName
 	 */
-	public AbstractXMLStreamScope(AbstractXMLStreamScope parent, String prefix, String localName) {
+	public AbstractXMLStreamScope(AbstractXMLStreamScope parent, String prefix, String localName, String namespaceURI) {
 		this.parent = parent;
 		this.prefix = prefix;
 		this.localName = localName;
+		this.namespaceURI = namespaceURI;
 		this.startTagClosed = false;
 		
-		defaultNamespace = parent.getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX);
+		defaultNamespace = parent.getNamespaceURI(XMLConstants.NULL_NS_URI);
 		parent.lastChild = this;
 		parent.startTagClosed = true;
 	}
 
 	public String getPrefix() {
-		return prefix;
+		return prefix == null ? getPrefix(namespaceURI) : prefix;
 	}
 	
 	public String getLocalName() {
 		return localName;
+	}
+	
+	public String getNamespaceURI() {
+		return namespaceURI == null ? getNamespaceURI(prefix) : namespaceURI;
 	}
 
 	public boolean isRoot() {
@@ -107,7 +116,26 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 		return startTagClosed;
 	}
 
-	void setStartTagClosed(boolean startTagClosed) {
+	void setStartTagClosed(boolean startTagClosed) throws XMLStreamException {
+		if (startTagClosed) {
+			if (prefix == null) {
+				if (!XMLConstants.NULL_NS_URI.equals(namespaceURI) && getPrefix(namespaceURI) == null) {
+					throw new XMLStreamException("No prefix for namespace URI: " + namespaceURI);
+				}
+			} else if (namespaceURI == null) {
+				if (!XMLConstants.DEFAULT_NS_PREFIX.equals(prefix) && XMLConstants.NULL_NS_URI.equals(getNamespaceURI(prefix))) {
+					throw new XMLStreamException("Unbound prefix: " + prefix);
+				}
+			} else {
+				if (!namespaceURI.equals(getNamespaceURI(prefix))) {
+					if (XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
+						throw new XMLStreamException("Prefix '" + prefix +"' is bound to: " + getNamespaceURI(prefix));
+					} else {
+						throw new XMLStreamException("Prefix '" + prefix +"' is not bound to: " + namespaceURI);
+					}
+				}
+			}
+		}
 		this.startTagClosed = startTagClosed;
 	}
 
@@ -137,9 +165,9 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 		if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
 			defaultNamespace = namespaceURI;
 		} else if (XMLConstants.XML_NS_PREFIX.equals(namespaceURI)) {
-			throw new IllegalArgumentException("Cannot redifine prefix: " + prefix);
+			throw new IllegalArgumentException("Cannot bind to prefix: " + prefix);
 		} else if (XMLConstants.XMLNS_ATTRIBUTE.equals(namespaceURI)) {
-			throw new IllegalArgumentException("Cannot redifine prefix: " + prefix);
+			throw new IllegalArgumentException("Cannot bind to prefix: " + prefix);
 		} else {
 			if (prefixes == null) {
 				prefixes = new LinkedList<Pair<String, String>>();

@@ -47,6 +47,23 @@ public class SimpleXMLStreamReader extends AbstractXMLStreamReader<String> {
 		initialize();
 	}
 
+	private void readAttrNsDecl(String name, String value) throws XMLStreamException {
+		int separator = name.indexOf(':');
+		if (separator < 0) {
+			if (XMLConstants.XMLNS_ATTRIBUTE.equals(name)) {
+				readNsDecl(XMLConstants.DEFAULT_NS_PREFIX, value);
+			} else {
+				readAttr(XMLConstants.DEFAULT_NS_PREFIX, name, null, value);
+			}
+		} else {
+			if (name.startsWith(XMLConstants.XMLNS_ATTRIBUTE) && separator == XMLConstants.XMLNS_ATTRIBUTE.length()) {
+				readNsDecl(name.substring(separator+1), value);
+			} else {
+				readAttr(name.substring(0, separator), name.substring(separator+1), null, value);
+			}
+		}
+	}
+
 	@Override
 	protected boolean consume() throws XMLStreamException, IOException {
 		XMLStreamReaderScope<String> scope = getScope();
@@ -127,13 +144,13 @@ public class SimpleXMLStreamReader extends AbstractXMLStreamReader<String> {
 				String tagName = readName(' ');
 				int colon = tagName.indexOf(':');
 				if (colon < 0) {
-					readStartElementTag(XMLConstants.DEFAULT_NS_PREFIX, tagName, tagName);
+					readStartElementTag(XMLConstants.DEFAULT_NS_PREFIX, tagName, null, tagName);
 				} else {
-					readStartElementTag(tagName.substring(0, colon), tagName.substring(colon+1), tagName);
+					readStartElementTag(tagName.substring(0, colon), tagName.substring(colon+1), null, tagName);
 				}
 				scope = getScope();
 				while (ch != '>' && ch != '/') {
-					String attrName = readName('=');
+					String name = readName('=');
 					nextChar();
 					skipWhitespace();
 					int quote = ch;
@@ -141,12 +158,7 @@ public class SimpleXMLStreamReader extends AbstractXMLStreamReader<String> {
 					String value = readText(quote);
 					nextChar();
 					skipWhitespace();
-					colon = attrName.indexOf(':');
-					if (colon < 0) {
-						readAttr(XMLConstants.DEFAULT_NS_PREFIX, attrName, value);
-					} else {
-						readAttr(attrName.substring(0, colon), attrName.substring(colon+1), value);
-					}
+					readAttrNsDecl(name, value);
 				}
 				if (ch == '/') {
 					nextChar(); // please, let it be '>'

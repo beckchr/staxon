@@ -196,4 +196,16 @@ public class AbstractXMLStreamReaderTest {
 		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
 		reader.close();
 	}
+
+	/**
+	 * <code>&lt;alice&gt;&lt;/alice&gt;</code>
+	 */
+	@Test(expected = XMLStreamException.class)
+	public void testUnboundPrefix() throws XMLStreamException {
+		String input = "<?xml version=\"1.0\"?><foo:alice></foo:alice>";
+		XMLStreamReader reader = new SimpleXMLStreamReader(new StringReader(input));
+		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
+	}
 }

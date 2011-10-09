@@ -64,18 +64,26 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 	private void readStartElementTag(String name) throws XMLStreamException {
 		int separator = name.indexOf(prefixSeparator);
 		if (separator < 0) {
-			readStartElementTag(XMLConstants.DEFAULT_NS_PREFIX, name, new ScopeInfo());
+			readStartElementTag(XMLConstants.DEFAULT_NS_PREFIX, name, null, new ScopeInfo());
 		} else {
-			readStartElementTag(name.substring(0, separator), name.substring(separator+1), new ScopeInfo());
+			readStartElementTag(name.substring(0, separator), name.substring(separator+1), null, new ScopeInfo());
 		}
 	}
 	
-	private void readAttr(String name, String value) throws XMLStreamException {
+	private void readAttrNsDecl(String name, String value) throws XMLStreamException {
 		int separator = name.indexOf(prefixSeparator);
 		if (separator < 0) {
-			readAttr(XMLConstants.DEFAULT_NS_PREFIX, name, value);
+			if (XMLConstants.XMLNS_ATTRIBUTE.equals(name)) {
+				readNsDecl(XMLConstants.DEFAULT_NS_PREFIX, value);
+			} else {
+				readAttr(XMLConstants.DEFAULT_NS_PREFIX, name, null, value);
+			}
 		} else {
-			readAttr(name.substring(0, separator), name.substring(separator+1), value);
+			if (name.startsWith(XMLConstants.XMLNS_ATTRIBUTE) && separator == XMLConstants.XMLNS_ATTRIBUTE.length()) {
+				readNsDecl(name.substring(separator+1), value);
+			} else {
+				readAttr(name.substring(0, separator), name.substring(separator+1), null, value);
+			}
 		}
 	}
 
@@ -84,15 +92,15 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 		if (fieldName.startsWith("@")) {
 			fieldName = fieldName.substring(1);
 			if (source.peek() == JsonStreamToken.VALUE) {
-				readAttr(fieldName, source.value());
+				readAttrNsDecl(fieldName, source.value());
 			} else if (XMLConstants.XMLNS_ATTRIBUTE.equals(fieldName)) { // badgerfish
 				source.startObject();
 				while (source.peek() == JsonStreamToken.NAME) {
 					String prefix = source.name();
 					if ("$".equals(prefix)) {
-						readAttr(XMLConstants.DEFAULT_NS_PREFIX, XMLConstants.XMLNS_ATTRIBUTE, source.value());
+						readNsDecl(XMLConstants.DEFAULT_NS_PREFIX, source.value());
 					} else {
-						readAttr(XMLConstants.XMLNS_ATTRIBUTE, prefix, source.value());
+						readNsDecl(prefix, source.value());
 					}
 				}
 				source.endObject();

@@ -34,8 +34,8 @@ public class XMLStreamWriterScope<T> extends AbstractXMLStreamScope {
 		this.emptyElement = false;
 	}
 
-	public XMLStreamWriterScope(XMLStreamWriterScope<T> parent, String prefix, String localName, boolean emptyElement) {
-		super(parent, prefix, localName);
+	public XMLStreamWriterScope(XMLStreamWriterScope<T> parent, String prefix, String localName, String namespaceURI, boolean emptyElement) {
+		super(parent, prefix, localName, namespaceURI);
 		this.emptyElement = emptyElement;
 	}
 

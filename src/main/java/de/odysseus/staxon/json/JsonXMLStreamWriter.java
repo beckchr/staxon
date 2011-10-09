@@ -22,7 +22,6 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 
 import de.odysseus.staxon.AbstractXMLStreamWriter;
-import de.odysseus.staxon.XMLStreamWriterScope;
 import de.odysseus.staxon.json.stream.JsonStreamTarget;
 
 /**
@@ -120,7 +119,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	}
 	
 	@Override
-	protected ScopeInfo writeStartElementTag(XMLStreamWriterScope<ScopeInfo> newScope) throws XMLStreamException {
+	protected ScopeInfo writeStartElementTag(String prefix, String localName, String namespaceURI) throws XMLStreamException {
 		ScopeInfo parentInfo = getScope().getInfo();
 		if (parentInfo.hasText()) {
 			if (!skipSpace || !isWhitespace(parentInfo.getText())) {
@@ -128,7 +127,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 			}
 			parentInfo.setText(null);
 		}
-		String fieldName = getFieldName(newScope.getPrefix(), newScope.getLocalName());
+		String fieldName = getFieldName(prefix, localName);
 		if (parentInfo.pendingStartArray) {
 			writeStartArray(fieldName);
 		}
@@ -182,7 +181,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	}
 
 	@Override
-	protected void writeAttr(String prefix, String localName, String value) throws XMLStreamException {
+	protected void writeAttr(String prefix, String localName, String namespaceURI, String value) throws XMLStreamException {
 		String name = XMLConstants.DEFAULT_NS_PREFIX.equals(prefix) ? localName : prefix + prefixSeparator + localName;
 		try {
 			if (!getScope().getInfo().startObjectWritten) {
@@ -193,6 +192,24 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 			target.value(value);
 		} catch (IOException e) {
 			throw new XMLStreamException("Cannot write attribute: " + name, e);
+		}
+	}
+	
+	@Override
+	protected void writeNsDecl(String prefix, String namespaceURI) throws XMLStreamException {
+		try {
+			if (!getScope().getInfo().startObjectWritten) {
+				target.startObject();
+				getScope().getInfo().startObjectWritten = true;
+			}
+			if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+				target.name('@' + XMLConstants.XMLNS_ATTRIBUTE);
+			} else {
+				target.name('@' + XMLConstants.XMLNS_ATTRIBUTE + prefixSeparator + prefix);
+			}
+			target.value(namespaceURI);
+		} catch (IOException e) {
+			throw new XMLStreamException("Cannot write namespace declaration: " + namespaceURI, e);
 		}
 	}
 	

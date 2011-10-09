@@ -17,6 +17,7 @@ package de.odysseus.staxon;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -64,15 +65,17 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 			.toString();
 		}
 	}
-	
-	static class PendingAttribute {
+
+	static class Attr {
 		final String prefix;
 		final String localName;
+		final String namespaceURI;
 		final String value;
 
-		PendingAttribute(String prefix, String localName, String value) {
+		Attr(String prefix, String localName, String namespaceURI, String value) {
 			this.prefix = prefix;
 			this.localName = localName;
+			this.namespaceURI = namespaceURI;
 			this.value = value;
 		}
 	}
@@ -135,7 +138,8 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	private XMLStreamReaderScope<T> scope;
 	private boolean moreTokens;
 	private Event event;
-	private List<PendingAttribute> pendingAttributes = new ArrayList<PendingAttribute>();
+	
+	private List<Attr> attributes = new ArrayList<Attr>();
 	
 	private String encodingScheme;
 	private String version;
@@ -149,17 +153,67 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		scope = new XMLStreamReaderScope<T>(XMLConstants.NULL_NS_URI, rootInfo);
 	}
 	
+	private String calculateAttributePrefix(String namespaceURI) throws XMLStreamException {
+		if (XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
+			return XMLConstants.DEFAULT_NS_PREFIX;
+		} else {
+			String prefix = scope.getPrefix(namespaceURI);
+			if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+				Iterator<String> prefixes = scope.getPrefixes(namespaceURI);
+				while (prefixes.hasNext()) {
+					prefix = prefixes.next();
+					if (!XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+						break;
+					}
+				}
+			}
+			if (prefix == null || XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+				throw new XMLStreamException("No prefix found for attribute namespace: " + namespaceURI);
+			}
+			return prefix;
+		}
+	}
+	
+	private String calculateAttributeNamespaceURI(String prefix) throws XMLStreamException {
+		if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+			return XMLConstants.NULL_NS_URI;
+		} else {
+			String namespaceURI = scope.getNamespaceURI(prefix);
+			if (namespaceURI == null || XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
+				throw new XMLStreamException("Unbound attribute prefix: " + prefix);
+			}
+			return namespaceURI;
+		}
+	}
+	
 	private void ensureStartTagClosed() throws XMLStreamException {
 		if (!scope.isStartTagClosed()) {
-			if (!pendingAttributes.isEmpty()) {
-				for (PendingAttribute attribute : pendingAttributes) {
-					String namespaceURI = scope.getNamespaceURI(attribute.prefix);
-					if (namespaceURI == null || XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
-						throw new XMLStreamException("Unbound attribute prefix: " + attribute.prefix);
+			if (!attributes.isEmpty()) {
+				for (Attr attr : attributes) {
+					if (attr.namespaceURI == null) {
+						String namespaceURI = calculateAttributeNamespaceURI(attr.prefix);
+						scope.addAttribute(attr.prefix, attr.localName, namespaceURI, attr.value);
+					} else if (attr.prefix == null) {
+						String prefix = calculateAttributePrefix(attr.namespaceURI);
+						scope.addAttribute(prefix, attr.localName, attr.namespaceURI, attr.value);
+					} else {
+						if (XMLConstants.DEFAULT_NS_PREFIX.equals(attr.prefix)) {
+							if (!XMLConstants.NULL_NS_URI.equals(attr.namespaceURI)) {
+								throw new XMLStreamException("Illegal namespace for unprefixed attribute: " + attr.namespaceURI);								
+							}
+						} else if (XMLConstants.NULL_NS_URI.equals(attr.namespaceURI)) {
+							if (!XMLConstants.DEFAULT_NS_PREFIX.equals(attr.prefix)) {
+								throw new XMLStreamException("Prefix required for attribute namespace: " + attr.namespaceURI);
+							}
+						} else {
+							if (!scope.getNamespaceURI(attr.prefix).equals(attr.namespaceURI)) {
+								throw new XMLStreamException("Prefix '" + attr.prefix +"' is not bound to: " + attr.namespaceURI);
+							}
+						}
+						scope.addAttribute(attr.prefix, attr.localName, attr.namespaceURI, attr.value);
 					}
-					scope.addAttribute(new QName(namespaceURI, attribute.localName, attribute.prefix), attribute.value);
 				}
-				pendingAttributes.clear();
+				attributes.clear();
 			}
 			scope.setStartTagClosed(true);
 		}
@@ -220,45 +274,54 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	 * Read start element.
 	 * A new scope is created and made the current scope. The provided <code>scopeInfo</code> is
 	 * stored in the new scope and will be available via <code>getScope().getInfo()</code>.
-	 * @param prefix element prefix (may be <code>XMLConstants.DEFAULT_NS_PREFIX</code>)
+	 * @param prefix element prefix (use <code>null</code> if unknown)
 	 * @param localName local name
+	 * @param namespaceURI (use <code>null</code> if unknown)
 	 * @param scopeInfo new scope info 
 	 * @throws XMLStreamException
 	 */
-	protected void readStartElementTag(String prefix, String localName, T scopeInfo) throws XMLStreamException {
+	protected void readStartElementTag(String prefix, String localName, String namespaceURI, T scopeInfo) throws XMLStreamException {
+		if (prefix == null && namespaceURI == null) {
+			throw new IllegalArgumentException("at least one of prefix and namespaceURI must not be null!");
+		}
 		ensureStartTagClosed();
-		scope = new XMLStreamReaderScope<T>(scope, prefix, localName);
+		scope = new XMLStreamReaderScope<T>(scope, prefix, localName, namespaceURI);
 		scope.setInfo(scopeInfo);
 		queue.add(new Event(XMLStreamConstants.START_ELEMENT, scope, null));
 	}
 	
 	/**
-	 * Read attribute (or namespace declaration).
-	 * @param prefix attribute prefix (may be <code>XMLConstants.DEFAULT_NS_PREFIX</code>)
+	 * Read attribute.
+	 * @param prefix attribute prefix (use <code>null</code> if unknown)
 	 * @param localName local name
+	 * @param namespaceURI (use <code>null</code> if unknown)
 	 * @param value attribute value
 	 * @throws XMLStreamException
 	 */
-	protected void readAttr(String prefix, String localName, String value) throws XMLStreamException {
-		if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-			if (XMLConstants.XMLNS_ATTRIBUTE.equals(localName)) {
-				scope.addNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX, value);
-			} else {
-				scope.addAttribute(new QName(localName), value);
-			}
-		} else {
-			if (XMLConstants.XMLNS_ATTRIBUTE.equals(prefix)) {
-				scope.addNamespaceURI(localName, value);
-			} else {
-				String namespaceURI = scope.getNamespaceURI(prefix);
-				 // delay attribute addition if URI is not yet known
-				if (namespaceURI == null || XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
-					pendingAttributes.add(new PendingAttribute(prefix, localName, value));
-				} else {
-					scope.addAttribute(new QName(namespaceURI, localName, prefix), value);
-				}
-			}
+	protected void readAttr(String prefix, String localName, String namespaceURI, String value) throws XMLStreamException {
+		if (scope.isStartTagClosed()) {
+			throw new XMLStreamException("Cannot read attribute: element has children or text");
 		}
+		if (prefix == null && namespaceURI == null) {
+			throw new IllegalArgumentException("at least one of prefix and namespaceURI must not be null!");
+		}
+		attributes.add(new Attr(prefix, localName, namespaceURI, value));
+	}
+
+	/**
+	 * Read namespace declaration.
+	 * @param prefix namespace prefix (must not be <code>null</code>)
+	 * @param namespaceURI namespace URI (must not be <code>null</code>)
+	 * @throws XMLStreamException
+	 */
+	protected void readNsDecl(String prefix, String namespaceURI) throws XMLStreamException {
+		if (scope.isStartTagClosed()) {
+			throw new XMLStreamException("Cannot read namespace: element has children or text");
+		}
+		if (prefix == null || namespaceURI == null) {
+			throw new IllegalArgumentException("at least one of prefix and namespaceURI must not be null!");
+		}
+		scope.addNamespaceURI(prefix, namespaceURI);
 	}
 
 	/**
@@ -555,7 +618,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 
 	@Override
 	public String getNamespaceURI() {
-		return hasName() ? event.getScope().getNamespaceURI(event.getScope().getPrefix()) : null;
+		return hasName() ? event.getScope().getNamespaceURI() : null;
 	}
 
 	@Override
