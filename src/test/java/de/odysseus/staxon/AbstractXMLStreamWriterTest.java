@@ -97,28 +97,41 @@ public class AbstractXMLStreamWriterTest {
 		Assert.assertEquals("<foo p:bar=\"foobar\"", writer.toString());
 	}
 
-	@Test
+	@Test(expected = XMLStreamException.class)
 	public void testWriteAttribute2b() throws XMLStreamException {
 		XMLStreamWriter writer = createXMLStreamWriter();
 		writer.writeStartElement("foo");
 		writer.writeAttribute("p", "http://p", "bar", "foobar");
-		writer.flush();
-//		Assert.assertEquals("<foo xmlns:p=\"http://p\" p:bar=\"foobar\"", writer.toString()); // according to XMLStreamWriter javadoc
-		Assert.assertEquals("<foo p:bar=\"foobar\"", writer.toString()); // according to implementations
-		Assert.assertEquals("p", writer.getPrefix("http://p"));
+		writer.writeEndElement();
 	}
 
 	@Test
 	public void testWriteAttribute2c() throws XMLStreamException {
 		XMLStreamWriter writer = createXMLStreamWriter();
+		writer.writeStartElement("foo");
+		writer.writeAttribute("p", "http://p", "bar", "foobar");
+		writer.writeNamespace("p", "http://p");
+		writer.writeEndElement();
+		writer.flush();
+		Assert.assertEquals("<foo p:bar=\"foobar\" xmlns:p=\"http://p\"></foo>", writer.toString());
+	}
+
+	@Test(expected = XMLStreamException.class)
+	public void testWriteAttribute2d() throws XMLStreamException {
+		XMLStreamWriter writer = createXMLStreamWriter();
 		writer.setPrefix("p", "http://p");
 		writer.writeStartElement("foo");
 		writer.writeAttribute("pp", "http://p", "bar", "foobar");
-//		Assert.fail("expected exception: bound to another prefix"); // according to XMLStreamWriter javadoc
-		writer.flush();
-		Assert.assertEquals("<foo pp:bar=\"foobar\"", writer.toString()); // according to implementations
-		Assert.assertEquals("http://p", writer.getNamespaceContext().getNamespaceURI("p"));
-		Assert.assertEquals("http://p", writer.getNamespaceContext().getNamespaceURI("pp"));
+		writer.writeEndElement();
+	}
+
+	@Test(expected = XMLStreamException.class)
+	public void testWriteAttribute2e() throws XMLStreamException {
+		XMLStreamWriter writer = createXMLStreamWriter();
+		writer.setPrefix("p", "http://p");
+		writer.writeStartElement("foo");
+		writer.writeAttribute("p", "http://pp", "bar", "foobar");
+		writer.writeEndElement();
 	}
 
 	@Test
@@ -156,30 +169,37 @@ public class AbstractXMLStreamWriterTest {
 		Assert.assertEquals("<p:foo></p:foo>", writer.toString());
 	}
 
-	@Test
+	@Test(expected = XMLStreamException.class)
 	public void testWriteElement2b() throws XMLStreamException {
 		XMLStreamWriter writer = createXMLStreamWriter();
 		writer.setPrefix("p", "http://p");
 		writer.writeStartElement("pp", "foo", "http://p");
-//		Assert.fail("expected exception: bound to another prefix"); // according to XMLStreamWriter javadoc
 		writer.writeEndElement();
 		writer.flush();
-		Assert.assertEquals("<pp:foo></pp:foo>", writer.toString()); // according to implementations
 	}
 
-	@Test
+	@Test(expected = XMLStreamException.class)
 	public void testWriteElement2c() throws XMLStreamException {
 		XMLStreamWriter writer = createXMLStreamWriter();
 		writer.writeStartElement("p", "foo", "http://p");
 		writer.writeEndElement();
+	}
+	
+	@Test(expected = XMLStreamException.class)
+	public void testWriteElement2d() throws XMLStreamException {
+		XMLStreamWriter writer = createXMLStreamWriter();
+		writer.setPrefix("p", "http://p");
+		writer.writeStartElement("p", "foo", "http://pp");
+		writer.writeEndElement();
 		writer.flush();
-		Assert.assertEquals("<p:foo></p:foo>", writer.toString());
 	}
 
+
 	@Test
-	public void testWriteElementAddsPrefixBinding() throws XMLStreamException {
+	public void testWriteNamespaceAddsPrefixBinding() throws XMLStreamException {
 		XMLStreamWriter writer = createXMLStreamWriter();
 		writer.writeStartElement("p", "foo", "http://p");
+		writer.writeNamespace("p", "http://p");
 		Assert.assertEquals("p", writer.getPrefix("http://p"));
 		Assert.assertEquals("http://p", writer.getNamespaceContext().getNamespaceURI("p"));
 		Assert.assertEquals("p", writer.getNamespaceContext().getPrefix("http://p"));

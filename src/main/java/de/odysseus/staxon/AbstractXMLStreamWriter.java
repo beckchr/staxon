@@ -15,8 +15,6 @@
  */
 package de.odysseus.staxon;
 
-import java.util.Iterator;
-
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamConstants;
@@ -157,9 +155,6 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 			throw new XMLStreamException("Namespace URI must not be null");
 		}
 		writeStartElement(prefix, localName, namespaceURI, false);
-		if (!scope.getNamespaceURI(prefix).equals(namespaceURI)) {
-			scope.setPrefix(prefix, namespaceURI);
-		}
 	}
 
 	@Override
@@ -202,9 +197,6 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 			throw new XMLStreamException("Namespace URI must not be null");
 		}
 		writeStartElement(prefix, localName, namespaceURI, true);
-		if (!scope.getNamespaceURI(prefix).equals(namespaceURI)) {
-			scope.setPrefix(prefix, namespaceURI);
-		}
 	}
 
 	@Override
@@ -222,35 +214,25 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		if (scope.isStartTagClosed()) {
 			throw new XMLStreamException("Cannot write attribute: element has children or text");
 		}
-		if (XMLConstants.NULL_NS_URI.equals(namespaceURI)) { // no namespace -> no prefix
+		if (namespaceURI == null) {
+			throw new XMLStreamException("Namespace URI must not be null");
+		} else if (XMLConstants.NULL_NS_URI.equals(namespaceURI)) { // no namespace -> no prefix
 			if (prefix == null) {
 				prefix = XMLConstants.DEFAULT_NS_PREFIX;
 			} else if (!XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-				throw new XMLStreamException("Cannot write attribute without a namespace URI and prefix: " + prefix);
+				throw new XMLStreamException("Cannot write prefixed attribute without a namespace URI: " + prefix);
 			}
 		} else { // namespace -> prefixed attribute
 			if (prefix == null) { // lookup prefix
-				prefix = scope.getPrefix(namespaceURI);
-				if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) { // need a non-empty prefix
-					Iterator<String> prefixes = scope.getPrefixes(namespaceURI);
-					while (prefixes.hasNext() && XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-						prefix = prefixes.next();
-					}
-				} else if (prefix == null) {
+				prefix = scope.getNonEmptyPrefix(namespaceURI);
+				if (prefix == null) {
 					throw new XMLStreamException("Namespace URI has not been bound to a prefix: " + namespaceURI);
 				}
-			} else if (!XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-				String boundNamespaceURI = scope.getNamespaceURI(prefix);
-				if (XMLConstants.NULL_NS_URI.equals(boundNamespaceURI)) {
-					getScope().setPrefix(prefix, namespaceURI);
-				} else if (!namespaceURI.equals(boundNamespaceURI)) {
-					throw new XMLStreamException("Another namespace URI has been bound to the given prefix: " + prefix);
-				}
-			}
-			if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+			} else if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
 				throw new XMLStreamException("Cannot write attribute without prefix for namespace URI: " + namespaceURI);
 			}
 		}
+		scope.addAttribute(prefix, localName, namespaceURI, value);
 		writeAttr(prefix, localName, namespaceURI, value);
 	}
 
@@ -320,7 +302,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 			throw new XMLStreamException("Cannot write namespace: element has children or text");
 		}
 		writeNsDecl(prefix, namespaceURI);
-		setPrefix(prefix, namespaceURI);
+		scope.setPrefix(prefix, namespaceURI);
 	}
 
 	@Override

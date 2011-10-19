@@ -196,7 +196,7 @@ public class SimpleXMLStreamWriterTest {
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeEmptyElement("bar", "bob", "http://bar");
-		writer.writeNamespace(writer.getPrefix("http://bar"), "http://bar");
+		writer.writeNamespace("bar", "http://bar");
 		writer.writeAttribute("jane", "dolly");
 		writer.writeCharacters("hello");
 		writer.writeEndElement();

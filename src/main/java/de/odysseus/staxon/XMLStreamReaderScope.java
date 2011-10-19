@@ -18,14 +18,11 @@ package de.odysseus.staxon;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 
-
 public class XMLStreamReaderScope<T> extends AbstractXMLStreamScope {
 	private List<Pair<String, String>> declarations;
-	private List<Pair<QName, String>> attributes;
 	private T info;
 
 	public XMLStreamReaderScope(String defaultNamespace, T info) {
@@ -73,37 +70,27 @@ public class XMLStreamReaderScope<T> extends AbstractXMLStreamScope {
 			declarations = new LinkedList<Pair<String, String>>();
 		}
 		declarations.add(new Pair<String, String>(prefix, namespaceURI));
-		setPrefix(prefix, namespaceURI);
-	}
-
-	void addAttribute(String prefix, String localName, String namespaceURI, String value) {
-		if (attributes == null) {
-			attributes = new LinkedList<Pair<QName, String>>();
-		}
-		attributes.add(new Pair<QName, String>(new QName(namespaceURI, localName, prefix), value));
 	}
 
 	public int getAttributeCount() {
-		return attributes == null ? 0 : attributes.size();
+		return getAttributes() == null ? 0 : getAttributes().size();
 	}
 
 	public QName getAttributeName(int index) {
-		return attributes.get(index).getFirst();
+		Attr attribute = getAttributes().get(index);
+		return new QName(attribute.getNamespaceURI(), attribute.getLocalName(), attribute.getPrefix());
 	}
 
 	public String getAttributeValue(int index) {
-		return attributes.get(index).getSecond();
+		return getAttributes().get(index).getValue();
 	}
 
 	public String getAttributeValue(String namespaceURI, String localName) {
-		if (attributes != null) {
-			if (namespaceURI == null) {
-				namespaceURI = XMLConstants.NULL_NS_URI;
-			}
-			for (Pair<QName, String> attribute : attributes) {
-				if (localName.equals(attribute.getFirst().getLocalPart())) {
-					if (namespaceURI.equals(attribute.getFirst().getNamespaceURI())) {
-						return attribute.getSecond();
+		if (getAttributes() != null) {
+			for (Attr attribute : getAttributes()) {
+				if (localName.equals(attribute.getLocalName())) {
+					if (namespaceURI == null || namespaceURI.equals(attribute.getNamespaceURI())) {
+						return attribute.getValue();
 					}
 				}
 			}

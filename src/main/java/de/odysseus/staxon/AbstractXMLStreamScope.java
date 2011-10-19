@@ -30,12 +30,87 @@ import javax.xml.stream.XMLStreamException;
  * attributes, implements {@link NamespaceContext}.
  */
 public abstract class AbstractXMLStreamScope implements NamespaceContext {
+	class Attr {
+		private final String prefix;
+		private final String localName;
+		private final String namespaceURI;
+		private final String value;
+
+		Attr(String prefix, String localName, String namespaceURI, String value) {
+			this.prefix = prefix;
+			this.localName = localName;
+			this.namespaceURI = namespaceURI;
+			this.value = value;
+		}
+
+		String getPrefix() {
+			if (prefix != null) {
+				return prefix;
+			} else if (XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
+				return XMLConstants.DEFAULT_NS_PREFIX;
+			} else {
+				return AbstractXMLStreamScope.this.getNonEmptyPrefix(namespaceURI);
+			}
+		}
+		
+		String getLocalName() {
+			return localName;
+		}
+		
+		String getNamespaceURI() {
+			if (namespaceURI != null) {
+				return namespaceURI;
+			} else if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+				return XMLConstants.NULL_NS_URI;
+			} else {
+				return AbstractXMLStreamScope.this.getNamespaceURI(prefix);
+			}
+		}
+
+		String getValue() {
+			return value;
+		}
+		
+		void verify() throws XMLStreamException {
+			if (prefix == null) {
+				if (!XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
+					String prefix = AbstractXMLStreamScope.this.getNonEmptyPrefix(namespaceURI);
+					if (prefix == null) {
+						throw new XMLStreamException("No prefix found for attribute namespace: " + namespaceURI);
+					}
+				}
+			} else if (namespaceURI == null) {
+				if (!XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+					String namespaceURI = AbstractXMLStreamScope.this.getNamespaceURI(prefix);
+					if (namespaceURI == null || XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
+						throw new XMLStreamException("Unbound attribute prefix: " + prefix);
+					}
+				}
+			} else {
+				if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+					if (!XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
+						throw new XMLStreamException("Illegal namespace for unprefixed attribute: " + namespaceURI);								
+					}
+				} else if (XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
+					if (!XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+						throw new XMLStreamException("Illegal prefix for null namespace: " + prefix);
+					}
+				} else {
+					if (!AbstractXMLStreamScope.this.getNamespaceURI(prefix).equals(namespaceURI)) {
+						throw new XMLStreamException("Prefix '" + prefix +"' is not bound to: " + namespaceURI);
+					}
+				}
+			}
+		}
+	}
+
 	private final NamespaceContext parent;
 	private final String prefix;
 	private final String localName;
 	private final String namespaceURI;
 
 	private String defaultNamespace;
+	private List<Attr> attributes;
 	private List<Pair<String, String>> prefixes;
 	private AbstractXMLStreamScope lastChild;
 	private boolean startTagClosed;
@@ -81,13 +156,24 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 		this.prefix = prefix;
 		this.localName = localName;
 		this.namespaceURI = namespaceURI;
-		this.startTagClosed = false;
-		
-		defaultNamespace = parent.getNamespaceURI(XMLConstants.NULL_NS_URI);
+		this.startTagClosed = false;		
+		this.defaultNamespace = parent.getNamespaceURI(XMLConstants.NULL_NS_URI);
+
 		parent.lastChild = this;
 		parent.startTagClosed = true;
 	}
 
+	void addAttribute(String prefix, String localName, String namespaceURI, String value) {
+		if (attributes == null) {
+			attributes = new LinkedList<Attr>();
+		}
+		attributes.add(new Attr(prefix, localName, namespaceURI, value));
+	}
+	
+	List<Attr> getAttributes() {
+		return attributes;
+	}
+	
 	public String getPrefix() {
 		return prefix == null ? getPrefix(namespaceURI) : prefix;
 	}
@@ -115,53 +201,92 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 	public boolean isStartTagClosed() {
 		return startTagClosed;
 	}
+	
+	private void verify() throws XMLStreamException {
+		if (prefix == null) {
+			if (!XMLConstants.NULL_NS_URI.equals(namespaceURI) && getPrefix(namespaceURI) == null) {
+				throw new XMLStreamException("No prefix for namespace URI: " + namespaceURI);
+			}
+		} else if (namespaceURI == null) {
+			if (!XMLConstants.DEFAULT_NS_PREFIX.equals(prefix) && XMLConstants.NULL_NS_URI.equals(getNamespaceURI(prefix))) {
+				throw new XMLStreamException("Unbound prefix: " + prefix);
+			}
+		} else {
+			if (!namespaceURI.equals(getNamespaceURI(prefix))) {
+				if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+					throw new XMLStreamException("Prefix required for namespace: '" + namespaceURI);
+				} else if (XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
+					throw new XMLStreamException("Prefix '" + prefix +"' is bound to: " + getNamespaceURI(prefix));
+				} else {
+					throw new XMLStreamException("Prefix '" + prefix +"' is not bound to: " + namespaceURI);
+				}
+			}
+		}
+		if (attributes != null) {
+			for (Attr attribute : attributes) {
+				attribute.verify();
+			}
+		}
+	}
 
 	void setStartTagClosed(boolean startTagClosed) throws XMLStreamException {
 		if (startTagClosed) {
-			if (prefix == null) {
-				if (!XMLConstants.NULL_NS_URI.equals(namespaceURI) && getPrefix(namespaceURI) == null) {
-					throw new XMLStreamException("No prefix for namespace URI: " + namespaceURI);
-				}
-			} else if (namespaceURI == null) {
-				if (!XMLConstants.DEFAULT_NS_PREFIX.equals(prefix) && XMLConstants.NULL_NS_URI.equals(getNamespaceURI(prefix))) {
-					throw new XMLStreamException("Unbound prefix: " + prefix);
-				}
-			} else {
-				if (!namespaceURI.equals(getNamespaceURI(prefix))) {
-					if (XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
-						throw new XMLStreamException("Prefix '" + prefix +"' is bound to: " + getNamespaceURI(prefix));
-					} else {
-						throw new XMLStreamException("Prefix '" + prefix +"' is not bound to: " + namespaceURI);
-					}
-				}
-			}
+			verify();
 		}
 		this.startTagClosed = startTagClosed;
 	}
 
-	@Override
-	public String getPrefix(String namespaceURI) {
+	private String findNonEmptyPrefix(String namespaceURI) {
+		if (prefixes != null) {
+			for (Pair<String, String> pair : prefixes) {
+				if (pair.getSecond().equals(namespaceURI)) {
+					return pair.getFirst();
+				}
+			}
+		}
+		if (isRoot()) {
+			if (parent == null) {
+				return null;
+			} else {
+				Iterator<?> prefixes = parent.getPrefixes(namespaceURI);
+				while (prefixes.hasNext()) {
+					String prefix = prefixes.next().toString();
+					if (!XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+						return prefix;
+					}
+				}
+				return null;
+			}
+		} else {
+			return getParent().findNonEmptyPrefix(namespaceURI);
+		}
+	}
+	
+	String getNonEmptyPrefix(String namespaceURI) {
 		if (namespaceURI == null) {
 			throw new IllegalArgumentException("Namespace URI must not be null");
-		} else if (namespaceURI.equals(defaultNamespace)) {
-			return XMLConstants.DEFAULT_NS_PREFIX;
 		} else if (XMLConstants.XML_NS_URI.equals(namespaceURI)) {
 			return XMLConstants.XML_NS_PREFIX;
 		} else if (XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(namespaceURI)) {
 			return XMLConstants.XMLNS_ATTRIBUTE;
 		} else {
-			if (prefixes != null) {
-				for (Pair<String, String> pair : prefixes) {
-					if (pair.getSecond().equals(namespaceURI)) {
-						return pair.getFirst();
-					}
-				}
-			}
-			return parent == null ? null : parent.getPrefix(namespaceURI);
+			return findNonEmptyPrefix(namespaceURI);
+		}
+	}
+
+	@Override
+	public String getPrefix(String namespaceURI) {
+		if (defaultNamespace.equals(namespaceURI)) {
+			return XMLConstants.DEFAULT_NS_PREFIX;
+		} else {
+			return getNonEmptyPrefix(namespaceURI);
 		}
 	}
 
 	public void setPrefix(String prefix, String namespaceURI) {
+		if (prefix == null || namespaceURI == null) {
+			throw new IllegalArgumentException("Prefix and namespace URI must not be null");
+		}
 		if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
 			defaultNamespace = namespaceURI;
 		} else if (XMLConstants.XML_NS_PREFIX.equals(namespaceURI)) {

@@ -16,10 +16,7 @@
 package de.odysseus.staxon;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 
 import javax.xml.XMLConstants;
@@ -63,20 +60,6 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 			.append(getEventName(type))
 			.append(": ").append(getText() != null ? getText() : getLocalName())
 			.toString();
-		}
-	}
-
-	static class Attr {
-		final String prefix;
-		final String localName;
-		final String namespaceURI;
-		final String value;
-
-		Attr(String prefix, String localName, String namespaceURI, String value) {
-			this.prefix = prefix;
-			this.localName = localName;
-			this.namespaceURI = namespaceURI;
-			this.value = value;
 		}
 	}
 
@@ -139,8 +122,6 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	private boolean moreTokens;
 	private Event event;
 	
-	private List<Attr> attributes = new ArrayList<Attr>();
-	
 	private String encodingScheme;
 	private String version;
 	private Boolean standalone;
@@ -151,70 +132,10 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	 */
 	public AbstractXMLStreamReader(T rootInfo) {
 		scope = new XMLStreamReaderScope<T>(XMLConstants.NULL_NS_URI, rootInfo);
-	}
-	
-	private String calculateAttributePrefix(String namespaceURI) throws XMLStreamException {
-		if (XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
-			return XMLConstants.DEFAULT_NS_PREFIX;
-		} else {
-			String prefix = scope.getPrefix(namespaceURI);
-			if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-				Iterator<String> prefixes = scope.getPrefixes(namespaceURI);
-				while (prefixes.hasNext()) {
-					prefix = prefixes.next();
-					if (!XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-						break;
-					}
-				}
-			}
-			if (prefix == null || XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-				throw new XMLStreamException("No prefix found for attribute namespace: " + namespaceURI);
-			}
-			return prefix;
-		}
-	}
-	
-	private String calculateAttributeNamespaceURI(String prefix) throws XMLStreamException {
-		if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-			return XMLConstants.NULL_NS_URI;
-		} else {
-			String namespaceURI = scope.getNamespaceURI(prefix);
-			if (namespaceURI == null || XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
-				throw new XMLStreamException("Unbound attribute prefix: " + prefix);
-			}
-			return namespaceURI;
-		}
-	}
+	}	
 	
 	private void ensureStartTagClosed() throws XMLStreamException {
 		if (!scope.isStartTagClosed()) {
-			if (!attributes.isEmpty()) {
-				for (Attr attr : attributes) {
-					if (attr.namespaceURI == null) {
-						String namespaceURI = calculateAttributeNamespaceURI(attr.prefix);
-						scope.addAttribute(attr.prefix, attr.localName, namespaceURI, attr.value);
-					} else if (attr.prefix == null) {
-						String prefix = calculateAttributePrefix(attr.namespaceURI);
-						scope.addAttribute(prefix, attr.localName, attr.namespaceURI, attr.value);
-					} else {
-						if (XMLConstants.DEFAULT_NS_PREFIX.equals(attr.prefix)) {
-							if (!XMLConstants.NULL_NS_URI.equals(attr.namespaceURI)) {
-								throw new XMLStreamException("Illegal namespace for unprefixed attribute: " + attr.namespaceURI);								
-							}
-						} else if (XMLConstants.NULL_NS_URI.equals(attr.namespaceURI)) {
-							if (!XMLConstants.DEFAULT_NS_PREFIX.equals(attr.prefix)) {
-								throw new XMLStreamException("Prefix required for attribute namespace: " + attr.namespaceURI);
-							}
-						} else {
-							if (!scope.getNamespaceURI(attr.prefix).equals(attr.namespaceURI)) {
-								throw new XMLStreamException("Prefix '" + attr.prefix +"' is not bound to: " + attr.namespaceURI);
-							}
-						}
-						scope.addAttribute(attr.prefix, attr.localName, attr.namespaceURI, attr.value);
-					}
-				}
-				attributes.clear();
-			}
 			scope.setStartTagClosed(true);
 		}
 	}
@@ -305,7 +226,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		if (prefix == null && namespaceURI == null) {
 			throw new IllegalArgumentException("at least one of prefix and namespaceURI must not be null!");
 		}
-		attributes.add(new Attr(prefix, localName, namespaceURI, value));
+		scope.addAttribute(prefix, localName, namespaceURI, value);
 	}
 
 	/**
@@ -322,6 +243,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 			throw new IllegalArgumentException("at least one of prefix and namespaceURI must not be null!");
 		}
 		scope.addNamespaceURI(prefix, namespaceURI);
+		scope.setPrefix(prefix, namespaceURI);
 	}
 
 	/**
