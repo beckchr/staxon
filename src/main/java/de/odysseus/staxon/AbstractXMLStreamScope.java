@@ -236,11 +236,13 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 		this.startTagClosed = startTagClosed;
 	}
 
-	private String findNonEmptyPrefix(String namespaceURI) {
+	private String findNonEmptyPrefix(String namespaceURI, AbstractXMLStreamScope descendent) {
 		if (prefixes != null) {
 			for (Pair<String, String> pair : prefixes) {
 				if (pair.getSecond().equals(namespaceURI)) {
-					return pair.getFirst();
+					if (descendent == this || descendent.getNamespaceURI(pair.getFirst()).equals(namespaceURI)) {
+						return pair.getFirst();
+					}
 				}
 			}
 		}
@@ -252,13 +254,15 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 				while (prefixes.hasNext()) {
 					String prefix = prefixes.next().toString();
 					if (!XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-						return prefix;
+						if (descendent == this || descendent.getNamespaceURI(prefix).equals(namespaceURI)) {
+							return prefix;
+						}
 					}
 				}
 				return null;
 			}
 		} else {
-			return getParent().findNonEmptyPrefix(namespaceURI);
+			return getParent().findNonEmptyPrefix(namespaceURI, descendent);
 		}
 	}
 	
@@ -270,7 +274,7 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 		} else if (XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(namespaceURI)) {
 			return XMLConstants.XMLNS_ATTRIBUTE;
 		} else {
-			return findNonEmptyPrefix(namespaceURI);
+			return findNonEmptyPrefix(namespaceURI, this);
 		}
 	}
 
@@ -336,11 +340,10 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 							if (pairs == null) {
 								pairs = prefixes.iterator();
 							}
-							Pair<String, String> p;
 							while (pairs.hasNext()) {
-								p = pairs.next();
-								if (namespaceURI.equals(p.getSecond())) {
-									return p.getFirst();
+								Pair<String, String> pair = pairs.next();
+								if (namespaceURI.equals(pair.getSecond())) {
+									return pair.getFirst();
 								}
 							}
 						}
@@ -350,8 +353,11 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 							if (above == null) {
 								above = parent.getPrefixes(namespaceURI);
 							}
-							if (above.hasNext()) {
-								return above.next().toString();
+							while (above.hasNext()) {
+								String prefix = above.next().toString();
+								if (getNamespaceURI(prefix).equals(namespaceURI)) {
+									return prefix;
+								}
 							}
 						}
 					default:
