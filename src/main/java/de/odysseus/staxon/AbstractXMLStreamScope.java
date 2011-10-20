@@ -26,7 +26,7 @@ import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamException;
 
 /**
- * Represent document/element scope. Used to store namespace declarations and
+ * Represent document/element scope. Used to store namespace bindings and
  * attributes, implements {@link NamespaceContext}.
  */
 public abstract class AbstractXMLStreamScope implements NamespaceContext {
