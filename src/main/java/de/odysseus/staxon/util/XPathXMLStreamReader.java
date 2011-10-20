@@ -34,8 +34,7 @@ public class XPathXMLStreamReader extends StreamReaderDelegate {
 	static class Scope {
 		private Scope parent;
 		private QName name;
-		private int position;
-		private Map<QName, Integer> children = new HashMap<QName, Integer>();
+		private Map<QName, Integer> positions = new HashMap<QName, Integer>();
 
 		/**
 		 * Reset all properties to their initial state.
@@ -43,24 +42,26 @@ public class XPathXMLStreamReader extends StreamReaderDelegate {
 		void reset() {
 			parent = null;
 			name = null;
-			position = 0;
-			children.clear();
+			positions.clear();
 		}
 
 		Scope getParent() {
 			return parent;
 		}
 
-		void setParent(Scope parent) {
-			this.parent = parent;
+		int getPosition() {
+			return parent == null ? 1 : parent.positions.get(name).intValue();
 		}
+		
+		void addChild(Scope child) {
+			child.parent = this;
 
-		int getChildCount(QName name) {
-			return children.containsKey(name) ? children.get(name) : 0;
-		}
-
-		void setChildCount(QName name, int value) {
-			children.put(name, Integer.valueOf(value));
+			QName key = child.getName();
+			if (positions.containsKey(key)) {				
+				positions.put(key, Integer.valueOf(positions.get(key).intValue() + 1));
+			} else {
+				positions.put(key, Integer.valueOf(1));
+			}
 		}
 
 		QName getName() {
@@ -71,29 +72,21 @@ public class XPathXMLStreamReader extends StreamReaderDelegate {
 			this.name = name;
 		}
 
-		int getPosition() {
-			return position;
-		}
-
-		void setPosition(int position) {
-			this.position = position;
-		}
-
-		StringBuilder append(StringBuilder builder, NamespaceContext context) {
+		StringBuilder append(StringBuilder builder, NamespaceContext context, boolean includePositions) {
 			if (parent != null) {
-				parent.append(builder, context);
+				parent.append(builder, context, includePositions);
 			}
 			builder.append('/');
-			String prefix = context == null ? getName().getPrefix() : context.getPrefix(name.getNamespaceURI());
+			String prefix = context == null ? name.getPrefix() : context.getPrefix(name.getNamespaceURI());
 			if (prefix == null) {
 				throw new IllegalArgumentException("Namespace URI '" + name.getNamespaceURI() + "' has no prefix");
 			}
 			if (!XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-				builder.append(name.getPrefix()).append(':');
+				builder.append(prefix).append(':');
 			}
 			builder.append(name.getLocalPart());
-			if (parent != null) {
-				builder.append('[').append(position).append(']');
+			if (includePositions && parent != null) {
+				builder.append('[').append(getPosition()).append(']');
 			}
 			return builder;
 		}
@@ -140,13 +133,8 @@ public class XPathXMLStreamReader extends StreamReaderDelegate {
 			 */
 			Scope child = recycle.isEmpty() ? new Scope() : recycle.pop();
 			child.setName(getName());
-			if (current == null) {
-				child.setPosition(1);
-				child.setParent(null);
-			} else {
-				child.setPosition(current.getChildCount(child.getName()) + 1);
-				current.setChildCount(child.getName(), child.getPosition());
-				child.setParent(current);
+			if (current != null) {				
+				current.addChild(child);
 			}
 			current = child;
 		}
@@ -185,31 +173,59 @@ public class XPathXMLStreamReader extends StreamReaderDelegate {
 			.append('(').append(super.toString()).append(')')
 			.toString();
 	}
-	
+
 	/**
-	 * Generate the "canonical" XPath string:
+	 * Generate XPath expression:
 	 * <ul>
 	 * <li>The expression is absolute (starts with a <code>'/'</code>)</li>
-	 * <li>All segments have a (one-based) position, except for the root segment</li>
+	 * <li>If <code>includePositions</code> is set to <code>true</code>,
+	 * all segments have a (one-based) position, except for the root segment</li>
 	 * </ul>
 	 * <p>
-	 * More formally, the canonical form is
-	 * <code>'/' &ltname&gt ('/' &ltname&gt '[' &ltposition&gt ']')*</code>
+	 * More formally, the result matches
 	 * </p>
-	 * 
+	 * <pre>'/' &ltname&gt ('/' &ltname&gt '[' &ltposition&gt ']')*</pre>
+	 * <p>
+	 * if <code>includePositions</code> is set to <code>true</code> and
+	 * </p>
+	 * <pre>'/' &ltname&gt ('/' &ltname&gt)*</pre>
+	 * <p>
+	 * otherwise.
+	 * </p>
 	 * @param context namespace context used to lookup prefixes (may be <code>null</code>)
-	 * @return "canonical" XPath expression.
+	 * @param includePositions whether to include element positions
+	 * @return XPath expression
 	 */
-	public String getXPath(NamespaceContext context) {
-		return current == null ? null : current.append(new StringBuilder(), context).toString();
+	public String getXPath(NamespaceContext context, boolean includePositions) {
+		return current == null ? null : current.append(new StringBuilder(), context, includePositions).toString();
 	}
 
 	/**
 	 * Same as <code>getXPath(null)</code>.
-	 * @return "canonical" XPath expression.
+	 * @return XPath expression (with positions)
 	 * @see #getXPath(NamespaceContext)
 	 */
 	public String getXPath() {
-		return getXPath(null);
+		return getXPath(null, true);
+	}
+	
+	/**
+	 * Gets the position for the current element (last segment of XPath expression).
+	 * Child positions are counted per name. For example, in
+	 * <pre>
+	 * &lt;alice>
+	 *   &lt;edgar/>
+	 *   &lt;edgar/>
+	 *   &lt;david/>
+	 *   &lt;edgar/>
+	 * &lt;/alice>
+	 * </pre>
+	 * <p>
+	 * the positions of <code>alice</code>' children are 1, 2, 1 and 3.
+	 * </p>
+	 * @return the (one-based) position of the current element
+	 */
+	public int getPosition() {
+		return current == null ? 0 : current.getPosition();
 	}
 }

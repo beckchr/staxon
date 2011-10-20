@@ -55,6 +55,7 @@ public class XPathXMLStreamReaderTest {
 	public void testNextTag() throws XMLStreamException {
 		String xml = "<alice><bob>charlie</bob><edgar/><bob>david</bob></alice>";
 		XPathXMLStreamReader reader = new XPathXMLStreamReader(XMLInputFactory.newFactory().createXMLStreamReader(new StringReader(xml)));
+		Assert.assertNull(reader.getXPath());
 		reader.nextTag();
 		reader.require(XMLStreamConstants.START_ELEMENT, null, "alice");
 		Assert.assertEquals("/alice", reader.getXPath());
@@ -79,5 +80,45 @@ public class XPathXMLStreamReaderTest {
 		reader.nextTag();
 		reader.require(XMLStreamConstants.END_ELEMENT, null, "alice");
 		Assert.assertEquals("/alice", reader.getXPath());
+	}
+
+	@Test
+	public void testSimplePathAndPosition() throws XMLStreamException {
+		String xml = "<alice><bob>charlie</bob><edgar/><bob>david</bob></alice>";
+		XPathXMLStreamReader reader = new XPathXMLStreamReader(XMLInputFactory.newFactory().createXMLStreamReader(new StringReader(xml)));
+		Assert.assertNull(reader.getXPath(null, false));
+		Assert.assertEquals(0, reader.getPosition());
+		reader.nextTag();
+		reader.require(XMLStreamConstants.START_ELEMENT, null, "alice");
+		Assert.assertEquals("/alice", reader.getXPath(null, false));
+		Assert.assertEquals(1, reader.getPosition());
+		reader.nextTag();
+		reader.require(XMLStreamConstants.START_ELEMENT, null, "bob");
+		Assert.assertEquals("/alice/bob", reader.getXPath(null, false));
+		Assert.assertEquals(1, reader.getPosition());
+		reader.getElementText();
+		reader.require(XMLStreamConstants.END_ELEMENT, null, "bob");
+		Assert.assertEquals("/alice/bob", reader.getXPath(null, false));
+		Assert.assertEquals(1, reader.getPosition());
+		reader.nextTag();
+		reader.require(XMLStreamConstants.START_ELEMENT, null, "edgar");
+		Assert.assertEquals("/alice/edgar", reader.getXPath(null, false));
+		Assert.assertEquals(1, reader.getPosition());
+		reader.nextTag();
+		reader.require(XMLStreamConstants.END_ELEMENT, null, "edgar");
+		Assert.assertEquals("/alice/edgar", reader.getXPath(null, false));
+		Assert.assertEquals(1, reader.getPosition());
+		reader.nextTag();
+		reader.require(XMLStreamConstants.START_ELEMENT, null, "bob");
+		Assert.assertEquals("/alice/bob", reader.getXPath(null, false));
+		Assert.assertEquals(2, reader.getPosition());
+		reader.getElementText();
+		reader.require(XMLStreamConstants.END_ELEMENT, null, "bob");
+		Assert.assertEquals("/alice/bob", reader.getXPath(null, false));
+		Assert.assertEquals(2, reader.getPosition());
+		reader.nextTag();
+		reader.require(XMLStreamConstants.END_ELEMENT, null, "alice");
+		Assert.assertEquals("/alice", reader.getXPath(null, false));
+		Assert.assertEquals(1, reader.getPosition());
 	}
 }
