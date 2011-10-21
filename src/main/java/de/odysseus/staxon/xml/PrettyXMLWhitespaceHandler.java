@@ -131,7 +131,7 @@ class PrettyXMLWhitespaceHandler {
 	/**
 	 * Whitespace writer.
 	 */
-	static abstract class WhitespaceWriter {
+	private static abstract class WhitespaceWriter {
 		abstract void add(WhitespaceEvent event) throws XMLStreamException;
 	}
 	
