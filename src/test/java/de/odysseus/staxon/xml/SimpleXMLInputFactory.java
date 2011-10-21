@@ -20,19 +20,28 @@ import java.io.Reader;
 
 import javax.xml.stream.EventFilter;
 import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLReporter;
 import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import de.odysseus.staxon.AbstractXMLInputFactory;
-import de.odysseus.staxon.event.SimpleXMLFilteredEventReader;
 import de.odysseus.staxon.event.SimpleXMLEventReader;
+import de.odysseus.staxon.event.SimpleXMLFilteredEventReader;
 
 public class SimpleXMLInputFactory extends AbstractXMLInputFactory {
-	private boolean coalescing = false;
-	
+	public SimpleXMLInputFactory() {		
+		/*
+		 * initialize properties
+		 */
+		super.setProperty(IS_COALESCING, Boolean.FALSE);
+		super.setProperty(IS_NAMESPACE_AWARE, Boolean.TRUE);
+		super.setProperty(IS_REPLACING_ENTITY_REFERENCES, Boolean.TRUE);
+		super.setProperty(IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
+		super.setProperty(IS_VALIDATING, Boolean.FALSE);
+		super.setProperty(SUPPORT_DTD, Boolean.FALSE);
+	}
+
 	@Override
 	public XMLStreamReader createXMLStreamReader(Reader reader) throws XMLStreamException {
 		return new SimpleXMLStreamReader(reader);
@@ -69,60 +78,30 @@ public class SimpleXMLInputFactory extends AbstractXMLInputFactory {
 	
 	@Override
 	public void setProperty(String name, Object value) throws IllegalArgumentException {
-		if (XMLInputFactory.IS_COALESCING.equals(name)) {
-			coalescing = ((Boolean)value).booleanValue();
-		} else if (XMLInputFactory.IS_NAMESPACE_AWARE.equals(name)) {
+		if (IS_NAMESPACE_AWARE.equals(name)) {
 			if (!getProperty(name).equals(value)) {
 				throw new IllegalArgumentException("Cannot change property: " + name);
 			}
-		} else if (XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES.equals(name)) {
+		} else if (IS_REPLACING_ENTITY_REFERENCES.equals(name)) {
 			if (!getProperty(name).equals(value)) {
 				throw new IllegalArgumentException("Cannot change property: " + name);
 			}
-		} else if (XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES.equals(name)) {
+		} else if (IS_SUPPORTING_EXTERNAL_ENTITIES.equals(name)) {
 			if (!getProperty(name).equals(value)) {
 				throw new IllegalArgumentException("Cannot change property: " + name);
 			}
-		} else if (XMLInputFactory.IS_VALIDATING.equals(name)) {
+		} else if (IS_VALIDATING.equals(name)) {
 			if (!getProperty(name).equals(value)) {
 				throw new IllegalArgumentException("Cannot change property: " + name);
 			}
+		} else if (SUPPORT_DTD.equals(name)) {
+			if (!getProperty(name).equals(value)) {
+				throw new IllegalArgumentException("Cannot change property: " + name);
+			}
+		} else if (super.isPropertySupported(name)) {
+			super.setProperty(name, value);
 		} else {
 			throw new IllegalArgumentException("Unsupported property: " + name);
-		}
-	}
-
-	@Override
-	public Object getProperty(String name) throws IllegalArgumentException {
-		if (XMLInputFactory.IS_COALESCING.equals(name)) {
-			return Boolean.valueOf(coalescing);
-		} else if (XMLInputFactory.IS_NAMESPACE_AWARE.equals(name)) {
-			return Boolean.TRUE;
-		} else if (XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES.equals(name)) {
-			return Boolean.TRUE;
-		} else if (XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES.equals(name)) {
-			return Boolean.FALSE;
-		} else if (XMLInputFactory.IS_VALIDATING.equals(name)) {
-			return Boolean.FALSE;
-		} else {
-			throw new IllegalArgumentException("Unsupported property: " + name);
-		}
-	}
-
-	@Override
-	public boolean isPropertySupported(String name) {
-		if (XMLInputFactory.IS_COALESCING.equals(name)) {
-			return true;
-		} else if (XMLInputFactory.IS_NAMESPACE_AWARE.equals(name)) {
-			return true;
-		} else if (XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES.equals(name)) {
-			return true;
-		} else if (XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES.equals(name)) {
-			return true;
-		} else if (XMLInputFactory.IS_VALIDATING.equals(name)) {
-			return true;
-		} else {
-			return false;
 		}
 	}
 }

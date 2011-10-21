@@ -23,15 +23,14 @@ import java.util.Arrays;
 import javax.xml.stream.EventFilter;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLReporter;
 import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import de.odysseus.staxon.AbstractXMLInputFactory;
-import de.odysseus.staxon.event.SimpleXMLFilteredEventReader;
 import de.odysseus.staxon.event.SimpleXMLEventReader;
+import de.odysseus.staxon.event.SimpleXMLFilteredEventReader;
 import de.odysseus.staxon.json.stream.JsonStreamFactory;
 import de.odysseus.staxon.json.stream.JsonStreamSource;
 import de.odysseus.staxon.json.stream.util.AddRootSource;
@@ -67,7 +66,6 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 
 	private boolean multiplePI = true;
 	private String virtualRoot = null;
-	private boolean coalescing = true;
 	private char prefixSeparator = ':';
 	
 	public JsonXMLInputFactory() throws FactoryConfigurationError {
@@ -76,6 +74,16 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 
 	public JsonXMLInputFactory(JsonStreamFactory streamFactory) {
 		this.streamFactory = streamFactory;
+		
+		/*
+		 * initialize properties
+		 */
+		super.setProperty(IS_COALESCING, Boolean.TRUE);
+		super.setProperty(IS_NAMESPACE_AWARE, Boolean.TRUE);
+		super.setProperty(IS_REPLACING_ENTITY_REFERENCES, Boolean.TRUE);
+		super.setProperty(IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
+		super.setProperty(IS_VALIDATING, Boolean.FALSE);
+		super.setProperty(SUPPORT_DTD, Boolean.FALSE);
 	}
 	
 	private JsonStreamSource decorate(JsonStreamSource source) {
@@ -126,54 +134,19 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	public void setXMLReporter(XMLReporter reporter) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
-	public void setProperty(String name, Object value) throws IllegalArgumentException {
-		if (XMLInputFactory.IS_COALESCING.equals(name)) {
-			coalescing = ((Boolean)value).booleanValue();
-		} else if (XMLInputFactory.IS_NAMESPACE_AWARE.equals(name)) {
-			if (!getProperty(name).equals(value)) {
-				throw new IllegalArgumentException("Cannot change property: " + name);
-			}
-		} else if (XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES.equals(name)) {
-			if (!getProperty(name).equals(value)) {
-				throw new IllegalArgumentException("Cannot change property: " + name);
-			}
-		} else if (XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES.equals(name)) {
-			if (!getProperty(name).equals(value)) {
-				throw new IllegalArgumentException("Cannot change property: " + name);
-			}
-		} else if (XMLInputFactory.IS_VALIDATING.equals(name)) {
-			if (!getProperty(name).equals(value)) {
-				throw new IllegalArgumentException("Cannot change property: " + name);
-			}
-		} else { // proprietary properties
-			if (PROP_MULTIPLE_PI.equals(name)) {
-				multiplePI = ((Boolean)value).booleanValue();
-			} else if (PROP_VIRTUAL_ROOT.equals(name)) {
-				virtualRoot = (String)value;
-			} else if (PROP_PREFIX_SEPARATOR.equals(name)) {
-				prefixSeparator = (Character)value;
-			} else {
-				throw new IllegalArgumentException("Unsupported property: " + name);
-			}
-		}
+	public boolean isPropertySupported(String name) {
+		return super.isPropertySupported(name)
+			|| Arrays.asList(PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT, PROP_PREFIX_SEPARATOR).contains(name);
 	}
 
 	@Override
 	public Object getProperty(String name) throws IllegalArgumentException {
-		if (XMLInputFactory.IS_COALESCING.equals(name)) {
-			return Boolean.valueOf(coalescing);
-		} else if (XMLInputFactory.IS_NAMESPACE_AWARE.equals(name)) {
-			return Boolean.TRUE;
-		} else if (XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES.equals(name)) {
-			return Boolean.TRUE;
-		} else if (XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES.equals(name)) {
-			return Boolean.FALSE;
-		} else if (XMLInputFactory.IS_VALIDATING.equals(name)) {
-			return Boolean.FALSE;
+		if (super.isPropertySupported(name)) {
+			return super.getProperty(name);
 		} else { // proprietary properties
-			 if (PROP_MULTIPLE_PI.equals(name)) {
+			if (PROP_MULTIPLE_PI.equals(name)) {
 				return Boolean.valueOf(multiplePI);
 			} else if (PROP_VIRTUAL_ROOT.equals(name)) {
 				return virtualRoot;
@@ -184,21 +157,41 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 			}
 		}
 	}
-
+	
 	@Override
-	public boolean isPropertySupported(String name) {
-		if (XMLInputFactory.IS_COALESCING.equals(name)) {
-			return true;
-		} else if (XMLInputFactory.IS_NAMESPACE_AWARE.equals(name)) {
-			return true;
-		} else if (XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES.equals(name)) {
-			return true;
-		} else if (XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES.equals(name)) {
-			return true;
-		} else if (XMLInputFactory.IS_VALIDATING.equals(name)) {
-			return true;
+	public void setProperty(String name, Object value) throws IllegalArgumentException {
+		if (IS_NAMESPACE_AWARE.equals(name)) {
+			if (!getProperty(name).equals(value)) {
+				throw new IllegalArgumentException("Cannot change property: " + name);
+			}
+		} else if (IS_REPLACING_ENTITY_REFERENCES.equals(name)) {
+			if (!getProperty(name).equals(value)) {
+				throw new IllegalArgumentException("Cannot change property: " + name);
+			}
+		} else if (IS_SUPPORTING_EXTERNAL_ENTITIES.equals(name)) {
+			if (!getProperty(name).equals(value)) {
+				throw new IllegalArgumentException("Cannot change property: " + name);
+			}
+		} else if (IS_VALIDATING.equals(name)) {
+			if (!getProperty(name).equals(value)) {
+				throw new IllegalArgumentException("Cannot change property: " + name);
+			}
+		} else if (SUPPORT_DTD.equals(name)) {
+			if (!getProperty(name).equals(value)) {
+				throw new IllegalArgumentException("Cannot change property: " + name);
+			}
+		} else if (super.isPropertySupported(name)) {
+			super.setProperty(name, value);
 		} else { // proprietary properties
-			return Arrays.asList(PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT, PROP_PREFIX_SEPARATOR).contains(name);
+			if (PROP_MULTIPLE_PI.equals(name)) {
+				multiplePI = ((Boolean)value).booleanValue();
+			} else if (PROP_VIRTUAL_ROOT.equals(name)) {
+				virtualRoot = (String)value;
+			} else if (PROP_PREFIX_SEPARATOR.equals(name)) {
+				prefixSeparator = (Character)value;
+			} else {
+				throw new IllegalArgumentException("Unsupported property: " + name);
+			}
 		}
 	}
 }

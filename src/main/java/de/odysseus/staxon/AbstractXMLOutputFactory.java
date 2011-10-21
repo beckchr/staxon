@@ -31,6 +31,8 @@ import javax.xml.transform.stream.StreamResult;
  * Abstract XML output factory.
  */
 public abstract class AbstractXMLOutputFactory extends XMLOutputFactory {
+	private boolean repairingNamespaces;
+	
 	@Override
 	public XMLStreamWriter createXMLStreamWriter(OutputStream stream, String encoding) throws XMLStreamException {
 		try {
@@ -82,4 +84,31 @@ public abstract class AbstractXMLOutputFactory extends XMLOutputFactory {
 	}
 
 	public abstract XMLEventWriter createXMLEventWriter(XMLStreamWriter writer) throws XMLStreamException;
+	
+	@Override
+	public boolean isPropertySupported(String name) {
+		if (XMLOutputFactory.IS_REPAIRING_NAMESPACES.equals(name)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	public Object getProperty(String name) throws IllegalArgumentException {
+		if (IS_REPAIRING_NAMESPACES.equals(name)) {
+			return Boolean.valueOf(repairingNamespaces);
+		} else {
+			throw new IllegalArgumentException("Unsupported property: " + name);
+		}
+	}
+	
+	@Override
+	public void setProperty(String name, Object value) throws IllegalArgumentException {
+		if (IS_REPAIRING_NAMESPACES.equals(name)) {
+			repairingNamespaces = ((Boolean)value).booleanValue();
+		} else {
+			throw new IllegalArgumentException("Unsupported property: " + name);
+		}
+	}
 }

@@ -41,6 +41,13 @@ public abstract class AbstractXMLInputFactory extends XMLInputFactory {
 	private XMLResolver resolver;
 	private XMLReporter reporter;
 	
+	private boolean coalescing;
+	private boolean namespaceAware;
+	private boolean replacingEntityReferences;
+	private boolean supportingExternalEntities;
+	private boolean validating;
+	private boolean supportDTD;
+	
 	@Override
 	public XMLStreamReader createXMLStreamReader(InputStream stream, String encoding) throws XMLStreamException {
 		try {
@@ -175,6 +182,81 @@ public abstract class AbstractXMLInputFactory extends XMLInputFactory {
 	@Override
 	public void setXMLReporter(XMLReporter reporter) {
 		this.reporter = reporter;
+	}
+	
+	@Override
+	public boolean isPropertySupported(String name) {
+		if (ALLOCATOR.equals(name)) {
+			return true;
+		} else if (IS_COALESCING.equals(name)) {
+			return true;
+		} else if (IS_NAMESPACE_AWARE.equals(name)) {
+			return true;
+		} else if (IS_REPLACING_ENTITY_REFERENCES.equals(name)) {
+			return true;
+		} else if (IS_SUPPORTING_EXTERNAL_ENTITIES.equals(name)) {
+			return true;
+		} else if (IS_VALIDATING.equals(name)) {
+			return true;
+		} else if (REPORTER.equals(name)) {
+			return true;
+		} else if (RESOLVER.equals(name)) {
+			return true;
+		} else if (SUPPORT_DTD.equals(name)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	@Override
+	public Object getProperty(String name) throws IllegalArgumentException {
+		if (ALLOCATOR.equals(name)) {
+			return allocator;
+		} else if (IS_COALESCING.equals(name)) {
+			return Boolean.valueOf(coalescing);
+		} else if (IS_NAMESPACE_AWARE.equals(name)) {
+			return Boolean.valueOf(namespaceAware);
+		} else if (IS_REPLACING_ENTITY_REFERENCES.equals(name)) {
+			return Boolean.valueOf(replacingEntityReferences);
+		} else if (IS_SUPPORTING_EXTERNAL_ENTITIES.equals(name)) {
+			return Boolean.valueOf(supportingExternalEntities);
+		} else if (IS_VALIDATING.equals(name)) {
+			return Boolean.valueOf(validating);
+		} else if (REPORTER.equals(name)) {
+			return reporter;
+		} else if (RESOLVER.equals(name)) {
+			return resolver;
+		} else if (SUPPORT_DTD.equals(name)) {
+			return Boolean.valueOf(supportDTD);
+		} else {
+			throw new IllegalArgumentException("Unsupported property: " + name);
+		}
+	}
+
+	@Override
+	public void setProperty(String name, Object value) throws IllegalArgumentException {
+		if (ALLOCATOR.equals(name)) {
+			allocator = (XMLEventAllocator)value;
+		} else if (IS_COALESCING.equals(name)) {
+			coalescing = ((Boolean)value).booleanValue();
+		} else if (IS_NAMESPACE_AWARE.equals(name)) {
+			namespaceAware = ((Boolean)value).booleanValue();
+		} else if (IS_REPLACING_ENTITY_REFERENCES.equals(name)) {
+			replacingEntityReferences = ((Boolean)value).booleanValue();
+		} else if (IS_SUPPORTING_EXTERNAL_ENTITIES.equals(name)) {
+			supportingExternalEntities = ((Boolean)value).booleanValue();
+		} else if (IS_VALIDATING.equals(name)) {
+			validating = ((Boolean)value).booleanValue();
+		} else if (REPORTER.equals(name)) {
+			reporter = (XMLReporter)value;
+		} else if (RESOLVER.equals(name)) {
+			resolver = (XMLResolver)value;
+		} else if (SUPPORT_DTD.equals(name)) {
+			supportDTD = ((Boolean)value).booleanValue();
+		} else {
+			throw new IllegalArgumentException("Unsupported property: " + name);
+		}
 	}
 }
 

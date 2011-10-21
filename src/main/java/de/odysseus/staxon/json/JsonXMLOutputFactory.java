@@ -88,6 +88,11 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 
 	public JsonXMLOutputFactory(JsonStreamFactory streamFactory) {
 		this.streamFactory = streamFactory;
+
+		/*
+		 * initialize properties
+		 */
+		super.setProperty(IS_REPAIRING_NAMESPACES, Boolean.FALSE);
 	}
 		
 	private JsonStreamTarget decorate(JsonStreamTarget target) {
@@ -124,34 +129,17 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	}
 
 	@Override
-	public void setProperty(String name, Object value) throws IllegalArgumentException {
-		if (XMLOutputFactory.IS_REPAIRING_NAMESPACES.equals(name)) {
-			if (!getProperty(name).equals(value)) {
-				throw new IllegalArgumentException("Cannot change property: " + name);
-			}
-		} else { // proprietary properties
-			if (PROP_AUTO_ARRAY.equals(name)) {
-				autoArray = ((Boolean)value).booleanValue();
-			} else if (PROP_MULTIPLE_PI.equals(name)) {
-				multiplePI = ((Boolean)value).booleanValue();
-			} else if (PROP_VIRTUAL_ROOT.equals(name)) {
-				virtualRoot = (String)value;
-			} else if (PROP_PRETTY_PRINT.equals(name)) {
-				prettyPrint = ((Boolean)value).booleanValue();
-			} else if (PROP_PREFIX_SEPARATOR.equals(name)) {
-				prefixSeparator = (Character)value;
-			} else {
-				throw new IllegalArgumentException("Unsupported property: " + name);
-			}
-		}
+	public boolean isPropertySupported(String name) {
+		return super.isPropertySupported(name)
+			|| Arrays.asList(PROP_AUTO_ARRAY, PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT, PROP_PREFIX_SEPARATOR, PROP_PRETTY_PRINT).contains(name);
 	}
 
 	@Override
 	public Object getProperty(String name) throws IllegalArgumentException {
-		if (XMLOutputFactory.IS_REPAIRING_NAMESPACES.equals(name)) {
-			return Boolean.FALSE;
+		if (super.isPropertySupported(name)) {
+			return super.getProperty(name);
 		} else { // proprietary properties
-			 if (PROP_AUTO_ARRAY.equals(name)) {
+			if (PROP_AUTO_ARRAY.equals(name)) {
 				return Boolean.valueOf(autoArray);
 			} else if (PROP_MULTIPLE_PI.equals(name)) {
 				return Boolean.valueOf(multiplePI);
@@ -168,11 +156,27 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	}
 
 	@Override
-	public boolean isPropertySupported(String name) {
+	public void setProperty(String name, Object value) throws IllegalArgumentException {
 		if (XMLOutputFactory.IS_REPAIRING_NAMESPACES.equals(name)) {
-			return true;
+			if (!getProperty(name).equals(value)) {
+				throw new IllegalArgumentException("Cannot change property: " + name);
+			}
+		} else if (super.isPropertySupported(name)) {
+			super.setProperty(name, value);
 		} else { // proprietary properties
-			return Arrays.asList(PROP_AUTO_ARRAY, PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT, PROP_PREFIX_SEPARATOR, PROP_PRETTY_PRINT).contains(name);
+			if (PROP_AUTO_ARRAY.equals(name)) {
+				autoArray = ((Boolean)value).booleanValue();
+			} else if (PROP_MULTIPLE_PI.equals(name)) {
+				multiplePI = ((Boolean)value).booleanValue();
+			} else if (PROP_VIRTUAL_ROOT.equals(name)) {
+				virtualRoot = (String)value;
+			} else if (PROP_PRETTY_PRINT.equals(name)) {
+				prettyPrint = ((Boolean)value).booleanValue();
+			} else if (PROP_PREFIX_SEPARATOR.equals(name)) {
+				prefixSeparator = (Character)value;
+			} else {
+				throw new IllegalArgumentException("Unsupported property: " + name);
+			}
 		}
 	}
 }

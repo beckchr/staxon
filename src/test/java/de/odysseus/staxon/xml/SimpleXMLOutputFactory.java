@@ -27,6 +27,13 @@ import de.odysseus.staxon.AbstractXMLOutputFactory;
 import de.odysseus.staxon.event.SimpleXMLEventWriter;
 
 public class SimpleXMLOutputFactory extends AbstractXMLOutputFactory {
+	public SimpleXMLOutputFactory() {
+		/*
+		 * initialize properties
+		 */
+		super.setProperty(IS_REPAIRING_NAMESPACES, Boolean.FALSE);
+	}
+
 	@Override
 	public XMLStreamWriter createXMLStreamWriter(Writer stream) throws XMLStreamException {
 		return new SimpleXMLStreamWriter(stream);
@@ -48,26 +55,10 @@ public class SimpleXMLOutputFactory extends AbstractXMLOutputFactory {
 			if (!getProperty(name).equals(value)) {
 				throw new IllegalArgumentException("Cannot change property: " + name);
 			}
+		} else if (super.isPropertySupported(name)) {
+			super.setProperty(name, value);
 		} else {
 			throw new IllegalArgumentException("Unsupported property: " + name);
-		}
-	}
-
-	@Override
-	public Object getProperty(String name) throws IllegalArgumentException {
-		if (XMLOutputFactory.IS_REPAIRING_NAMESPACES.equals(name)) {
-			return Boolean.FALSE;
-		} else {
-			throw new IllegalArgumentException("Unsupported property: " + name);
-		}
-	}
-
-	@Override
-	public boolean isPropertySupported(String name) {
-		if (XMLOutputFactory.IS_REPAIRING_NAMESPACES.equals(name)) {
-			return true;
-		} else {
-			return false;
 		}
 	}
 }
