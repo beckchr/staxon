@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.odysseus.staxon.xml;
+package de.odysseus.staxon.xml.util;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
