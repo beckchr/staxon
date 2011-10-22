@@ -124,7 +124,7 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 		this.parent = null;
 		this.prefix = null;
 		this.localName = null;
-		this.namespaceURI = null;
+		this.namespaceURI = XMLConstants.NULL_NS_URI;
 		this.defaultNamespace = defaultNamespace;
 		this.startTagClosed = true;
 	}
@@ -139,7 +139,7 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 		this.parent = parent;
 		this.prefix = null;
 		this.localName = null;
-		this.namespaceURI = null;
+		this.namespaceURI = XMLConstants.NULL_NS_URI;
 		this.defaultNamespace = parent.getNamespaceURI(XMLConstants.NULL_NS_URI);
 		this.startTagClosed = true;
 	}
@@ -214,7 +214,7 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 		} else {
 			if (!namespaceURI.equals(getNamespaceURI(prefix))) {
 				if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-					throw new XMLStreamException("Prefix required for namespace: '" + namespaceURI);
+					throw new XMLStreamException("Prefix required for namespace URI: '" + namespaceURI);
 				} else if (XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
 					throw new XMLStreamException("Prefix '" + prefix +"' is bound to: " + getNamespaceURI(prefix));
 				} else {
@@ -280,7 +280,9 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 
 	@Override
 	public String getPrefix(String namespaceURI) {
-		if (defaultNamespace.equals(namespaceURI)) {
+		if (XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
+			return null;
+		} else if (defaultNamespace.equals(namespaceURI)) {
 			return XMLConstants.DEFAULT_NS_PREFIX;
 		} else {
 			return getNonEmptyPrefix(namespaceURI);
