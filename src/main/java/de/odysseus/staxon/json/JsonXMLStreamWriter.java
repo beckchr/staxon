@@ -98,6 +98,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	private final boolean multiplePI;
 	private final boolean autoEndArray;
 	private final boolean skipSpace;
+	private final boolean writeNamespaces;
 	private final char prefixSeparator;
 
 	/**
@@ -105,11 +106,12 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	 * @param target stream target
 	 * @param multiplePI whether to use processing instruction to trigger array start
 	 */
-	public JsonXMLStreamWriter(JsonStreamTarget target, boolean multiplePI, char prefixSeparator) {
+	public JsonXMLStreamWriter(JsonStreamTarget target, boolean multiplePI, char prefixSeparator, boolean writeNamespaces) {
 		super(new ScopeInfo());
 		this.target = target;
 		this.multiplePI = multiplePI;
 		this.prefixSeparator = prefixSeparator;
+		this.writeNamespaces = writeNamespaces;
 		this.autoEndArray = true;
 		this.skipSpace = true;
 	}
@@ -197,19 +199,21 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	
 	@Override
 	protected void writeNsDecl(String prefix, String namespaceURI) throws XMLStreamException {
-		try {
-			if (!getScope().getInfo().startObjectWritten) {
-				target.startObject();
-				getScope().getInfo().startObjectWritten = true;
+		if (writeNamespaces) {
+			try {
+				if (!getScope().getInfo().startObjectWritten) {
+					target.startObject();
+					getScope().getInfo().startObjectWritten = true;
+				}
+				if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+					target.name('@' + XMLConstants.XMLNS_ATTRIBUTE);
+				} else {
+					target.name('@' + XMLConstants.XMLNS_ATTRIBUTE + prefixSeparator + prefix);
+				}
+				target.value(namespaceURI);
+			} catch (IOException e) {
+				throw new XMLStreamException("Cannot write namespace declaration: " + namespaceURI, e);
 			}
-			if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-				target.name('@' + XMLConstants.XMLNS_ATTRIBUTE);
-			} else {
-				target.name('@' + XMLConstants.XMLNS_ATTRIBUTE + prefixSeparator + prefix);
-			}
-			target.value(namespaceURI);
-		} catch (IOException e) {
-			throw new XMLStreamException("Cannot write namespace declaration: " + namespaceURI, e);
 		}
 	}
 	
