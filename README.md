@@ -95,8 +95,10 @@ You can get StAXON artifacts from our [maven repositories](http://beckchr.github
 		<dependency>
 			<groupId>de.odysseus.staxon</groupId>
 			<artifactId>staxon</artifactId>
-			<version>0.8.0</version>
+			<version>0.8.1</version>
 		</dependency>
+		
+		<!-- jackson backend (optional) -->
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-core-asl</artifactId>
@@ -104,12 +106,13 @@ You can get StAXON artifacts from our [maven repositories](http://beckchr.github
 		</dependency>
 	</dependencies>
 
-Manually download the latest release: StAXON 0.8.0 (2011/10/22):
+Manually download the latest release: StAXON 0.8.1 (2011/10/25):
 
-- [staxon-0.8.0.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon/0.8.0/staxon-0.8.0.jar)
-- [staxon-0.8.0-sources.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon/0.8.0/staxon-0.8.0-sources.jar)
+- [staxon-0.8.1.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon/0.8.1/staxon-0.8.1.jar)
+- [staxon-0.8.1-sources.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon/0.8.1/staxon-0.8.1-sources.jar)
 
-Make sure you have the `jackson-core` (or `gson`) jar on your classpath ([jackson download](http://wiki.fasterxml.com/JacksonDownload)).
+If the `jackson-core` (or `gson`) jar is on your classpath ([jackson download](http://wiki.fasterxml.com/JacksonDownload)),
+StAXON will use it as its JSON parsing/formatting backend. Otherwise, StAXON uses its own (simple) JSON parser and formatter.
 
 ## Development
 
