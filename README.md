@@ -95,7 +95,7 @@ You can get StAXON artifacts from our [maven repositories](http://beckchr.github
 		<dependency>
 			<groupId>de.odysseus.staxon</groupId>
 			<artifactId>staxon</artifactId>
-			<version>0.8.1</version>
+			<version>0.8.2</version>
 		</dependency>
 		
 		<!-- jackson backend (optional) -->
@@ -106,13 +106,14 @@ You can get StAXON artifacts from our [maven repositories](http://beckchr.github
 		</dependency>
 	</dependencies>
 
-Manually download the latest release: StAXON 0.8.1 (2011/10/25):
+Manually download the latest release: StAXON 0.8.2 (2011/10/25):
 
-- [staxon-0.8.1.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon/0.8.1/staxon-0.8.1.jar)
-- [staxon-0.8.1-sources.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon/0.8.1/staxon-0.8.1-sources.jar)
+- [staxon-0.8.2.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon/0.8.2/staxon-0.8.2.jar)
+- [staxon-0.8.2-sources.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon/0.8.2/staxon-0.8.2-sources.jar)
 
 If the `jackson-core` (or `gson`) jar is on your classpath ([jackson download](http://wiki.fasterxml.com/JacksonDownload)),
-StAXON will use it as its JSON parsing/formatting backend. Otherwise, StAXON uses its own (simple) JSON parser and formatter.
+StAXON will use it as its JSON parsing/formatting backend (recommended). Otherwise, StAXON uses its own (simple) JSON parser
+and formatter.
 
 ## Development
 
