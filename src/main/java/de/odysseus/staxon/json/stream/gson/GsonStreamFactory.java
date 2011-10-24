@@ -33,6 +33,10 @@ import de.odysseus.staxon.json.stream.JsonStreamSource;
 import de.odysseus.staxon.json.stream.JsonStreamTarget;
 
 public class GsonStreamFactory extends JsonStreamFactory {
+	public GsonStreamFactory() {
+		JsonReader.class.getName(); // force loading Gson class
+	}
+	
 	@Override
 	public JsonStreamSource createJsonStreamSource(InputStream input) throws IOException {
 		return createJsonStreamSource(new InputStreamReader(input));
