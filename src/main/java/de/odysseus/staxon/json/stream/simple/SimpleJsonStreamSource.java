@@ -97,11 +97,7 @@ class SimpleJsonStreamSource implements JsonStreamSource {
 			return JsonStreamToken.NONE;
 		}
 		if (token == null) {
-			if (symbol == Scanner.Symbol.START_OBJECT) {
-				return JsonStreamToken.START_OBJECT;
-			} else {
-				throw new IOException("Unexpected symbol: " + symbol);
-			}
+			return startJsonValue(symbol);
 		}
 		switch (token) {
 		case NAME:
