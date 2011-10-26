@@ -1,11 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.odysseus.staxon</groupId>
-	<artifactId>staxon</artifactId>
-	<packaging>jar</packaging>
+	<artifactId>staxon-parent</artifactId>
 	<version>0.8.3-SNAPSHOT</version>
-	<name>StAXON</name>
-	<description>JSON via StAX</description>
+	<packaging>pom</packaging>
+	<name>StAXON Parent</name>
+	<description>JSON via StAX - Parent</description>
+
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
 
 	<url>http://beckchr.github.com/staxon/</url>
 	<inceptionYear>2011</inceptionYear>
@@ -30,12 +36,12 @@
 	<distributionManagement>
 		<repository>
 			<id>releases</id>
-			<url>file:../../../staxon.gh-pages/maven/releases</url>
+			<url>file:../../../../staxon.gh-pages/maven/releases</url>
 		</repository>
 		<snapshotRepository>
 			<id>snapshots</id>
 			<uniqueVersion>false</uniqueVersion>
-			<url>file:../staxon.gh-pages/maven/snapshots</url>
+			<url>file:../../staxon.gh-pages/maven/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 
@@ -68,38 +74,10 @@
 					</execution>
 				</executions>
 			</plugin>
-
-			<plugin>
-				<groupId>de.jflex</groupId>
-				<artifactId>maven-jflex-plugin</artifactId>
-				<version>1.4.3</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-						<configuration>
-							<backup>false</backup>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-core-asl</artifactId>
-			<version>1.9.0</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>1.7.1</version>
-			<scope>provided</scope>
-		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -107,5 +85,11 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	
+	<modules>
+		<module>staxon-core</module>
+		<module>staxon-gson</module>
+		<module>staxon-jackson</module>
+	</modules>
 	
 </project>
