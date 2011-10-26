@@ -28,8 +28,6 @@ import java.util.Properties;
 
 import javax.xml.stream.FactoryConfigurationError;
 
-import de.odysseus.staxon.json.stream.simple.SimpleJsonStreamFactory;
-
 public abstract class JsonStreamFactory {
 	/**
 	 * <p>Create a new instance of a JsonStreamFactory.</p>
@@ -44,9 +42,7 @@ public abstract class JsonStreamFactory {
 	 * used as the name of the implementation class.</li>
 	 * <li>Use the de.odysseus.staxon.json.stream.JsonStreamFactory system property. If a system property
 	 * with this name is defined, then its value is used as the name of the implementation class.</li>
-	 * <li>Use platform default: try "de.odysseus.staxon.json.stream.jackson.JacksonStreamFactory" first.
-	 * If this class is not found, try "de.odysseus.staxon.json.stream.gson.GsonStreamFactory". As a last
-	 * exit, create an instance of "de.odysseus.staxon.json.stream.simple.SimpleJsonStreamFactory".</li>
+	 * <li>Use platform default: "de.odysseus.staxon.json.stream.simple.SimpleJsonStreamFactory".</li>
 	 * </ol>
 	 * </p>
 	 * @return An instance of JsonStreamFactory.
@@ -122,23 +118,13 @@ public abstract class JsonStreamFactory {
 		}
 		
 		if (className == null || className.trim().length() == 0) {
-			className = "de.odysseus.staxon.json.stream.jackson.JacksonStreamFactory";
-			try {
-				return (JsonStreamFactory) classLoader.loadClass(className).newInstance();
-			} catch (Throwable e1) {
-				className = "de.odysseus.staxon.json.stream.gson.GsonStreamFactory";
-				try {
-					return (JsonStreamFactory) classLoader.loadClass(className).newInstance();
-				} catch (Throwable e2) {
-					return new SimpleJsonStreamFactory(); // last exit...
-				}
-			}
-		} else {
-			try {
-				return (JsonStreamFactory) classLoader.loadClass(className).newInstance();
-			} catch (Throwable e) {
-				throw new FactoryConfigurationError("Error creating stream factory: " + e);
-			}
+			className = "de.odysseus.staxon.json.stream.simple.SimpleJsonStreamFactory";
+		}
+
+		try {
+			return (JsonStreamFactory) classLoader.loadClass(className).newInstance();
+		} catch (Throwable e) {
+			throw new FactoryConfigurationError("Error creating stream factory: " + e);
 		}
 	}
 
