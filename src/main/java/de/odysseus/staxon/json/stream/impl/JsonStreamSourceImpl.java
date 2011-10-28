@@ -56,6 +56,7 @@ class JsonStreamSourceImpl implements JsonStreamSource {
 	private final boolean closeScanner;
 
 	private JsonStreamToken token;
+	private Scanner.Symbol symbol;
 	private int depth;
 	
 	JsonStreamSourceImpl(Scanner scanner, boolean closeScanner) {
@@ -63,7 +64,7 @@ class JsonStreamSourceImpl implements JsonStreamSource {
 		this.closeScanner = closeScanner;
 	}
 
-	private JsonStreamToken startJsonValue(Scanner.Symbol symbol) throws IOException {
+	private JsonStreamToken startJsonValue() throws IOException {
 		switch (symbol) {
 		case FALSE:
 		case NULL:
@@ -85,25 +86,25 @@ class JsonStreamSourceImpl implements JsonStreamSource {
 		}
 	}
 	
-	private void require(Scanner.Symbol expected, Scanner.Symbol actual) throws IOException {
-		if (actual != expected) {
-			throw new IOException("Unexpected symbol:" + actual);
+	private void require(Scanner.Symbol expected) throws IOException {
+		if (symbol != expected) {
+			throw new IOException("Unexpected symbol:" + symbol);
 		}		
 	}
 
 	private JsonStreamToken next() throws IOException {
-		Scanner.Symbol symbol = scanner.nextSymbol();
+		symbol = scanner.nextSymbol();
 		if (symbol == Scanner.Symbol.EOF) {
 			return JsonStreamToken.NONE;
 		}
 		if (token == null) {
-			return startJsonValue(symbol);
+			return startJsonValue();
 		}
 		switch (token) {
 		case NAME:
-			require(Scanner.Symbol.COLON, symbol);
+			require(Scanner.Symbol.COLON);
 			symbol = scanner.nextSymbol();
-			return startJsonValue(symbol);
+			return startJsonValue();
 		case END_OBJECT:
 		case END_ARRAY:
 		case VALUE:
@@ -111,9 +112,9 @@ class JsonStreamSourceImpl implements JsonStreamSource {
 			case COMMA:
 				symbol = scanner.nextSymbol();
 				if (arrays[depth]) {
-					return startJsonValue(symbol);
+					return startJsonValue();
 				} else {
-					require(Scanner.Symbol.STRING, symbol);
+					require(Scanner.Symbol.STRING);
 					return JsonStreamToken.NAME;
 				}
 			case END_ARRAY:
@@ -144,7 +145,7 @@ class JsonStreamSourceImpl implements JsonStreamSource {
 				arrays[depth] = false;
 				return JsonStreamToken.END_ARRAY;
 			default:
-				return startJsonValue(symbol);
+				return startJsonValue();
 			}
 		default:
 			throw new IOException("Unexpected token: " + token);
@@ -175,7 +176,7 @@ class JsonStreamSourceImpl implements JsonStreamSource {
 	@Override
 	public String value() throws IOException {
 		require(JsonStreamToken.VALUE);
-		String result = scanner.getText();
+		String result = symbol == Scanner.Symbol.NULL ? null : scanner.getText();
 		token = next();
 		return result;
 	}
