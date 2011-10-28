@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.odysseus.staxon.json.stream.simple;
+package de.odysseus.staxon.json.stream.impl;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -23,7 +23,7 @@ import de.odysseus.staxon.json.stream.JsonStreamTarget;
 /**
  * Simple <code>JsonStreamTarget</code> implementation.
  */
-class SimpleJsonStreamTarget implements JsonStreamTarget {
+class JsonStreamTargetImpl implements JsonStreamTarget {
 	private final Writer writer;
 	private final int[] namePos = new int[64];
 	private final int[] arrayPos = new int[64];
@@ -36,7 +36,7 @@ class SimpleJsonStreamTarget implements JsonStreamTarget {
 
 	private int depth = 0;
 	
-	SimpleJsonStreamTarget(Writer writer, boolean closeWriter, boolean pretty) {
+	JsonStreamTargetImpl(Writer writer, boolean closeWriter, boolean pretty) {
 		this.writer = writer;
 		this.closeWriter = closeWriter;
 		this.pretty = pretty;

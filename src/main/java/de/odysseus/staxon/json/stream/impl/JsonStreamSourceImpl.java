@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.odysseus.staxon.json.stream.simple;
+package de.odysseus.staxon.json.stream.impl;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -24,7 +24,7 @@ import de.odysseus.staxon.json.stream.JsonStreamToken;
 /**
  * Simple <code>JsonStreamSource</code> implementation.
  */
-class SimpleJsonStreamSource implements JsonStreamSource {
+class JsonStreamSourceImpl implements JsonStreamSource {
 	/**
 	 * Scanner interface
 	 */
@@ -58,7 +58,7 @@ class SimpleJsonStreamSource implements JsonStreamSource {
 	private JsonStreamToken token;
 	private int depth;
 	
-	SimpleJsonStreamSource(Scanner scanner, boolean closeScanner) {
+	JsonStreamSourceImpl(Scanner scanner, boolean closeScanner) {
 		this.scanner = scanner;
 		this.closeScanner = closeScanner;
 	}

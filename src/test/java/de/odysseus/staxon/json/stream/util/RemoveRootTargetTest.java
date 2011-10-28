@@ -24,12 +24,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import de.odysseus.staxon.json.JsonXMLStreamWriter;
-import de.odysseus.staxon.json.stream.simple.SimpleJsonStreamFactory;
+import de.odysseus.staxon.json.stream.impl.JsonStreamFactoryImpl;
 import de.odysseus.staxon.json.stream.util.RemoveRootTarget;
 
 public class RemoveRootTargetTest {
 	private RemoveRootTarget createTarget(StringWriter result, String root) throws IOException {
-		return new RemoveRootTarget(new SimpleJsonStreamFactory().createJsonStreamTarget(result, false), root);
+		return new RemoveRootTarget(new JsonStreamFactoryImpl().createJsonStreamTarget(result, false), root);
 	}
 	
 	/**

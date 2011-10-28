@@ -27,12 +27,12 @@ import org.junit.Test;
 
 import de.odysseus.staxon.json.JsonXMLStreamConstants;
 import de.odysseus.staxon.json.JsonXMLStreamReader;
-import de.odysseus.staxon.json.stream.simple.SimpleJsonStreamFactory;
+import de.odysseus.staxon.json.stream.impl.JsonStreamFactoryImpl;
 import de.odysseus.staxon.json.stream.util.AddRootSource;
 
 public class AddRootSourceTest {
 	private AddRootSource createSource(StringReader reader, String root) throws IOException {
-		return new AddRootSource(new SimpleJsonStreamFactory().createJsonStreamSource(reader), root);
+		return new AddRootSource(new JsonStreamFactoryImpl().createJsonStreamSource(reader), root);
 	}
 
 	void verify(XMLStreamReader reader, int expectedEventType, String expectedLocalName, String expectedText) {

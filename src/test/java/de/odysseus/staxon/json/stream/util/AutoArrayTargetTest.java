@@ -24,12 +24,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import de.odysseus.staxon.json.JsonXMLStreamWriter;
-import de.odysseus.staxon.json.stream.simple.SimpleJsonStreamFactory;
+import de.odysseus.staxon.json.stream.impl.JsonStreamFactoryImpl;
 import de.odysseus.staxon.json.stream.util.AutoArrayTarget;
 
 public class AutoArrayTargetTest {
 	private AutoArrayTarget createTarget(StringWriter result) throws IOException {
-		return new AutoArrayTarget(new SimpleJsonStreamFactory().createJsonStreamTarget(result, false));
+		return new AutoArrayTarget(new JsonStreamFactoryImpl().createJsonStreamTarget(result, false));
 	}
 	
 	/**

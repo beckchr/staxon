@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.odysseus.staxon.json.stream.simple;
+package de.odysseus.staxon.json.stream.impl;
 
 @SuppressWarnings("unused")
 %%
 %final
-%implements SimpleJsonStreamSource.Scanner
+%implements JsonStreamSourceImpl.Scanner
 %apiprivate
 
 %char

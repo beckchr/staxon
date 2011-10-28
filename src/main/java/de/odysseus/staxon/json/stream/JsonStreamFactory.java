@@ -42,7 +42,7 @@ public abstract class JsonStreamFactory {
 	 * used as the name of the implementation class.</li>
 	 * <li>Use the de.odysseus.staxon.json.stream.JsonStreamFactory system property. If a system property
 	 * with this name is defined, then its value is used as the name of the implementation class.</li>
-	 * <li>Use platform default: "de.odysseus.staxon.json.stream.simple.SimpleJsonStreamFactory".</li>
+	 * <li>Use platform default: "de.odysseus.staxon.json.stream.impl.JsonStreamFactoryImpl".</li>
 	 * </ol>
 	 * </p>
 	 * @return An instance of JsonStreamFactory.
@@ -118,7 +118,7 @@ public abstract class JsonStreamFactory {
 		}
 		
 		if (className == null || className.trim().length() == 0) {
-			className = "de.odysseus.staxon.json.stream.simple.SimpleJsonStreamFactory";
+			className = "de.odysseus.staxon.json.stream.impl.JsonStreamFactoryImpl";
 		}
 
 		try {

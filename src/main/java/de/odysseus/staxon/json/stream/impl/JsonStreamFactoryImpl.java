@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.odysseus.staxon.json.stream.simple;
+package de.odysseus.staxon.json.stream.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,8 +26,9 @@ import java.io.Writer;
 import de.odysseus.staxon.json.stream.JsonStreamFactory;
 import de.odysseus.staxon.json.stream.JsonStreamSource;
 import de.odysseus.staxon.json.stream.JsonStreamTarget;
+import de.odysseus.staxon.json.stream.impl.Yylex;
 
-public class SimpleJsonStreamFactory extends JsonStreamFactory {
+public class JsonStreamFactoryImpl extends JsonStreamFactory {
 	@Override
 	public JsonStreamSource createJsonStreamSource(InputStream input) throws IOException {
 		return createJsonStreamSource(new InputStreamReader(input, "UTF-8"));
@@ -35,7 +36,7 @@ public class SimpleJsonStreamFactory extends JsonStreamFactory {
 	
 	@Override
 	public JsonStreamSource createJsonStreamSource(Reader reader) {
-		return new SimpleJsonStreamSource(new Yylex(reader), false);
+		return new JsonStreamSourceImpl(new Yylex(reader), false);
 	}
 
 	@Override
@@ -45,6 +46,6 @@ public class SimpleJsonStreamFactory extends JsonStreamFactory {
 	
 	@Override
 	public JsonStreamTarget createJsonStreamTarget(Writer writer, boolean pretty) {
-		return new SimpleJsonStreamTarget(writer, false, pretty);
+		return new JsonStreamTargetImpl(writer, false, pretty);
 	}
 }
