@@ -54,19 +54,23 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	 * XML requires a single root element. This property takes the name
 	 * of a "virtual" root element, which will be added to the stream
 	 * when reading.</p>
+	 * 
+	 * <p>The default value is <code>null</code>.</p>
 	 */
 	public static final String PROP_VIRTUAL_ROOT = "JsonXMLInputFactory.virtualRoot";
 
 	/**
-	 * Namespace prefix separator.
+	 * <p>Namespace prefix separator.</p>
+	 * 
+	 * <p>The default value is <code>':'</code>.</p>
 	 */
-	public static final String PROP_PREFIX_SEPARATOR = "JsonXMLInputFactory.prefixSeparator";
+	public static final String PROP_NAMESPACE_SEPARATOR = "JsonXMLInputFactory.namespaceSeparator";
 
 	private final JsonStreamFactory streamFactory;
 
 	private boolean multiplePI = true;
 	private String virtualRoot = null;
-	private char prefixSeparator = ':';
+	private char namespaceSeparator = ':';
 	
 	public JsonXMLInputFactory() throws FactoryConfigurationError {
 		this(JsonStreamFactory.newFactory());
@@ -96,7 +100,7 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	@Override
 	public XMLStreamReader createXMLStreamReader(Reader reader) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(reader)), multiplePI, prefixSeparator);
+			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(reader)), multiplePI, namespaceSeparator);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -105,7 +109,7 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	@Override
 	public XMLStreamReader createXMLStreamReader(InputStream stream) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(stream)), multiplePI, prefixSeparator);
+			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(stream)), multiplePI, namespaceSeparator);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -138,7 +142,7 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	@Override
 	public boolean isPropertySupported(String name) {
 		return super.isPropertySupported(name)
-			|| Arrays.asList(PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT, PROP_PREFIX_SEPARATOR).contains(name);
+			|| Arrays.asList(PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT, PROP_NAMESPACE_SEPARATOR).contains(name);
 	}
 
 	@Override
@@ -150,8 +154,8 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 				return Boolean.valueOf(multiplePI);
 			} else if (PROP_VIRTUAL_ROOT.equals(name)) {
 				return virtualRoot;
-			} else if (PROP_PREFIX_SEPARATOR.equals(name)) {
-				return prefixSeparator;
+			} else if (PROP_NAMESPACE_SEPARATOR.equals(name)) {
+				return namespaceSeparator;
 			} else {
 				throw new IllegalArgumentException("Unsupported property: " + name);
 			}
@@ -187,8 +191,8 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 				multiplePI = ((Boolean)value).booleanValue();
 			} else if (PROP_VIRTUAL_ROOT.equals(name)) {
 				virtualRoot = (String)value;
-			} else if (PROP_PREFIX_SEPARATOR.equals(name)) {
-				prefixSeparator = (Character)value;
+			} else if (PROP_NAMESPACE_SEPARATOR.equals(name)) {
+				namespaceSeparator = (Character)value;
 			} else {
 				throw new IllegalArgumentException("Unsupported property: " + name);
 			}

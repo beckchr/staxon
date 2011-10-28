@@ -98,26 +98,28 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	private final boolean multiplePI;
 	private final boolean autoEndArray;
 	private final boolean skipSpace;
-	private final boolean writeNamespaces;
-	private final char prefixSeparator;
+	private final char namespaceSeparator;
+	private final boolean namespaceDeclarations;
 
 	/**
 	 * Create writer instance.
 	 * @param target stream target
-	 * @param multiplePI whether to use processing instruction to trigger array start
+	 * @param multiplePI whether to consume <code>&lt;xml-multiple?&gt;</code> PIs to trigger array start
+	 * @param namespaceSeparator namespace prefix separator
+	 * @param namespaceDeclarations whether to write namespace declarations
 	 */
-	public JsonXMLStreamWriter(JsonStreamTarget target, boolean multiplePI, char prefixSeparator, boolean writeNamespaces) {
+	public JsonXMLStreamWriter(JsonStreamTarget target, boolean multiplePI, char namespaceSeparator, boolean namespaceDeclarations) {
 		super(new ScopeInfo());
 		this.target = target;
 		this.multiplePI = multiplePI;
-		this.prefixSeparator = prefixSeparator;
-		this.writeNamespaces = writeNamespaces;
+		this.namespaceSeparator = namespaceSeparator;
+		this.namespaceDeclarations = namespaceDeclarations;
 		this.autoEndArray = true;
 		this.skipSpace = true;
 	}
 
 	private String getFieldName(String prefix, String localName) {
-		return XMLConstants.DEFAULT_NS_PREFIX.equals(prefix) ? localName : prefix + prefixSeparator + localName;
+		return XMLConstants.DEFAULT_NS_PREFIX.equals(prefix) ? localName : prefix + namespaceSeparator + localName;
 	}
 	
 	@Override
@@ -184,7 +186,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 
 	@Override
 	protected void writeAttr(String prefix, String localName, String namespaceURI, String value) throws XMLStreamException {
-		String name = XMLConstants.DEFAULT_NS_PREFIX.equals(prefix) ? localName : prefix + prefixSeparator + localName;
+		String name = XMLConstants.DEFAULT_NS_PREFIX.equals(prefix) ? localName : prefix + namespaceSeparator + localName;
 		try {
 			if (!getScope().getInfo().startObjectWritten) {
 				target.startObject();
@@ -199,7 +201,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	
 	@Override
 	protected void writeNsDecl(String prefix, String namespaceURI) throws XMLStreamException {
-		if (writeNamespaces) {
+		if (namespaceDeclarations) {
 			try {
 				if (!getScope().getInfo().startObjectWritten) {
 					target.startObject();
@@ -208,7 +210,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 				if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
 					target.name('@' + XMLConstants.XMLNS_ATTRIBUTE);
 				} else {
-					target.name('@' + XMLConstants.XMLNS_ATTRIBUTE + prefixSeparator + prefix);
+					target.name('@' + XMLConstants.XMLNS_ATTRIBUTE + namespaceSeparator + prefix);
 				}
 				target.value(namespaceURI);
 			} catch (IOException e) {

@@ -45,24 +45,25 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 	
 	private final JsonStreamSource source;
 	private final boolean multiplePI;
-	private final char prefixSeparator;
+	private final char namespaceSeparator;
 
 	/**
 	 * Create reader instance.
 	 * @param source stream source
-	 * @param multiplePI whether to use processing instruction to trigger array start
+	 * @param multiplePI whether to produce <code>&lt;xml-multiple?&gt;</code> PIs to signal array start
+	 * @param namespaceSeparator namespace prefix separator
 	 * @throws XMLStreamException
 	 */
-	public JsonXMLStreamReader(JsonStreamSource source, boolean multiplePI, char prefixSeparator) throws XMLStreamException {
+	public JsonXMLStreamReader(JsonStreamSource source, boolean multiplePI, char namespaceSeparator) throws XMLStreamException {
 		super(new ScopeInfo());
 		this.source = source;
 		this.multiplePI = multiplePI;
-		this.prefixSeparator = prefixSeparator;
+		this.namespaceSeparator = namespaceSeparator;
 		initialize();
 	}
 
 	private void readStartElementTag(String name) throws XMLStreamException {
-		int separator = name.indexOf(prefixSeparator);
+		int separator = name.indexOf(namespaceSeparator);
 		if (separator < 0) {
 			readStartElementTag(XMLConstants.DEFAULT_NS_PREFIX, name, null, new ScopeInfo());
 		} else {
@@ -71,7 +72,7 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 	}
 	
 	private void readAttrNsDecl(String name, String value) throws XMLStreamException {
-		int separator = name.indexOf(prefixSeparator);
+		int separator = name.indexOf(namespaceSeparator);
 		if (separator < 0) {
 			if (XMLConstants.XMLNS_ATTRIBUTE.equals(name)) {
 				readNsDecl(XMLConstants.DEFAULT_NS_PREFIX, value);
