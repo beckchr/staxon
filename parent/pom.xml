@@ -43,7 +43,7 @@
 		<snapshotRepository>
 			<id>snapshots</id>
 			<uniqueVersion>false</uniqueVersion>
-			<url>file:../staxon.gh-pages/maven/snapshots</url>
+			<url>file:../../staxon.gh-pages/maven/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 
