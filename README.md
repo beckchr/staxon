@@ -92,6 +92,8 @@ You _must_ have the StAXON core library on your classpath. Additionally, you _ma
 Jackson streaming backend. However, unless you want to avoid a dependency to an external JSON processor, it is
 recommended to choose one of those as backend.
 
+## Maven
+
 Releases are synced to Maven Central. To add a dependency to StAXON in your POM file like this:
 
 	<dependencies>
@@ -117,7 +119,7 @@ Releases are synced to Maven Central. To add a dependency to StAXON in your POM 
 		-->		
 	</dependencies>
 
-## Download
+## Downloads
 
 Manually download the latest release: StAXON 0.9.1 (2011/10/29):
 
