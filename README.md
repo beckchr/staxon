@@ -94,7 +94,7 @@ recommended to choose one of those as backend.
 
 ## Maven
 
-Releases are synced to Maven Central. To add a dependency to StAXON in your POM file like this:
+Releases are synced to Maven Central. Add a dependency to StAXON in your POM file like this:
 
 	<dependencies>
 		<dependency>
