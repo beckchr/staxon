@@ -88,62 +88,53 @@ StAXON consists of the following modules:
 - `staxon-gson` - streaming backend for [Gson](http://code.google.com/p/google-gson/) JSON processor (optional)
 - `staxon-jackson` - streaming backend for [Jackson](http://jackson.codehaus.org/) JSON processor (optional)
 
-You _must_ have the StAXON core library on your classpath and _may_ choose to use the Gson or the Jackson
-streaming backend.
+You _must_ have the StAXON core library on your classpath. Additionally, you _may_ choose to use the Gson _or_ the
+Jackson streaming backend. However, unless you want to avoid a dependency to an external JSON processor, it is
+recommended to choose one of those as backend.
 
-Currently, you can get StAXON artifacts from our [Maven repositories](http://beckchr.github.com/staxon/maven/) at github: 
-
-	<repositories>
-		<repository>
-			<id>staxon</id>
-			<url>http://beckchr.github.com/staxon/maven/releases</url>
-		</repository>
-	</repositories>
+Releases are synced to Maven Central. To add a dependency to StAXON in your POM file like this:
 
 	<dependencies>
 		<dependency>
 			<groupId>de.odysseus.staxon</groupId>
 			<artifactId>staxon</artifactId>
-			<version>0.9.0</version>
+			<version>0.9.1</version>
 		</dependency>
-		
-		<!-- or, to use the Jackson streaming backend
+
+		<!-- or, to use the Jackson streaming backend -->
 		<dependency>
 			<groupId>de.odysseus.staxon</groupId>
 			<artifactId>staxon-jackson</artifactId>
-			<version>0.9.0</version>
+			<version>0.9.1</version>
 		</dependency>
-		-->
 
 		<!-- or, to use the Gson streaming backend
 		<dependency>
 			<groupId>de.odysseus.staxon</groupId>
 			<artifactId>staxon-gson</artifactId>
-			<version>0.9.0</version>
+			<version>0.9.1</version>
 		</dependency>
-		-->
+		-->		
 	</dependencies>
-
-From version 1.0.0 (scheduled for December 2011) upwards, StAXON artifacts will be uploaded to Maven central. 
 
 ## Download
 
-Manually download the latest release: StAXON 0.9.0 (2011/10/29):
+Manually download the latest release: StAXON 0.9.1 (2011/10/29):
 
 Core library:
 
-- [staxon-0.9.0.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon/0.9.0/staxon-0.9.0.jar)
-- [staxon-0.9.0-sources.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon/0.9.0/staxon-0.9.0-sources.jar)
+- [staxon-0.9.1.jar](http://repo1.maven.org/maven2/de/odysseus/staxon/staxon/0.9.1/staxon-0.9.1.jar)
+- [staxon-0.9.1-sources.jar](http://repo1.maven.org/maven2/de/odysseus/staxon/staxon/0.9.1//staxon-0.9.1-sources.jar)
 
 Gson backend:
 
-- [staxon-gson-0.9.0.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon-gson/0.9.0/staxon-gson-0.9.0.jar)
-- [staxon-gson-0.9.0-sources.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon-gson/0.9.0/staxon-gson-0.9.0-sources.jar)
+- [staxon-gson-0.9.1.jar](http://repo1.maven.org/maven2/de/odysseus/staxon/staxon-gson/0.9.1/staxon-gson-0.9.1.jar)
+- [staxon-gson-0.9.1-sources.jar](http://repo1.maven.org/maven2/de/odysseus/staxon/staxon-gson/0.9.1/staxon-gson-0.9.1-sources.jar)
 
 Jackson backend:
 
-- [staxon-jackson-0.9.0.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon-jackson/0.9.0/staxon-jackson-0.9.0.jar)
-- [staxon-jackson-0.9.0-sources.jar](http://beckchr.github.com/staxon/maven/releases/de/odysseus/staxon/staxon-jackson/0.9.0/staxon-jackson-0.9.0-sources.jar)
+- [staxon-jackson-0.9.1.jar](http://repo1.maven.org/maven2/de/odysseus/staxon/staxon-jackson/0.9.1/staxon-jackson-0.9.1.jar)
+- [staxon-jackson-0.9.1-sources.jar](http://repo1.maven.org/maven2/de/odysseus/staxon/staxon-jackson/0.9.1/staxon-jackson-0.9.1-sources.jar)
 
 ## Development
 
