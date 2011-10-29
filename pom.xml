@@ -7,13 +7,11 @@
 	<name>StAXON Parent</name>
 	<description>JSON via StAX - Parent</description>
 
-	<!--
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
 		<artifactId>oss-parent</artifactId>
 		<version>7</version>
 	</parent>
-	-->
 
 	<url>http://beckchr.github.com/staxon/</url>
 	<inceptionYear>2011</inceptionYear>
@@ -34,18 +32,6 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-
-	<distributionManagement>
-		<repository>
-			<id>releases</id>
-			<url>file:../../../staxon.gh-pages/maven/releases</url>
-		</repository>
-		<snapshotRepository>
-			<id>snapshots</id>
-			<uniqueVersion>false</uniqueVersion>
-			<url>file:../staxon.gh-pages/maven/snapshots</url>
-		</snapshotRepository>
-	</distributionManagement>
 
 	<build>
 		<plugins>
