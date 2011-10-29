@@ -128,7 +128,7 @@ From version 1.0.0 (scheduled for December 2011) upwards, StAXON artifacts will 
 
 ## Download
 
-Manually download the latest release: StAXON 0.9.0 (2011/10/28):
+Manually download the latest release: StAXON 0.9.0 (2011/10/29):
 
 Core library:
 
