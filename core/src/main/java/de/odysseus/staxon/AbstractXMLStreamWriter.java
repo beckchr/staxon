@@ -52,9 +52,6 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 			throw new XMLStreamException("Local name must not be null");
 		}
 		ensureStartTagClosed();
-		if (startDocumentWritten && scope.isRoot() && scope.getLastChild() != null) {
-			throw new XMLStreamException("Multiple roots within document");
-		}
 		T scopeInfo = writeStartElementTag(prefix, localPart, namespaceURI);
 		scope = new XMLStreamWriterScope<T>(scope, prefix, localPart, namespaceURI, emptyElement);
 		scope.setInfo(scopeInfo);

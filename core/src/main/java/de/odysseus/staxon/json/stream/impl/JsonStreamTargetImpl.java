@@ -153,7 +153,7 @@ class JsonStreamTargetImpl implements JsonStreamTarget {
 			}
 			arrayPos[depth]++;
 		}
-		if (pretty && depth > 0) {
+		if (pretty && (depth > 0 || arrayPos[depth] > 0)) {
 			writer.write(' ');
 		}
 		writer.write('{');

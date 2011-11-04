@@ -185,6 +185,14 @@ public class SimpleXMLStreamWriterTest {
 		Assert.assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><alice xmlns=\"http://some-namespace\">bob</alice>", result.toString());
 	}
 
+	@Test(expected = XMLStreamException.class)
+	public void testWriteElementMultipleRoots() throws XMLStreamException {
+		XMLStreamWriter writer = new SimpleXMLStreamWriter(new StringWriter());
+		writer.writeStartElement("foo");
+		writer.writeEndElement();
+		writer.writeStartElement("foo");
+	}
+
 	/**
 	 * <code>&lt;alice&gt;&lt;bar:bob xmlns:bar="http://bar" jane="dolly"/&gt;hello&lt;/alice&gt;</code>
 	 */

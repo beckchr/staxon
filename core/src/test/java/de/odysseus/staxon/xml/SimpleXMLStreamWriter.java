@@ -75,6 +75,9 @@ public class SimpleXMLStreamWriter extends AbstractXMLStreamWriter<String> {
 
 	@Override
 	protected String writeStartElementTag(String prefix, String localName, String namespaceURI) throws XMLStreamException {
+		if (getScope().isRoot() && getScope().getLastChild() != null) {
+			throw new XMLStreamException("Multiple roots within document");
+		}
 		String tagName = getTagName(prefix, localName);
 		try {
 			writer.write('<');

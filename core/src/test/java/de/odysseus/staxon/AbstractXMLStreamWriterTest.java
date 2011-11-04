@@ -255,21 +255,9 @@ public class AbstractXMLStreamWriterTest {
 		Assert.assertEquals("<p:foo", writer.toString());
 	}
 
-	@Test
+	@Test(expected = XMLStreamException.class)
 	public void testWriteElementMultipleRoots() throws XMLStreamException {
 		XMLStreamWriter writer = createXMLStreamWriter();
-		writer.writeStartElement("foo");
-		writer.writeEndElement();
-		writer.writeStartElement("foo");
-		writer.writeEndElement();
-		writer.flush();
-		Assert.assertEquals("<foo></foo><foo></foo>", writer.toString());
-	}
-
-	@Test(expected = XMLStreamException.class)
-	public void testWriteElementMultipleRoots2() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
-		writer.writeStartDocument();
 		writer.writeStartElement("foo");
 		writer.writeEndElement();
 		writer.writeStartElement("foo");

@@ -23,9 +23,9 @@ import javax.xml.stream.XMLStreamWriter;
 import org.junit.Assert;
 import org.junit.Test;
 
+import de.odysseus.staxon.json.JsonXMLStreamConstants;
 import de.odysseus.staxon.json.JsonXMLStreamWriter;
 import de.odysseus.staxon.json.stream.impl.JsonStreamFactoryImpl;
-import de.odysseus.staxon.json.stream.util.RemoveRootTarget;
 
 public class RemoveRootTargetTest {
 	private RemoveRootTarget createTarget(StringWriter result, String root) throws IOException {
@@ -141,5 +141,22 @@ public class RemoveRootTargetTest {
 		writer.writeEndDocument();
 		writer.close();
 		Assert.assertEquals("null", result.toString());
+	}
+
+	@Test
+	public void testRootArray() throws Exception {
+		StringWriter result = new StringWriter();
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result, "alice"), true, ':', true);
+		writer.writeStartDocument();
+		writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET);
+		writer.writeStartElement("alice");
+		writer.writeCharacters("bob");
+		writer.writeEndElement();
+		writer.writeStartElement("alice");
+		writer.writeCharacters("bob");
+		writer.writeEndElement();
+		writer.writeEndDocument(); // flush?
+		writer.close();
+		Assert.assertEquals("[\"bob\",\"bob\"]", result.toString());
 	}
 }

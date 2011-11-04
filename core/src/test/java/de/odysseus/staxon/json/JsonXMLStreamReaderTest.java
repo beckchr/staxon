@@ -180,4 +180,33 @@ public class JsonXMLStreamReaderTest {
 		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
 		reader.close();
 	}
+
+	/**
+	 * <code>&lt;alice&gt;bob&lt;/alice&gt;&lt;alice&gt;bob&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testRootArray() throws Exception {
+		String input = "{\"alice\":[\"bob\",\"bob\"]}";
+		XMLStreamReader reader = new JsonXMLInputFactory().createXMLStreamReader(new StringReader(input));
+		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
+		reader.next();
+		verify(reader, XMLStreamConstants.PROCESSING_INSTRUCTION, null, null);
+		Assert.assertEquals(JsonXMLStreamConstants.MULTIPLE_PI_TARGET, reader.getPITarget());
+		Assert.assertEquals("alice", reader.getPIData());
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.CHARACTERS, null, "bob");
+		reader.next();
+		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.CHARACTERS, null, "bob");
+		reader.next();
+		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
+		reader.close();
+	}
 }

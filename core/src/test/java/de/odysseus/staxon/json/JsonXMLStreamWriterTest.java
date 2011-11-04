@@ -17,6 +17,7 @@ package de.odysseus.staxon.json;
 
 import java.io.StringWriter;
 
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.junit.Assert;
@@ -155,5 +156,34 @@ public class JsonXMLStreamWriterTest {
 		writer.writeEndDocument();
 		writer.close();
 		Assert.assertEquals("{\"alice\":{\"@xmlns\":\"http://some-namespace\",\"$\":\"bob\"}}", result.toString());
+	}
+
+	/**
+	 * <code>&lt;alice&gt;bob&lt;/alice&gt;&lt;alice&gt;bob&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testRootArray() throws Exception {
+		StringWriter result = new StringWriter();
+		XMLStreamWriter writer = new JsonXMLOutputFactory().createXMLStreamWriter(result);
+		writer.writeStartDocument();
+		writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET, "alice");
+		writer.writeStartElement("alice");
+		writer.writeCharacters("bob");
+		writer.writeEndElement();
+		writer.writeStartElement("alice");
+		writer.writeCharacters("bob");
+		writer.writeEndElement();
+		writer.writeEndDocument(); // flush?
+		writer.close();
+		Assert.assertEquals("{\"alice\":[\"bob\",\"bob\"]}", result.toString());
+	}
+
+	@Test(expected = XMLStreamException.class)
+	public void testElementMultipleRoots() throws XMLStreamException {
+		XMLStreamWriter writer = new JsonXMLOutputFactory().createXMLStreamWriter(new StringWriter());
+		writer.writeStartDocument();
+		writer.writeStartElement("foo");
+		writer.writeEndElement();
+		writer.writeStartElement("bar");
 	}
 }

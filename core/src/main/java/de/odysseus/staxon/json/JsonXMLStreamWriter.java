@@ -132,6 +132,9 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 			parentInfo.setText(null);
 		}
 		String fieldName = getFieldName(prefix, localName);
+		if (getScope().isRoot() && getScope().getLastChild() != null && !fieldName.equals(parentInfo.getArrayName())) {
+			throw new XMLStreamException("Multiple roots within document");
+		}
 		if (parentInfo.pendingStartArray) {
 			writeStartArray(fieldName);
 		}
@@ -255,6 +258,9 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	public void writeEndDocument() throws XMLStreamException {
 		super.writeEndDocument();
 		try {
+			if (getScope().getInfo().getArrayName() != null) {
+				target.endArray();
+			}
 			target.endObject();
 		} catch (IOException e) {
 			throw new XMLStreamException("Cannot end document", e);
