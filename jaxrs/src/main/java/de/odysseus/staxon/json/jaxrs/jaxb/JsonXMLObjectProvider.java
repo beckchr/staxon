@@ -32,7 +32,10 @@ import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.Providers;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -55,13 +58,13 @@ public class JsonXMLObjectProvider extends AbstractJsonXMLProvider<Object> {
 	@Override
 	public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
 		return isJson(mediaType) && getConfig(annotations) != null
-				&& type.isAnnotationPresent(XmlRootElement.class);
+				&& (type.isAnnotationPresent(XmlRootElement.class) || type.isAnnotationPresent(XmlType.class));
 	}
 
 	@Override
 	public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
 		return isJson(mediaType) && getConfig(annotations) != null
-				&& type.isAnnotationPresent(XmlRootElement.class);
+				&& (type.isAnnotationPresent(XmlRootElement.class) || type.isAnnotationPresent(XmlType.class));
 	}
 
 	@Override
@@ -77,7 +80,8 @@ public class JsonXMLObjectProvider extends AbstractJsonXMLProvider<Object> {
 		try {
 			JAXBContext context = store.getContext(type, mediaType);
 			XMLStreamReader reader = factory.createXMLStreamReader(entityStream);
-			return context.createUnmarshaller().unmarshal(reader);
+			Unmarshaller unmarshaller = context.createUnmarshaller();
+			return unmarshal(unmarshaller, reader, type);
 		} catch (XMLStreamException e) {
 			throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
 		} catch (JAXBException e) {
@@ -87,7 +91,7 @@ public class JsonXMLObjectProvider extends AbstractJsonXMLProvider<Object> {
 
 	@Override
 	public void writeTo(
-			Object t,
+			Object entry,
 			Class<?> type,
 			Type genericType,
 			Annotation[] annotations,
@@ -102,7 +106,8 @@ public class JsonXMLObjectProvider extends AbstractJsonXMLProvider<Object> {
 			if (config.multiplePaths().length > 0) {
 				writer = new XMLMultipleStreamWriter(writer, config.multiplePaths());
 			}
-			context.createMarshaller().marshal(t, writer);
+			Marshaller marshaller = context.createMarshaller();
+			marshal(marshaller, writer, entry);
 		} catch (XMLStreamException e) {
 			throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
 		} catch (JAXBException e) {

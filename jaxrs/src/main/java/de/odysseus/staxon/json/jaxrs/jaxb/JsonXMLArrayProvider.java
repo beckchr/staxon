@@ -27,8 +27,12 @@ import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
@@ -44,6 +48,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -102,7 +107,10 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
 			return false;
 		}
 		Class<?> componentType = getComponentType(type, genericType);
-		return componentType != null && componentType.isAnnotationPresent(XmlRootElement.class);
+		if (componentType == null) {
+			return false;
+		}
+		return componentType.isAnnotationPresent(XmlRootElement.class) || componentType.isAnnotationPresent(XmlType.class);
 	}
 
 	@Override
@@ -111,17 +119,29 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
 			return false;
 		}
 		Class<?> componentType = getComponentType(type, genericType);
-		return componentType != null && componentType.isAnnotationPresent(XmlRootElement.class);
+		if (componentType == null) {
+			return false;
+		}
+		return componentType.isAnnotationPresent(XmlRootElement.class) || componentType.isAnnotationPresent(XmlType.class);
 	}
 
 	protected Collection<Object> createDefaultCollection(Class<?> type) {
 		if (List.class.isAssignableFrom(type)) {
-			return new ArrayList<Object>();
+			if (List.class.equals(type) || ArrayList.class.equals(type)) {
+				return new ArrayList<Object>();
+			} else if (LinkedList.class.equals(type)) {
+				return new LinkedList<Object>();
+			}
 		} else if (Set.class.isAssignableFrom(type)) {
-			return new HashSet<Object>();
-		} else {
-			return new ArrayList<Object>();
+			if (Set.class.equals(type) || HashSet.class.equals(type)) {
+				return new HashSet<Object>();
+			} else if (LinkedHashSet.class.equals(type)) {
+				return new LinkedHashSet<Object>();
+			} else if (SortedSet.class.equals(type) || TreeSet.class.equals(type)) {
+				return new TreeSet<Object>();
+			}
 		}
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -166,9 +186,12 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
 				reader.next();
 			}
 			reader.require(XMLStreamConstants.START_ELEMENT, null, null);
-			Collection<Object> collection = type.isArray() ? new ArrayList<Object>() : createCollection(componentType);
+			Collection<Object> collection = type.isArray() ? new ArrayList<Object>() : createCollection(type);
+			if (collection == null) {
+				throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+			}
 			while (reader.hasNext()) {
-				collection.add(unmarshaller.unmarshal(reader));
+				collection.add(unmarshal(unmarshaller, reader, componentType));
 			}
 			if (type.isArray()) {
 				return toArray((List<?>) collection, componentType);
@@ -202,12 +225,12 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
 				writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET);
 			}
 			if (type.isArray()) {
-				for (Object obj : (Object[]) entry) {
-					marshaller.marshal(obj, writer);
+				for (Object value : (Object[]) entry) {
+					marshal(marshaller, writer, value);
 				}
 			} else {
-				for (Object obj : (Collection<?>) entry)
-					marshaller.marshal(obj, writer);
+				for (Object value : (Collection<?>) entry)
+					marshal(marshaller, writer, value);
 			}
 			writer.writeEndDocument();
 			writer.close();

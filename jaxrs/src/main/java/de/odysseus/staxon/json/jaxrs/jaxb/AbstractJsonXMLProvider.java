@@ -21,6 +21,13 @@ import java.lang.reflect.Type;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 
 import de.odysseus.staxon.json.JsonXMLInputFactory;
 import de.odysseus.staxon.json.JsonXMLOutputFactory;
@@ -61,6 +68,20 @@ abstract class AbstractJsonXMLProvider<T> implements MessageBodyReader<T>, Messa
 		factory.setProperty(JsonXMLOutputFactory.PROP_NAMESPACE_SEPARATOR, config.namespaceSeparator());
 		factory.setProperty(JsonXMLOutputFactory.PROP_NAMESPACE_DECLARATIONS, config.namespaceDeclarations());
 		return factory;
+	}
+	
+	protected Object unmarshal(Unmarshaller unmarshaller, XMLStreamReader reader, Class<?> type) throws JAXBException {
+        if (type.isAnnotationPresent(XmlRootElement.class)) {
+            return unmarshaller.unmarshal(reader);
+        } else if (type.isAnnotationPresent(XmlType.class)) {
+            return unmarshaller.unmarshal(reader, type).getValue();
+        } else {
+            return unmarshaller.unmarshal(reader, type);
+        }
+	}
+	
+	protected void marshal(Marshaller marshaller, XMLStreamWriter writer, Object value) throws JAXBException {
+		marshaller.marshal(value, writer);
 	}
 	
 	@Override
