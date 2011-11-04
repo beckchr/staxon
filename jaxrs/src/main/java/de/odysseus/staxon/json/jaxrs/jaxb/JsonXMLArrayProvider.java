@@ -103,11 +103,14 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
 
 	@Override
 	public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-		if (!isJson(mediaType) || getConfig(annotations) == null) {
+		if (!isJson(mediaType)) {
 			return false;
 		}
 		Class<?> componentType = getComponentType(type, genericType);
 		if (componentType == null) {
+			return false;
+		}
+		if (getConfig(componentType.getAnnotations()) == null && getConfig(annotations) == null) {
 			return false;
 		}
 		return componentType.isAnnotationPresent(XmlRootElement.class) || componentType.isAnnotationPresent(XmlType.class);
@@ -115,33 +118,31 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
 
 	@Override
 	public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-		if (!isJson(mediaType) || getConfig(annotations) == null) {
+		if (!isJson(mediaType)) {
 			return false;
 		}
 		Class<?> componentType = getComponentType(type, genericType);
 		if (componentType == null) {
 			return false;
 		}
+		if (getConfig(componentType.getAnnotations()) == null && getConfig(annotations) == null) {
+			return false;
+		}
 		return componentType.isAnnotationPresent(XmlRootElement.class) || componentType.isAnnotationPresent(XmlType.class);
 	}
 
 	protected Collection<Object> createDefaultCollection(Class<?> type) {
-		if (List.class.isAssignableFrom(type)) {
-			if (List.class.equals(type) || ArrayList.class.equals(type)) {
-				return new ArrayList<Object>();
-			} else if (LinkedList.class.equals(type)) {
-				return new LinkedList<Object>();
-			}
-		} else if (Set.class.isAssignableFrom(type)) {
-			if (Set.class.equals(type) || HashSet.class.equals(type)) {
-				return new HashSet<Object>();
-			} else if (LinkedHashSet.class.equals(type)) {
-				return new LinkedHashSet<Object>();
-			} else if (SortedSet.class.equals(type) || TreeSet.class.equals(type)) {
-				return new TreeSet<Object>();
-			}
+		if (type.isAssignableFrom(ArrayList.class)) {
+			return new ArrayList<Object>();
+		} else if (type.isAssignableFrom(LinkedList.class)) {
+			return new LinkedList<Object>();
+		} if (type.isAssignableFrom(HashSet.class)) {
+			return new HashSet<Object>();
+		} else if (type.isAssignableFrom(TreeSet.class)) {
+			return new TreeSet<Object>();
+		} else {
+			return null;
 		}
-		return null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -171,6 +172,9 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
 			WebApplicationException {
 		Class<?> componentType = getComponentType(type, genericType);
 		JsonXML config = getConfig(annotations);
+		if (config == null) {
+			config = getConfig(componentType.getAnnotations());
+		}
 		XMLInputFactory factory = createInputFactory(config);
 		try {
 			JAXBContext context = store.getContext(componentType, mediaType);
@@ -209,11 +213,14 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
 	public void writeTo(Object entry, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType,
 			MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException,
 			WebApplicationException {
-		Class<?> componentTypeType = getComponentType(type, genericType);
+		Class<?> componentType = getComponentType(type, genericType);
 		JsonXML config = getConfig(annotations);
+		if (config == null) {
+			config = getConfig(componentType.getAnnotations());
+		}
 		XMLOutputFactory factory = createOutputFactory(config);
 		try {
-			JAXBContext context = store.getContext(componentTypeType, mediaType);
+			JAXBContext context = store.getContext(componentType, mediaType);
 			XMLStreamWriter writer = factory.createXMLStreamWriter(entityStream);
 			if (config.multiplePaths().length > 0) {
 				writer = new XMLMultipleStreamWriter(writer, config.multiplePaths());
