@@ -27,11 +27,8 @@ import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.ws.rs.Consumes;
@@ -110,7 +107,7 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
 		if (componentType == null) {
 			return false;
 		}
-		if (getConfig(componentType.getAnnotations()) == null && getConfig(annotations) == null) {
+		if (getConfig(componentType, annotations) == null) {
 			return false;
 		}
 		return componentType.isAnnotationPresent(XmlRootElement.class) || componentType.isAnnotationPresent(XmlType.class);
@@ -125,7 +122,7 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
 		if (componentType == null) {
 			return false;
 		}
-		if (getConfig(componentType.getAnnotations()) == null && getConfig(annotations) == null) {
+		if (getConfig(componentType, annotations) == null) {
 			return false;
 		}
 		return componentType.isAnnotationPresent(XmlRootElement.class) || componentType.isAnnotationPresent(XmlType.class);
@@ -171,10 +168,7 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
 			MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException,
 			WebApplicationException {
 		Class<?> componentType = getComponentType(type, genericType);
-		JsonXML config = getConfig(annotations);
-		if (config == null) {
-			config = getConfig(componentType.getAnnotations());
-		}
+		JsonXML config = getConfig(componentType, annotations);
 		XMLInputFactory factory = createInputFactory(config);
 		try {
 			JAXBContext context = store.getContext(componentType, mediaType);
@@ -214,10 +208,7 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
 			MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException,
 			WebApplicationException {
 		Class<?> componentType = getComponentType(type, genericType);
-		JsonXML config = getConfig(annotations);
-		if (config == null) {
-			config = getConfig(componentType.getAnnotations());
-		}
+		JsonXML config = getConfig(componentType, annotations);
 		XMLOutputFactory factory = createOutputFactory(config);
 		try {
 			JAXBContext context = store.getContext(componentType, mediaType);

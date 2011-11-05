@@ -43,8 +43,12 @@ abstract class AbstractJsonXMLProvider<T> implements MessageBodyReader<T>, Messa
 		return null;
 	}
 
-	protected static JsonXML getConfig(Annotation[] annotations) {
-		return getAnnotation(annotations, JsonXML.class);
+	protected static JsonXML getConfig(Class<?> type, Annotation[] resourceAnnotations) {
+		JsonXML result = getAnnotation(resourceAnnotations, JsonXML.class);
+		if (result == null) {
+			result = type.getAnnotation(JsonXML.class);
+		}
+		return result;
 	}
 	
 	protected static boolean isJson(MediaType mediaType) {
