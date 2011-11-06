@@ -180,7 +180,7 @@ class JsonStreamTargetImpl implements JsonStreamTarget {
 		if (arrayPos[depth] > 0) {
 			throw new IOException("Nested arrays are not supported!");
 		}
-		if (pretty) {
+		if (pretty && depth > 0) {
 			writer.write(' ');
 		}
 		writer.write('[');
