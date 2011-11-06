@@ -64,7 +64,7 @@ abstract class AbstractJsonXMLProvider<T> implements MessageBodyReader<T>, Messa
 
 	protected JsonXMLInputFactory createInputFactory(JsonXML config) {
 		JsonXMLInputFactory factory = new JsonXMLInputFactory();
-		factory.setProperty(JsonXMLInputFactory.PROP_MULTIPLE_PI, !config.autoArray());
+		factory.setProperty(JsonXMLInputFactory.PROP_MULTIPLE_PI, true);
 		factory.setProperty(JsonXMLInputFactory.PROP_VIRTUAL_ROOT, config.virtualRoot().isEmpty() ? null : config.virtualRoot());
 		factory.setProperty(JsonXMLInputFactory.PROP_NAMESPACE_SEPARATOR, config.namespaceSeparator());
 		return factory;
@@ -72,7 +72,7 @@ abstract class AbstractJsonXMLProvider<T> implements MessageBodyReader<T>, Messa
 	
 	protected JsonXMLOutputFactory createOutputFactory(JsonXML config) {
 		JsonXMLOutputFactory factory = new JsonXMLOutputFactory();
-		factory.setProperty(JsonXMLOutputFactory.PROP_MULTIPLE_PI, !config.autoArray());
+		factory.setProperty(JsonXMLOutputFactory.PROP_MULTIPLE_PI, true);
 		factory.setProperty(JsonXMLOutputFactory.PROP_AUTO_ARRAY, config.autoArray());
 		factory.setProperty(JsonXMLOutputFactory.PROP_PRETTY_PRINT, config.prettyPrint());
 		factory.setProperty(JsonXMLOutputFactory.PROP_VIRTUAL_ROOT, config.virtualRoot().isEmpty() ? null : config.virtualRoot());
