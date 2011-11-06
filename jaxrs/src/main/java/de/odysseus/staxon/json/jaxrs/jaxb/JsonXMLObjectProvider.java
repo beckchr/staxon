@@ -34,8 +34,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -58,14 +56,12 @@ public class JsonXMLObjectProvider extends AbstractJsonXMLProvider<Object> {
 
 	@Override
 	public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-		return isJson(mediaType) && getConfig(type, annotations) != null
-				&& (type.isAnnotationPresent(XmlRootElement.class) || type.isAnnotationPresent(XmlType.class));
+		return isSupported(mediaType) && getJsonXML(type, annotations) != null && isMappable(type);
 	}
 
 	@Override
 	public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-		return isJson(mediaType) && getConfig(type, annotations) != null
-				&& (type.isAnnotationPresent(XmlRootElement.class) || type.isAnnotationPresent(XmlType.class));
+		return isSupported(mediaType) && getJsonXML(type, annotations) != null && isMappable(type);
 	}
 
 	@Override
@@ -76,14 +72,14 @@ public class JsonXMLObjectProvider extends AbstractJsonXMLProvider<Object> {
 			MediaType mediaType,
 			MultivaluedMap<String, String> httpHeaders,
 			InputStream entityStream) throws IOException, WebApplicationException {
-		JsonXML config = getConfig(type, annotations);
+		JsonXML config = getJsonXML(type, annotations);
 		XMLInputFactory factory = createInputFactory(config);
 		try {
 			JAXBContext context = store.getContext(type, mediaType);
 			XMLStreamReader reader = factory.createXMLStreamReader(entityStream);
 			reader.require(XMLStreamConstants.START_DOCUMENT, null, null);
 			Unmarshaller unmarshaller = context.createUnmarshaller();
-			Object result = unmarshal(unmarshaller, reader, type);
+			Object result = unmarshal(type, config, unmarshaller, reader);
 			reader.require(XMLStreamConstants.END_DOCUMENT, null, null);
 			reader.close();
 			return result;
@@ -103,7 +99,7 @@ public class JsonXMLObjectProvider extends AbstractJsonXMLProvider<Object> {
 			MediaType mediaType,
 			MultivaluedMap<String, Object> httpHeaders,
 			OutputStream entityStream) throws IOException, WebApplicationException {
-		JsonXML config = getConfig(type, annotations);
+		JsonXML config = getJsonXML(type, annotations);
 		XMLOutputFactory factory = createOutputFactory(config);
 		try {
 			JAXBContext context = store.getContext(type, mediaType);
@@ -113,7 +109,7 @@ public class JsonXMLObjectProvider extends AbstractJsonXMLProvider<Object> {
 			}
 			Marshaller marshaller = context.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_ENCODING, getEncoding(mediaType));
-			marshal(marshaller, writer, type, config.virtualRoot(), entry);
+			marshal(type, config, marshaller, writer, entry);
 			writer.close();
 		} catch (XMLStreamException e) {
 			throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);

@@ -59,7 +59,7 @@ public class JsonXMLContextStore {
 		}
 	}
 
-	private final ConcurrentHashMap<CacheKey, JAXBContext> cache = new ConcurrentHashMap<JsonXMLContextStore.CacheKey, JAXBContext>();
+	private final ConcurrentHashMap<CacheKey, JAXBContext> cache = new ConcurrentHashMap<CacheKey, JAXBContext>();
 	private final Providers providers;
 	
 	public JsonXMLContextStore(Providers providers) {
@@ -91,17 +91,4 @@ public class JsonXMLContextStore {
 		}
 		return null;
 	}
-
-//	public JAXBContext getContext(Class<?>... types) throws JAXBException {
-//		CacheKey key = new CacheKey(types);
-//		JAXBContext result = cache.get(key);
-//		if (result != null) {
-//			return result;
-//		}
-//		result = createContext(types);
-//		if (result != null) {
-//			return cache.putIfAbsent(key, result) == null ? result : cache.get(key);
-//		}
-//		return null;
-//	}
 }

@@ -50,7 +50,7 @@ abstract class AbstractJsonXMLProvider<T> implements MessageBodyReader<T>, Messa
 		return null;
 	}
 
-	protected static JsonXML getConfig(Class<?> type, Annotation[] resourceAnnotations) {
+	protected JsonXML getJsonXML(Class<?> type, Annotation[] resourceAnnotations) {
 		JsonXML result = getAnnotation(resourceAnnotations, JsonXML.class);
 		if (result == null) {
 			result = type.getAnnotation(JsonXML.class);
@@ -58,11 +58,11 @@ abstract class AbstractJsonXMLProvider<T> implements MessageBodyReader<T>, Messa
 		return result;
 	}
 	
-	protected static boolean isJson(MediaType mediaType) {
+	protected boolean isSupported(MediaType mediaType) {
 		return "json".equalsIgnoreCase(mediaType.getSubtype()) || mediaType.getSubtype().endsWith("+json");
 	}
 
-	protected static JsonXMLInputFactory createInputFactory(JsonXML config) {
+	protected JsonXMLInputFactory createInputFactory(JsonXML config) {
 		JsonXMLInputFactory factory = new JsonXMLInputFactory();
 		factory.setProperty(JsonXMLInputFactory.PROP_MULTIPLE_PI, !config.autoArray());
 		factory.setProperty(JsonXMLInputFactory.PROP_VIRTUAL_ROOT, config.virtualRoot().isEmpty() ? null : config.virtualRoot());
@@ -70,7 +70,7 @@ abstract class AbstractJsonXMLProvider<T> implements MessageBodyReader<T>, Messa
 		return factory;
 	}
 	
-	protected static JsonXMLOutputFactory createOutputFactory(JsonXML config) {
+	protected JsonXMLOutputFactory createOutputFactory(JsonXML config) {
 		JsonXMLOutputFactory factory = new JsonXMLOutputFactory();
 		factory.setProperty(JsonXMLOutputFactory.PROP_MULTIPLE_PI, !config.autoArray());
 		factory.setProperty(JsonXMLOutputFactory.PROP_AUTO_ARRAY, config.autoArray());
@@ -81,12 +81,16 @@ abstract class AbstractJsonXMLProvider<T> implements MessageBodyReader<T>, Messa
 		return factory;
 	}
 	
+	protected boolean isMappable(Class<?> type) {
+		return type.isAnnotationPresent(XmlRootElement.class) || type.isAnnotationPresent(XmlType.class);
+	}
+
 	protected String getEncoding(MediaType mediaType) {	
 		Map<String, String> parameters = mediaType.getParameters();
 		return parameters.containsKey("charset") ? parameters.get("charset") : "UTF-8";
 	}
 	
-	protected Object unmarshal(Unmarshaller unmarshaller, XMLStreamReader reader, Class<?> type) throws JAXBException, XMLStreamException {
+	protected Object unmarshal(Class<?> type, JsonXML config, Unmarshaller unmarshaller, XMLStreamReader reader) throws JAXBException, XMLStreamException {
 		if (type.isAnnotationPresent(XmlRootElement.class)) {
 			return unmarshaller.unmarshal(reader);
 		} else if (type.isAnnotationPresent(XmlType.class)) {
@@ -107,7 +111,7 @@ abstract class AbstractJsonXMLProvider<T> implements MessageBodyReader<T>, Messa
 			try {
 				factoryClass = Thread.currentThread().getContextClassLoader().loadClass(defaultObjectFactoryName);
 			} catch (Exception e) {
-				return null;
+				factoryClass = type;
 			}
 		}
 		if (factoryClass.getAnnotation(XmlRegistry.class) == null) {
@@ -135,21 +139,28 @@ abstract class AbstractJsonXMLProvider<T> implements MessageBodyReader<T>, Messa
 		return null;
 	}
 	
-	protected void marshal(Marshaller marshaller, XMLStreamWriter writer, Class<?> type, String virtualRoot, Object value) throws JAXBException, XMLStreamException {
+	protected void marshal(Class<?> type, JsonXML config, Marshaller marshaller, XMLStreamWriter writer, Object value) throws JAXBException, XMLStreamException {
+		Object element = null;
 		if (type.isAnnotationPresent(XmlRootElement.class)) {
-			marshaller.marshal(value, writer);
+			element = value;
 		} else if (type.isAnnotationPresent(XmlType.class)) {
+			XmlType annotation = type.getAnnotation(XmlType.class);
+			/*
+			 * determine expected localName
+			 */
 			String localPart = null;
-			String namespaceURI = null;
-			if (virtualRoot != null && virtualRoot.length() > 0) {
-				int colon = virtualRoot.indexOf(':');
+			if (config.virtualRoot().length() > 0) {
+				int colon = config.virtualRoot().indexOf(':');
 				if (colon > 0) {
-					localPart = virtualRoot.substring(colon + 1);
+					localPart = config.virtualRoot().substring(colon + 1);
 				} else {
-					localPart = virtualRoot;
+					localPart = config.virtualRoot();
 				}
 			}
-			XmlType annotation = type.getAnnotation(XmlType.class);
+			/*
+			 * determine expected namespace URI
+			 */
+			String namespaceURI = null;
 			if ("##default".equals(annotation.namespace())) {
 				XmlSchema schema = type.getPackage().getAnnotation(XmlSchema.class);
 				if (schema != null) {
@@ -158,14 +169,17 @@ abstract class AbstractJsonXMLProvider<T> implements MessageBodyReader<T>, Messa
 			} else {
 				namespaceURI = annotation.namespace();
 			}
-			JAXBElement<?> element = createJAXBElement(type, namespaceURI, localPart, value);
+			/*
+			 * create JAXBElement
+			 */
+			element = createJAXBElement(type, namespaceURI, localPart, value);
 			if (element == null) {
-				throw new JAXBException("Cannot determine JAXBElement factory method");
+				throw new JAXBException("Cannot create JAXBElement");
 			}
-			marshaller.marshal(element, writer);
 		} else { // good luck...
-			marshaller.marshal(value, writer);
+			element = value;
 		}
+		marshaller.marshal(element, writer);
 	}
 	
 	@Override

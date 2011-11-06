@@ -44,8 +44,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -98,32 +96,20 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
 
 	@Override
 	public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-		if (!isJson(mediaType)) {
+		if (!isSupported(mediaType)) {
 			return false;
 		}
 		Class<?> componentType = getComponentType(type, genericType);
-		if (componentType == null) {
-			return false;
-		}
-		if (getConfig(componentType, annotations) == null) {
-			return false;
-		}
-		return componentType.isAnnotationPresent(XmlRootElement.class) || componentType.isAnnotationPresent(XmlType.class);
+		return componentType != null && getJsonXML(componentType, annotations) != null && isMappable(componentType);
 	}
 
 	@Override
 	public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-		if (!isJson(mediaType)) {
+		if (!isSupported(mediaType)) {
 			return false;
 		}
 		Class<?> componentType = getComponentType(type, genericType);
-		if (componentType == null) {
-			return false;
-		}
-		if (getConfig(componentType, annotations) == null) {
-			return false;
-		}
-		return componentType.isAnnotationPresent(XmlRootElement.class) || componentType.isAnnotationPresent(XmlType.class);
+		return componentType != null && getJsonXML(componentType, annotations) != null && isMappable(componentType);
 	}
 
 	protected Collection<Object> createDefaultCollection(Class<?> type) {
@@ -170,7 +156,7 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
 			throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
 		}
 		Class<?> componentType = getComponentType(type, genericType);
-		JsonXML config = getConfig(componentType, annotations);
+		JsonXML config = getJsonXML(componentType, annotations);
 		XMLInputFactory factory = createInputFactory(config);
 		try {
 			JAXBContext context = store.getContext(componentType, mediaType);
@@ -178,9 +164,8 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
 			Unmarshaller unmarshaller = context.createUnmarshaller();
 			reader.require(XMLStreamConstants.START_DOCUMENT, null, null);
 			reader.nextTag();
-			reader.require(XMLStreamConstants.START_ELEMENT, null, null);
 			while (reader.hasNext()) {
-				collection.add(unmarshal(unmarshaller, reader, componentType));
+				collection.add(unmarshal(componentType, config, unmarshaller, reader));
 			}
 			reader.require(XMLStreamConstants.END_DOCUMENT, null, null);
 			reader.close();
@@ -201,7 +186,7 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
 			MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException,
 			WebApplicationException {
 		Class<?> componentType = getComponentType(type, genericType);
-		JsonXML config = getConfig(componentType, annotations);
+		JsonXML config = getJsonXML(componentType, annotations);
 		XMLOutputFactory factory = createOutputFactory(config);
 		try {
 			JAXBContext context = store.getContext(componentType, mediaType);
@@ -216,11 +201,12 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
 			writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET);
 			if (type.isArray()) {
 				for (Object value : (Object[]) entry) {
-					marshal(marshaller, writer, componentType, config.virtualRoot(), value);
+					marshal(componentType, config, marshaller, writer, value);
 				}
 			} else {
-				for (Object value : (Collection<?>) entry)
-					marshal(marshaller, writer, componentType, config.virtualRoot(), value);
+				for (Object value : (Collection<?>) entry) {
+					marshal(componentType, config, marshaller, writer, value);
+				}
 			}
 			writer.writeEndDocument();
 			writer.close();
