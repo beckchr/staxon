@@ -53,8 +53,6 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
-import de.odysseus.staxon.json.JsonXMLInputFactory;
-import de.odysseus.staxon.json.JsonXMLOutputFactory;
 import de.odysseus.staxon.json.JsonXMLStreamConstants;
 import de.odysseus.staxon.json.jaxrs.JsonXML;
 import de.odysseus.staxon.json.util.XMLMultipleStreamWriter;
@@ -167,6 +165,10 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
 	public Object readFrom(Class<Object> type, Type genericType, Annotation[] annotations, MediaType mediaType,
 			MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException,
 			WebApplicationException {
+		Collection<Object> collection = type.isArray() ? new ArrayList<Object>() : createCollection(type);
+		if (collection == null) {
+			throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+		}
 		Class<?> componentType = getComponentType(type, genericType);
 		JsonXML config = getConfig(componentType, annotations);
 		XMLInputFactory factory = createInputFactory(config);
@@ -175,22 +177,13 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
 			XMLStreamReader reader = factory.createXMLStreamReader(entityStream);
 			Unmarshaller unmarshaller = context.createUnmarshaller();
 			reader.require(XMLStreamConstants.START_DOCUMENT, null, null);
-			reader.next();
-			if (Boolean.TRUE.equals(factory.getProperty(JsonXMLInputFactory.PROP_MULTIPLE_PI))) {
-				reader.require(XMLStreamConstants.PROCESSING_INSTRUCTION, null, null);
-				if (!JsonXMLStreamConstants.MULTIPLE_PI_TARGET.equals(reader.getPITarget())) {
-					throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
-				}
-				reader.next();
-			}
+			reader.nextTag();
 			reader.require(XMLStreamConstants.START_ELEMENT, null, null);
-			Collection<Object> collection = type.isArray() ? new ArrayList<Object>() : createCollection(type);
-			if (collection == null) {
-				throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
-			}
 			while (reader.hasNext()) {
 				collection.add(unmarshal(unmarshaller, reader, componentType));
 			}
+			reader.require(XMLStreamConstants.END_DOCUMENT, null, null);
+			reader.close();
 			if (type.isArray()) {
 				return toArray((List<?>) collection, componentType);
 			} else {
@@ -218,17 +211,16 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
 			}
 			Marshaller marshaller = context.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
+			marshaller.setProperty(Marshaller.JAXB_ENCODING, getEncoding(mediaType));
 			writer.writeStartDocument();
-			if (Boolean.TRUE.equals(factory.getProperty(JsonXMLOutputFactory.PROP_MULTIPLE_PI))) {
-				writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET);
-			}
+			writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET);
 			if (type.isArray()) {
 				for (Object value : (Object[]) entry) {
-					marshal(marshaller, writer, value);
+					marshal(marshaller, writer, componentType, config.virtualRoot(), value);
 				}
 			} else {
 				for (Object value : (Collection<?>) entry)
-					marshal(marshaller, writer, value);
+					marshal(marshaller, writer, componentType, config.virtualRoot(), value);
 			}
 			writer.writeEndDocument();
 			writer.close();

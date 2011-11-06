@@ -16,16 +16,23 @@
 package de.odysseus.staxon.json.jaxrs.jaxb;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlElementDecl;
+import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
@@ -74,18 +81,91 @@ abstract class AbstractJsonXMLProvider<T> implements MessageBodyReader<T>, Messa
 		return factory;
 	}
 	
-	protected Object unmarshal(Unmarshaller unmarshaller, XMLStreamReader reader, Class<?> type) throws JAXBException {
-        if (type.isAnnotationPresent(XmlRootElement.class)) {
-            return unmarshaller.unmarshal(reader);
-        } else if (type.isAnnotationPresent(XmlType.class)) {
-            return unmarshaller.unmarshal(reader, type).getValue();
-        } else {
-            return unmarshaller.unmarshal(reader, type);
-        }
+	protected String getEncoding(MediaType mediaType) {	
+		Map<String, String> parameters = mediaType.getParameters();
+		return parameters.containsKey("charset") ? parameters.get("charset") : "UTF-8";
 	}
 	
-	protected void marshal(Marshaller marshaller, XMLStreamWriter writer, Object value) throws JAXBException {
-		marshaller.marshal(value, writer);
+	protected Object unmarshal(Unmarshaller unmarshaller, XMLStreamReader reader, Class<?> type) throws JAXBException, XMLStreamException {
+		if (type.isAnnotationPresent(XmlRootElement.class)) {
+			return unmarshaller.unmarshal(reader);
+		} else if (type.isAnnotationPresent(XmlType.class)) {
+			return unmarshaller.unmarshal(reader, type).getValue();
+		} else {
+			return unmarshaller.unmarshal(reader, type);
+		}
+	}
+	
+	protected JAXBElement<?> createJAXBElement(Class<?> type, String namespaceURI, String localName, Object value) {
+		XmlType xmlType = type.getAnnotation(XmlType.class);
+		if (xmlType == null) {
+			return null;
+		}
+		Class<?> factoryClass = xmlType.factoryClass();
+		if (factoryClass == XmlType.DEFAULT.class) {
+			String defaultObjectFactoryName = type.getPackage().getName() + ".ObjectFactory";
+			try {
+				factoryClass = Thread.currentThread().getContextClassLoader().loadClass(defaultObjectFactoryName);
+			} catch (Exception e) {
+				return null;
+			}
+		}
+		if (factoryClass.getAnnotation(XmlRegistry.class) == null) {
+			return null;
+		}
+		for (Method method : factoryClass.getDeclaredMethods()) {
+			XmlElementDecl xmlElementDecl = method.getAnnotation(XmlElementDecl.class);
+			if (xmlElementDecl != null) {
+				if (localName == null || localName.equals(xmlElementDecl.name())) {
+					if (namespaceURI == null || namespaceURI.equals(xmlElementDecl.namespace())) {
+						if (method.getReturnType() == JAXBElement.class) {
+							Class<?>[] parameterTypes = method.getParameterTypes();
+							if (parameterTypes.length == 1 && parameterTypes[0] == type) {
+								try {
+									return (JAXBElement<?>)method.invoke(factoryClass.newInstance(), value);
+								} catch (Exception e) {
+									return null;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
+	protected void marshal(Marshaller marshaller, XMLStreamWriter writer, Class<?> type, String virtualRoot, Object value) throws JAXBException, XMLStreamException {
+		if (type.isAnnotationPresent(XmlRootElement.class)) {
+			marshaller.marshal(value, writer);
+		} else if (type.isAnnotationPresent(XmlType.class)) {
+			String localPart = null;
+			String namespaceURI = null;
+			if (virtualRoot != null && virtualRoot.length() > 0) {
+				int colon = virtualRoot.indexOf(':');
+				if (colon > 0) {
+					localPart = virtualRoot.substring(colon + 1);
+				} else {
+					localPart = virtualRoot;
+				}
+			}
+			XmlType annotation = type.getAnnotation(XmlType.class);
+			if ("##default".equals(annotation.namespace())) {
+				XmlSchema schema = type.getPackage().getAnnotation(XmlSchema.class);
+				if (schema != null) {
+					namespaceURI = schema.namespace();
+				}
+			} else {
+				namespaceURI = annotation.namespace();
+			}
+			JAXBElement<?> element = createJAXBElement(type, namespaceURI, localPart, value);
+			if (element == null) {
+				throw new JAXBException("Cannot determine JAXBElement factory method");
+			}
+			marshaller.marshal(element, writer);
+		} else { // good luck...
+			marshaller.marshal(value, writer);
+		}
 	}
 	
 	@Override

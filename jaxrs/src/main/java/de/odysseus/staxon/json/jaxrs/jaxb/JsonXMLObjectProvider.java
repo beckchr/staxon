@@ -38,6 +38,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -80,8 +81,12 @@ public class JsonXMLObjectProvider extends AbstractJsonXMLProvider<Object> {
 		try {
 			JAXBContext context = store.getContext(type, mediaType);
 			XMLStreamReader reader = factory.createXMLStreamReader(entityStream);
+			reader.require(XMLStreamConstants.START_DOCUMENT, null, null);
 			Unmarshaller unmarshaller = context.createUnmarshaller();
-			return unmarshal(unmarshaller, reader, type);
+			Object result = unmarshal(unmarshaller, reader, type);
+			reader.require(XMLStreamConstants.END_DOCUMENT, null, null);
+			reader.close();
+			return result;
 		} catch (XMLStreamException e) {
 			throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
 		} catch (JAXBException e) {
@@ -107,7 +112,9 @@ public class JsonXMLObjectProvider extends AbstractJsonXMLProvider<Object> {
 				writer = new XMLMultipleStreamWriter(writer, config.multiplePaths());
 			}
 			Marshaller marshaller = context.createMarshaller();
-			marshal(marshaller, writer, entry);
+			marshaller.setProperty(Marshaller.JAXB_ENCODING, getEncoding(mediaType));
+			marshal(marshaller, writer, type, config.virtualRoot(), entry);
+			writer.close();
 		} catch (XMLStreamException e) {
 			throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
 		} catch (JAXBException e) {
