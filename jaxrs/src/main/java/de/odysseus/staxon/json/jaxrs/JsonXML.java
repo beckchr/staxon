@@ -21,6 +21,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * <p>The <code>JsonXML</code> annotation is used to configure the JSON
+ * serialization <em>and</em> deserialization process. It may be placed on a</p>
+ * <ul>
+ * <li>a model type (e.g. a JAXB-annotated class) to configure serialization and deserialization of that type,</li>
+ * <li>a JAX-RS resource method to configure serialization of the result type,</li>
+ * <li>a parameter of a JAX-RS resource method to configure deserialiation of the parameter type.</li>
+ * </ul>
+ * <p>If an annotations is present at a model type and a resource method or parameter, the latter
+ * overrides the model type annotation.</p>
+ */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.TYPE, ElementType.PARAMETER })
