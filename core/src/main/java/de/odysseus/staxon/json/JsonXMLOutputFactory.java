@@ -108,11 +108,11 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	}
 		
 	private JsonStreamTarget decorate(JsonStreamTarget target) {
-		if (autoArray) {
-			target = new AutoArrayTarget(target);
-		}
 		if (virtualRoot != null) {
 			target = new RemoveRootTarget(target, virtualRoot);
+		}
+		if (autoArray) {
+			target = new AutoArrayTarget(target);
 		}
 		return target;
 	}
