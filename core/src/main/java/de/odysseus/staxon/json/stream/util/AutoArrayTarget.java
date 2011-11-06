@@ -205,7 +205,9 @@ public class AutoArrayTarget implements JsonStreamTarget {
 
 	@Override
 	public void endObject() throws IOException {
-		popField();
+		if (events.peekLast().token() != JsonStreamToken.START_OBJECT) {
+			popField();
+		}
 		events.add(END_OBJECT);
 		if (fields.isEmpty()) {
 			while (!events.isEmpty()) {
