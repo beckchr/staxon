@@ -163,7 +163,9 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
 			XMLStreamReader reader = factory.createXMLStreamReader(entityStream);
 			Unmarshaller unmarshaller = context.createUnmarshaller();
 			reader.require(XMLStreamConstants.START_DOCUMENT, null, null);
-			reader.nextTag();
+			while (reader.hasNext() && !reader.isStartElement()) {
+				reader.next();
+			}
 			while (reader.hasNext()) {
 				collection.add(unmarshal(componentType, config, unmarshaller, reader));
 			}
@@ -198,7 +200,11 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
 			marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
 			marshaller.setProperty(Marshaller.JAXB_ENCODING, getEncoding(mediaType));
 			writer.writeStartDocument();
-			writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET);
+			if (config.virtualRoot().length() > 0) {
+				writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET, config.virtualRoot());
+			} else {
+				writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET);
+			}
 			if (type.isArray()) {
 				for (Object value : (Object[]) entry) {
 					marshal(componentType, config, marshaller, writer, value);
