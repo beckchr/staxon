@@ -174,10 +174,9 @@ public class AutoArrayTarget implements JsonStreamTarget {
 	}
 
 	private void popField() {
-		if (fields.peek().isArray()) {
+		if (fields.pop().isArray()) {
 			events.add(END_ARRAY);
 		}
-		fields.pop();
 	}
 	
 	@Override
@@ -217,12 +216,18 @@ public class AutoArrayTarget implements JsonStreamTarget {
 
 	@Override
 	public void startArray() throws IOException {
-		throw new IllegalStateException();
+		if (fields.peek().isArray()) {
+			throw new IllegalStateException();
+		}
+		fields.peek().setArray(true);
 	}
 
 	@Override
 	public void endArray() throws IOException {
-		throw new IllegalStateException();
+		if (!fields.peek().isArray()) {
+			throw new IllegalStateException();
+		}
+		// array will be closed automatically
 	}
 
 	@Override

@@ -91,6 +91,23 @@ public class AutoArrayTargetTest {
 		Assert.assertEquals("{\"alice\":{\"bob\":[\"charlie\",\"david\"],\"edgar\":null}}", result.toString());
 	}
 
+	@Test
+	public void testArray3() throws Exception {
+		StringWriter result = new StringWriter();
+		JsonXMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result), true, ':', true);
+		writer.writeStartDocument();
+		writer.writeStartElement("alice");
+		writer.writeStartArray("bob");
+		writer.writeStartElement("bob");
+		writer.writeCharacters("charlie");
+		writer.writeEndElement();
+		writer.writeEndArray();
+		writer.writeEndElement();
+		writer.writeEndDocument();
+		writer.close();
+		Assert.assertEquals("{\"alice\":{\"bob\":[\"charlie\"]}}", result.toString());
+	}
+
 	/**
 	 * <code>&lt;alice&gt;&lt;bob&gt;charlie&lt;/bob&gt;&lt;david&gt;edgar&lt;/david&gt;&lt;/alice&gt;</code>
 	 */
