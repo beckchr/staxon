@@ -58,7 +58,7 @@ import de.odysseus.staxon.json.util.XMLMultipleStreamWriter;
 @Provider
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class JsonXMLArrayProvider extends AbstractJsonXMLProvider<Object> {
+public class JsonXMLArrayProvider extends AbstractJsonXMLProvider {
 	private final JsonXMLContextStore store;
 
 	public JsonXMLArrayProvider(@Context Providers providers) {

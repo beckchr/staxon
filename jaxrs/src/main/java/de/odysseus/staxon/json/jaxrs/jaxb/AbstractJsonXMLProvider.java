@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -40,7 +41,7 @@ import de.odysseus.staxon.json.JsonXMLInputFactory;
 import de.odysseus.staxon.json.JsonXMLOutputFactory;
 import de.odysseus.staxon.json.jaxrs.JsonXML;
 
-abstract class AbstractJsonXMLProvider<T> implements MessageBodyReader<T>, MessageBodyWriter<T> {
+abstract class AbstractJsonXMLProvider implements MessageBodyReader<Object>, MessageBodyWriter<Object> {
 	protected static <A extends Annotation> A getAnnotation(Annotation[] annotations, Class<A> annotationType) {
 		for (Annotation annotation : annotations) {
 			if (annotation.annotationType() == annotationType) {
@@ -100,7 +101,23 @@ abstract class AbstractJsonXMLProvider<T> implements MessageBodyReader<T>, Messa
 		}
 	}
 	
-	protected JAXBElement<?> createJAXBElement(Class<?> type, String namespaceURI, String localName, Object value) {
+	protected String getNamespaceURI(XmlType xmlType, XmlSchema xmlSchema) {
+		if ("##default".equals(xmlType.namespace())) {
+			return xmlSchema == null ? XMLConstants.NULL_NS_URI : xmlSchema.namespace();
+		} else {
+			return xmlType.namespace();
+		}
+	}
+
+	protected String getNamespaceURI(XmlElementDecl xmlElementDecl, XmlSchema xmlSchema) {
+		if ("##default".equals(xmlElementDecl.namespace())) {
+			return xmlSchema == null ? XMLConstants.NULL_NS_URI : xmlSchema.namespace();
+		} else {
+			return xmlElementDecl.namespace();
+		}
+	}
+
+	protected JAXBElement<?> createJAXBElement(Class<?> type, String localName, Object value) throws JAXBException {
 		XmlType xmlType = type.getAnnotation(XmlType.class);
 		if (xmlType == null) {
 			return null;
@@ -117,19 +134,19 @@ abstract class AbstractJsonXMLProvider<T> implements MessageBodyReader<T>, Messa
 		if (factoryClass.getAnnotation(XmlRegistry.class) == null) {
 			return null;
 		}
+		XmlSchema xmlSchema = type.getPackage().getAnnotation(XmlSchema.class);
+		String namespaceURI = getNamespaceURI(xmlType, xmlSchema);
 		for (Method method : factoryClass.getDeclaredMethods()) {
 			XmlElementDecl xmlElementDecl = method.getAnnotation(XmlElementDecl.class);
-			if (xmlElementDecl != null) {
+			if (xmlElementDecl != null && namespaceURI.equals(getNamespaceURI(xmlElementDecl, xmlSchema))) {
 				if (localName == null || localName.equals(xmlElementDecl.name())) {
-					if (namespaceURI == null || namespaceURI.equals(xmlElementDecl.namespace())) {
-						if (method.getReturnType() == JAXBElement.class) {
-							Class<?>[] parameterTypes = method.getParameterTypes();
-							if (parameterTypes.length == 1 && parameterTypes[0] == type) {
-								try {
-									return (JAXBElement<?>)method.invoke(factoryClass.newInstance(), value);
-								} catch (Exception e) {
-									return null;
-								}
+					if (method.getReturnType() == JAXBElement.class) {
+						Class<?>[] parameterTypes = method.getParameterTypes();
+						if (parameterTypes.length == 1 && parameterTypes[0] == type) {
+							try {
+								return (JAXBElement<?>)method.invoke(factoryClass.newInstance(), value);
+							} catch (Exception e) {
+								throw new JAXBException("Cannot create JAXBElement", e);
 							}
 						}
 					}
@@ -144,7 +161,6 @@ abstract class AbstractJsonXMLProvider<T> implements MessageBodyReader<T>, Messa
 		if (type.isAnnotationPresent(XmlRootElement.class)) {
 			element = value;
 		} else if (type.isAnnotationPresent(XmlType.class)) {
-			XmlType annotation = type.getAnnotation(XmlType.class);
 			/*
 			 * determine expected localName
 			 */
@@ -158,21 +174,9 @@ abstract class AbstractJsonXMLProvider<T> implements MessageBodyReader<T>, Messa
 				}
 			}
 			/*
-			 * determine expected namespace URI
-			 */
-			String namespaceURI = null;
-			if ("##default".equals(annotation.namespace())) {
-				XmlSchema schema = type.getPackage().getAnnotation(XmlSchema.class);
-				if (schema != null) {
-					namespaceURI = schema.namespace();
-				}
-			} else {
-				namespaceURI = annotation.namespace();
-			}
-			/*
 			 * create JAXBElement
 			 */
-			element = createJAXBElement(type, namespaceURI, localPart, value);
+			element = createJAXBElement(type, localPart, value);
 			if (element == null) {
 				throw new JAXBException("Cannot create JAXBElement");
 			}
@@ -183,7 +187,7 @@ abstract class AbstractJsonXMLProvider<T> implements MessageBodyReader<T>, Messa
 	}
 	
 	@Override
-	public long getSize(T t, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+	public long getSize(Object t, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
 		return -1;
 	}
 }
