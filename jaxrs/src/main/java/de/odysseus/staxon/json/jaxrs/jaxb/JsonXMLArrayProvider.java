@@ -94,24 +94,6 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider {
 		}
 	}
 
-	@Override
-	public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-		if (!isSupported(mediaType)) {
-			return false;
-		}
-		Class<?> componentType = getComponentType(type, genericType);
-		return componentType != null && getJsonXML(componentType, annotations) != null && isMappable(componentType);
-	}
-
-	@Override
-	public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-		if (!isSupported(mediaType)) {
-			return false;
-		}
-		Class<?> componentType = getComponentType(type, genericType);
-		return componentType != null && getJsonXML(componentType, annotations) != null && isMappable(componentType);
-	}
-
 	protected Collection<Object> createDefaultCollection(Class<?> type) {
 		if (type.isAssignableFrom(ArrayList.class)) {
 			return new ArrayList<Object>();
@@ -146,11 +128,33 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider {
 		}
 		return result;
 	}
-	
+
 	@Override
-	public Object readFrom(Class<Object> type, Type genericType, Annotation[] annotations, MediaType mediaType,
-			MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException,
-			WebApplicationException {
+	public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+		if (!isSupported(mediaType)) {
+			return false;
+		}
+		Class<?> componentType = getComponentType(type, genericType);
+		return componentType != null && getJsonXML(componentType, annotations) != null && isMappable(componentType);
+	}
+
+	@Override
+	public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+		if (!isSupported(mediaType)) {
+			return false;
+		}
+		Class<?> componentType = getComponentType(type, genericType);
+		return componentType != null && getJsonXML(componentType, annotations) != null && isMappable(componentType);
+	}
+
+	@Override
+	public Object readFrom(
+			Class<Object> type,
+			Type genericType,
+			Annotation[] annotations,
+			MediaType mediaType,
+			MultivaluedMap<String, String> httpHeaders,
+			InputStream entityStream) throws IOException, WebApplicationException {
 		Collection<Object> collection = type.isArray() ? new ArrayList<Object>() : createCollection(type);
 		if (collection == null) {
 			throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
@@ -184,9 +188,14 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider {
 	}
 
 	@Override
-	public void writeTo(Object entry, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType,
-			MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException,
-			WebApplicationException {
+	public void writeTo(
+			Object entry,
+			Class<?> type,
+			Type genericType,
+			Annotation[] annotations,
+			MediaType mediaType,
+			MultivaluedMap<String, Object> httpHeaders,
+			OutputStream entityStream) throws IOException, WebApplicationException {
 		Class<?> componentType = getComponentType(type, genericType);
 		JsonXML config = getJsonXML(componentType, annotations);
 		XMLOutputFactory factory = createOutputFactory(config);
