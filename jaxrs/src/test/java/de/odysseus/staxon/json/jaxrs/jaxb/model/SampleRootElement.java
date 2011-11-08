@@ -27,8 +27,8 @@ import de.odysseus.staxon.json.jaxrs.JsonXML;
 @JsonXML
 public class SampleRootElement {
 	@XmlAttribute
-	String attribute;
+	public String attribute;
 	
 	@XmlElement
-	List<String> elements;
+	public List<String> elements;
 }

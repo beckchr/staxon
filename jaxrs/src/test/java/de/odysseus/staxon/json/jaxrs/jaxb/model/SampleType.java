@@ -21,5 +21,5 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType
 public class SampleType {
 	@XmlElement
-	String element;
+	public String element;
 }

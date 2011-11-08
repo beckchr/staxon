@@ -50,7 +50,7 @@ import de.odysseus.staxon.json.jaxrs.jaxb.model.SampleType;
 import de.odysseus.staxon.json.jaxrs.jaxb.model.SampleTypeWithNamespace;
 
 public class AbstractJsonXMLProviderTest {
-	static class DummyProvider extends AbstractJsonXMLProvider {
+	static class TestProvider extends AbstractJsonXMLProvider {
 		@Override
 		public boolean isReadable(Class<?> arg0, Type arg1, Annotation[] arg2, MediaType arg3) {
 			return false;
@@ -91,12 +91,12 @@ public class AbstractJsonXMLProviderTest {
 
 	@Test
 	public void testCreateInputFactory() {
-		JsonXMLInputFactory factory = new DummyProvider().createInputFactory(JsonXMLDefault.class.getAnnotation(JsonXML.class));
+		JsonXMLInputFactory factory = new TestProvider().createInputFactory(JsonXMLDefault.class.getAnnotation(JsonXML.class));
 		Assert.assertEquals(Boolean.TRUE, factory.getProperty(JsonXMLInputFactory.PROP_MULTIPLE_PI));
 		Assert.assertEquals(Character.valueOf(':'), factory.getProperty(JsonXMLInputFactory.PROP_NAMESPACE_SEPARATOR));
 		Assert.assertNull(factory.getProperty(JsonXMLInputFactory.PROP_VIRTUAL_ROOT));
 
-		factory = new DummyProvider().createInputFactory(JsonXMLCustom.class.getAnnotation(JsonXML.class));
+		factory = new TestProvider().createInputFactory(JsonXMLCustom.class.getAnnotation(JsonXML.class));
 		Assert.assertEquals(Boolean.TRUE, factory.getProperty(JsonXMLInputFactory.PROP_MULTIPLE_PI));
 		Assert.assertEquals(Character.valueOf('_'), factory.getProperty(JsonXMLInputFactory.PROP_NAMESPACE_SEPARATOR));
 		Assert.assertEquals("root", factory.getProperty(JsonXMLInputFactory.PROP_VIRTUAL_ROOT));
@@ -104,7 +104,7 @@ public class AbstractJsonXMLProviderTest {
 
 	@Test
 	public void testCreateOutputFactory() {
-		JsonXMLOutputFactory factory = new DummyProvider().createOutputFactory(JsonXMLDefault.class.getAnnotation(JsonXML.class));
+		JsonXMLOutputFactory factory = new TestProvider().createOutputFactory(JsonXMLDefault.class.getAnnotation(JsonXML.class));
 		Assert.assertEquals(Boolean.TRUE, factory.getProperty(JsonXMLOutputFactory.PROP_MULTIPLE_PI));
 		Assert.assertEquals(Character.valueOf(':'), factory.getProperty(JsonXMLOutputFactory.PROP_NAMESPACE_SEPARATOR));
 		Assert.assertNull(factory.getProperty(JsonXMLOutputFactory.PROP_VIRTUAL_ROOT));
@@ -112,7 +112,7 @@ public class AbstractJsonXMLProviderTest {
 		Assert.assertEquals(Boolean.FALSE, factory.getProperty(JsonXMLOutputFactory.PROP_PRETTY_PRINT));
 		Assert.assertEquals(Boolean.FALSE, factory.getProperty(JsonXMLOutputFactory.PROP_AUTO_ARRAY));
 
-		factory = new DummyProvider().createOutputFactory(JsonXMLCustom.class.getAnnotation(JsonXML.class));
+		factory = new TestProvider().createOutputFactory(JsonXMLCustom.class.getAnnotation(JsonXML.class));
 		Assert.assertEquals(Boolean.TRUE, factory.getProperty(JsonXMLOutputFactory.PROP_MULTIPLE_PI));
 		Assert.assertEquals(Character.valueOf('_'), factory.getProperty(JsonXMLOutputFactory.PROP_NAMESPACE_SEPARATOR));
 		Assert.assertEquals("root", factory.getProperty(JsonXMLOutputFactory.PROP_VIRTUAL_ROOT));
@@ -123,7 +123,7 @@ public class AbstractJsonXMLProviderTest {
 	
 	@Test
 	public void testCreateJAXBElement() throws JAXBException {
-		AbstractJsonXMLProvider provider = new DummyProvider();
+		AbstractJsonXMLProvider provider = new TestProvider();
 		Assert.assertNull(provider.createJAXBElement(SampleRootElement.class, null, new SampleRootElement()));
 		Assert.assertNull(provider.createJAXBElement(EmptyType.class, null, new EmptyType()));
 		Assert.assertNotNull(provider.createJAXBElement(SampleType.class, null, new SampleType()));
@@ -133,49 +133,49 @@ public class AbstractJsonXMLProviderTest {
 	
 	@Test
 	public void testGetEncoding() {
-		Assert.assertEquals("UTF-8", new DummyProvider().getEncoding(MediaType.APPLICATION_JSON_TYPE));
+		Assert.assertEquals("UTF-8", new TestProvider().getEncoding(MediaType.APPLICATION_JSON_TYPE));
 		Map<String, String> parameters = new HashMap<String, String>();		
 		parameters.put("charset", "ASCII");
 		MediaType customMediaType = new MediaType("application", "json", parameters);
-		Assert.assertEquals("ASCII", new DummyProvider().getEncoding(customMediaType));
+		Assert.assertEquals("ASCII", new TestProvider().getEncoding(customMediaType));
 	}
 	
 	@Test
 	public void testGetJsonXML() {
 		JsonXML typeAnnotation = SampleType.class.getAnnotation(JsonXML.class);
-		Assert.assertEquals(typeAnnotation, new DummyProvider().getJsonXML(SampleType.class, new Annotation[0]));
+		Assert.assertEquals(typeAnnotation, new TestProvider().getJsonXML(SampleType.class, new Annotation[0]));
 
 		Annotation[] resourceAnnotations = new Annotation[]{JsonXMLCustom.class.getAnnotation(JsonXML.class)};
-		Assert.assertEquals(resourceAnnotations[0], new DummyProvider().getJsonXML(SampleType.class, resourceAnnotations));
+		Assert.assertEquals(resourceAnnotations[0], new TestProvider().getJsonXML(SampleType.class, resourceAnnotations));
 	}
 	
 	@Test
 	public void testGetSize() {
-		Assert.assertEquals(-1, new DummyProvider().getSize(null, null, null, null, null));
+		Assert.assertEquals(-1, new TestProvider().getSize(null, null, null, null, null));
 	}
 	
 	@Test
 	public void testIsMappable() {
-		Assert.assertTrue(new DummyProvider().isMappable(SampleRootElement.class));
-		Assert.assertTrue(new DummyProvider().isMappable(SampleType.class));
-		Assert.assertFalse(new DummyProvider().isMappable(getClass()));
+		Assert.assertTrue(new TestProvider().isMappable(SampleRootElement.class));
+		Assert.assertTrue(new TestProvider().isMappable(SampleType.class));
+		Assert.assertFalse(new TestProvider().isMappable(getClass()));
 	}
 	
 	@Test
 	public void testIsSupported() {
-		Assert.assertTrue(new DummyProvider().isSupported(MediaType.APPLICATION_JSON_TYPE));
-		Assert.assertTrue(new DummyProvider().isSupported(new MediaType("text", "json")));
-		Assert.assertTrue(new DummyProvider().isSupported(new MediaType("text", "JSON")));
-		Assert.assertTrue(new DummyProvider().isSupported(new MediaType("text", "special+json")));
-		Assert.assertFalse(new DummyProvider().isSupported(MediaType.APPLICATION_XML_TYPE));
+		Assert.assertTrue(new TestProvider().isSupported(MediaType.APPLICATION_JSON_TYPE));
+		Assert.assertTrue(new TestProvider().isSupported(new MediaType("text", "json")));
+		Assert.assertTrue(new TestProvider().isSupported(new MediaType("text", "JSON")));
+		Assert.assertTrue(new TestProvider().isSupported(new MediaType("text", "special+json")));
+		Assert.assertFalse(new TestProvider().isSupported(MediaType.APPLICATION_XML_TYPE));
 	}
 	
 	@Test
 	public void testGetNamespaceURI_XmlType() {
 		Assert.assertEquals(XMLConstants.NULL_NS_URI,
-				new DummyProvider().getNamespaceURI(SampleType.class.getAnnotation(XmlType.class), null));
+				new TestProvider().getNamespaceURI(SampleType.class.getAnnotation(XmlType.class), null));
 		Assert.assertEquals("urn:staxon-jaxrs:test",
-				new DummyProvider().getNamespaceURI(SampleTypeWithNamespace.class.getAnnotation(XmlType.class), null));
+				new TestProvider().getNamespaceURI(SampleTypeWithNamespace.class.getAnnotation(XmlType.class), null));
 	}
 
 	@Test
@@ -183,11 +183,11 @@ public class AbstractJsonXMLProviderTest {
 			Method createSampleType =
 					ObjectFactory.class.getMethod("createSampleType", SampleType.class);
 		Assert.assertEquals(XMLConstants.NULL_NS_URI,
-				new DummyProvider().getNamespaceURI(createSampleType.getAnnotation(XmlElementDecl.class), null));
+				new TestProvider().getNamespaceURI(createSampleType.getAnnotation(XmlElementDecl.class), null));
 		Method createSampleTypeWithNamespace =
 				ObjectFactory.class.getMethod("createSampleTypeWithNamespace", SampleTypeWithNamespace.class);
 		Assert.assertEquals("urn:staxon-jaxrs:test",
-				new DummyProvider().getNamespaceURI(createSampleTypeWithNamespace.getAnnotation(XmlElementDecl.class), null));
+				new TestProvider().getNamespaceURI(createSampleTypeWithNamespace.getAnnotation(XmlElementDecl.class), null));
 	}
 
 	@Test
@@ -197,7 +197,7 @@ public class AbstractJsonXMLProviderTest {
 		ByteArrayOutputStream entityStream = new ByteArrayOutputStream();
 		Object entry = new SampleRootElement();
 		Class<?> type = SampleRootElement.class;
-		AbstractJsonXMLProvider provider = new DummyProvider();
+		AbstractJsonXMLProvider provider = new TestProvider();
 		String encoding = provider.getEncoding(mediaType);
 
 		XMLStreamWriter writer = provider.createOutputFactory(config).createXMLStreamWriter(entityStream);
@@ -216,7 +216,7 @@ public class AbstractJsonXMLProviderTest {
 		ByteArrayOutputStream entityStream = new ByteArrayOutputStream();
 		Object entry = new SampleType();
 		Class<?> type = SampleType.class;
-		AbstractJsonXMLProvider provider = new DummyProvider();
+		AbstractJsonXMLProvider provider = new TestProvider();
 		String encoding = provider.getEncoding(mediaType);
 
 		XMLStreamWriter writer = provider.createOutputFactory(config).createXMLStreamWriter(entityStream);
@@ -234,7 +234,7 @@ public class AbstractJsonXMLProviderTest {
 		ByteArrayOutputStream entityStream = new ByteArrayOutputStream();
 		Object entry = new SampleTypeWithNamespace();
 		Class<?> type = SampleTypeWithNamespace.class;
-		AbstractJsonXMLProvider provider = new DummyProvider();
+		AbstractJsonXMLProvider provider = new TestProvider();
 		String encoding = provider.getEncoding(mediaType);
 
 		XMLStreamWriter writer = provider.createOutputFactory(config).createXMLStreamWriter(entityStream);
