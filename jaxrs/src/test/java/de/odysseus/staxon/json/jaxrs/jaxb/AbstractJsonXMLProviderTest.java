@@ -83,7 +83,7 @@ public class AbstractJsonXMLProviderTest {
 	public void testGetAnnotation() {
 		Annotation[] annotations = new Annotation[2];
 		annotations[0] = SampleType.class.getAnnotation(XmlType.class);
-		annotations[1] = SampleType.class.getAnnotation(JsonXML.class);
+		annotations[1] = JsonXMLDefault.class.getAnnotation(JsonXML.class);
 		Assert.assertEquals(XmlType.class, AbstractJsonXMLProvider.getAnnotation(annotations, XmlType.class).annotationType());
 		Assert.assertEquals(JsonXML.class, AbstractJsonXMLProvider.getAnnotation(annotations, JsonXML.class).annotationType());
 		Assert.assertNull(AbstractJsonXMLProvider.getAnnotation(annotations, XmlRootElement.class));

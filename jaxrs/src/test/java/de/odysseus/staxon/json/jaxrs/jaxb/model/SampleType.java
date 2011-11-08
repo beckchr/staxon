@@ -18,10 +18,7 @@ package de.odysseus.staxon.json.jaxrs.jaxb.model;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
-import de.odysseus.staxon.json.jaxrs.JsonXML;
-
 @XmlType
-@JsonXML
 public class SampleType {
 	@XmlElement
 	String element;
