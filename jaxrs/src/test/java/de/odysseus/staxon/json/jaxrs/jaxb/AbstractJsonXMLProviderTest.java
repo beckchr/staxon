@@ -52,21 +52,20 @@ import de.odysseus.staxon.json.jaxrs.jaxb.model.SampleTypeWithNamespace;
 public class AbstractJsonXMLProviderTest {
 	static class TestProvider extends AbstractJsonXMLProvider {
 		@Override
-		public boolean isReadable(Class<?> arg0, Type arg1, Annotation[] arg2, MediaType arg3) {
+		protected boolean isReadWritable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
 			return false;
 		}
 		@Override
-		public boolean isWriteable(Class<?> arg0, Type arg1, Annotation[] arg2, MediaType arg3) {
-			return false;
+		public Object read(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType,
+				MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException,
+				WebApplicationException {
+			throw new UnsupportedOperationException();
 		}
 		@Override
-		public Object readFrom(Class<Object> arg0, Type arg1, Annotation[] arg2, MediaType arg3,
-				MultivaluedMap<String, String> arg4, InputStream arg5) throws IOException, WebApplicationException {
-			return null;
-		}
-		@Override
-		public void writeTo(Object arg0, Class<?> arg1, Type arg2, Annotation[] arg3, MediaType arg4,
-				MultivaluedMap<String, Object> arg5, OutputStream arg6) throws IOException, WebApplicationException {
+		public void write(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType,
+				MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream, Object entry)
+				throws IOException, WebApplicationException {
+			throw new UnsupportedOperationException();
 		}
 	}
 	

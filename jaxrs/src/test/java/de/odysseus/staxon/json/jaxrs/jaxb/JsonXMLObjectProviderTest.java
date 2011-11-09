@@ -1,7 +1,9 @@
 package de.odysseus.staxon.json.jaxrs.jaxb;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 
 import javax.ws.rs.core.MediaType;
 
@@ -42,22 +44,46 @@ public class JsonXMLObjectProviderTest {
 	}
 
 	@Test
-	public void testReadFrom() throws Exception {
+	public void testRead() throws Exception {
 		JsonXMLObjectProvider provider = new JsonXMLObjectProvider(null);
 		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
 
 		String json = "{\"sampleRootElement\":{\"@attribute\":\"hello\",\"elements\":[\"world\"]}}";
 		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes(encoding));
-		SampleRootElement sampleRootElement = (SampleRootElement)provider.readFrom(
-				Object.class, null, new Annotation[0], MediaType.APPLICATION_JSON_TYPE, null, input);
+		SampleRootElement sampleRootElement = (SampleRootElement)provider.read(SampleRootElement.class,
+				null, new Annotation[0], MediaType.APPLICATION_JSON_TYPE, null, input);
 		Assert.assertEquals("hello", sampleRootElement.attribute);
 		Assert.assertEquals("world", sampleRootElement.elements.get(0));
 		
 		Annotation[] jsonXMLAnnotations = new Annotation[]{JsonXMLDefault.class.getAnnotation(JsonXML.class)};
 		json = "{\"sampleType\":{\"element\":\"hi!\"}}";
 		input = new ByteArrayInputStream(json.getBytes(encoding));
-		SampleType sampleType = (SampleType)provider.readFrom(
-				Object.class, null, jsonXMLAnnotations, MediaType.APPLICATION_JSON_TYPE, null, input);
+		SampleType sampleType = (SampleType)provider.read(SampleType.class,
+				null, jsonXMLAnnotations, MediaType.APPLICATION_JSON_TYPE, null, input);
 		Assert.assertEquals("hi!", sampleType.element);
+	}
+
+	@Test
+	public void testWrite() throws Exception {
+		JsonXMLObjectProvider provider = new JsonXMLObjectProvider(null);
+		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
+		
+		SampleRootElement sampleRootElement = new SampleRootElement();
+		sampleRootElement.attribute = "hello";
+		sampleRootElement.elements = Arrays.asList("world");	
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		provider.write(SampleRootElement.class,
+				null, new Annotation[0], MediaType.APPLICATION_JSON_TYPE, null, output, sampleRootElement);
+		String json = "{\"sampleRootElement\":{\"@attribute\":\"hello\",\"elements\":\"world\"}}";
+		Assert.assertEquals(json, new String(output.toByteArray(), encoding));
+
+		SampleType sampleType = new SampleType();
+		sampleType.element = "hi!";
+		Annotation[] jsonXMLAnnotations = new Annotation[]{JsonXMLDefault.class.getAnnotation(JsonXML.class)};
+		output = new ByteArrayOutputStream();
+		provider.write(SampleType.class,
+				null, jsonXMLAnnotations, MediaType.APPLICATION_JSON_TYPE, null, output, sampleType);
+		json = "{\"sampleType\":{\"element\":\"hi!\"}}";
+		Assert.assertEquals(json, new String(output.toByteArray(), encoding));
 	}
 }

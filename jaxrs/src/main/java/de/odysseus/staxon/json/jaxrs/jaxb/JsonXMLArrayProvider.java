@@ -130,7 +130,7 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider {
 	}
 
 	@Override
-	public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+	protected boolean isReadWritable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
 		if (!isSupported(mediaType)) {
 			return false;
 		}
@@ -139,17 +139,8 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider {
 	}
 
 	@Override
-	public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-		if (!isSupported(mediaType)) {
-			return false;
-		}
-		Class<?> componentType = getComponentType(type, genericType);
-		return componentType != null && getJsonXML(componentType, annotations) != null && isMappable(componentType);
-	}
-
-	@Override
-	public Object readFrom(
-			Class<Object> type,
+	public Object read(
+			Class<?> type,
 			Type genericType,
 			Annotation[] annotations,
 			MediaType mediaType,
@@ -188,14 +179,14 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider {
 	}
 
 	@Override
-	public void writeTo(
-			Object entry,
+	public void write(
 			Class<?> type,
 			Type genericType,
 			Annotation[] annotations,
 			MediaType mediaType,
 			MultivaluedMap<String, Object> httpHeaders,
-			OutputStream entityStream) throws IOException, WebApplicationException {
+			OutputStream entityStream,
+			Object entry) throws IOException, WebApplicationException {
 		Class<?> componentType = getComponentType(type, genericType);
 		JsonXML config = getJsonXML(componentType, annotations);
 		XMLOutputFactory factory = createOutputFactory(config);
