@@ -44,46 +44,66 @@ public class JsonXMLObjectProviderTest {
 	}
 
 	@Test
-	public void testRead() throws Exception {
+	public void testReadSampleRootElement() throws Exception {
 		JsonXMLObjectProvider provider = new JsonXMLObjectProvider(null);
 		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
-
+		Annotation[] annotations = new Annotation[0];
 		String json = "{\"sampleRootElement\":{\"@attribute\":\"hello\",\"elements\":[\"world\"]}}";
 		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes(encoding));
+
 		SampleRootElement sampleRootElement = (SampleRootElement)provider.read(SampleRootElement.class,
-				null, new Annotation[0], MediaType.APPLICATION_JSON_TYPE, null, input);
+				null, annotations, MediaType.APPLICATION_JSON_TYPE, null, input);
+
 		Assert.assertEquals("hello", sampleRootElement.attribute);
 		Assert.assertEquals("world", sampleRootElement.elements.get(0));
-		
-		Annotation[] jsonXMLAnnotations = new Annotation[]{JsonXMLDefault.class.getAnnotation(JsonXML.class)};
-		json = "{\"sampleType\":{\"element\":\"hi!\"}}";
-		input = new ByteArrayInputStream(json.getBytes(encoding));
+	}
+
+	@Test
+	public void testReadSampleType() throws Exception {
+		JsonXMLObjectProvider provider = new JsonXMLObjectProvider(null);
+		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
+		Annotation[] annotations = new Annotation[]{JsonXMLDefault.class.getAnnotation(JsonXML.class)};
+		String json = "{\"sampleType\":{\"element\":\"hi!\"}}";
+		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes(encoding));		
+
 		SampleType sampleType = (SampleType)provider.read(SampleType.class,
-				null, jsonXMLAnnotations, MediaType.APPLICATION_JSON_TYPE, null, input);
+				null, annotations, MediaType.APPLICATION_JSON_TYPE, null, input);
+
 		Assert.assertEquals("hi!", sampleType.element);
 	}
 
 	@Test
-	public void testWrite() throws Exception {
+	public void testWriteSampleRootElement() throws Exception {
 		JsonXMLObjectProvider provider = new JsonXMLObjectProvider(null);
 		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
+		Annotation[] annotations = new Annotation[0];
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		
 		SampleRootElement sampleRootElement = new SampleRootElement();
 		sampleRootElement.attribute = "hello";
 		sampleRootElement.elements = Arrays.asList("world");	
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
+
 		provider.write(SampleRootElement.class,
-				null, new Annotation[0], MediaType.APPLICATION_JSON_TYPE, null, output, sampleRootElement);
+				null, annotations, MediaType.APPLICATION_JSON_TYPE, null, output, sampleRootElement);
+
 		String json = "{\"sampleRootElement\":{\"@attribute\":\"hello\",\"elements\":\"world\"}}";
 		Assert.assertEquals(json, new String(output.toByteArray(), encoding));
+	}
+
+	@Test
+	public void testWriteSampleType() throws Exception {
+		JsonXMLObjectProvider provider = new JsonXMLObjectProvider(null);
+		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
+		Annotation[] annotations = new Annotation[]{JsonXMLDefault.class.getAnnotation(JsonXML.class)};
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
 
 		SampleType sampleType = new SampleType();
 		sampleType.element = "hi!";
-		Annotation[] jsonXMLAnnotations = new Annotation[]{JsonXMLDefault.class.getAnnotation(JsonXML.class)};
-		output = new ByteArrayOutputStream();
+
 		provider.write(SampleType.class,
-				null, jsonXMLAnnotations, MediaType.APPLICATION_JSON_TYPE, null, output, sampleType);
-		json = "{\"sampleType\":{\"element\":\"hi!\"}}";
+				null, annotations, MediaType.APPLICATION_JSON_TYPE, null, output, sampleType);
+
+		String json = "{\"sampleType\":{\"element\":\"hi!\"}}";
 		Assert.assertEquals(json, new String(output.toByteArray(), encoding));
 	}
 }
