@@ -139,7 +139,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 			writeStartArray(fieldName);
 		}
 		try {
-			if (parentInfo.getArrayName() == null) {
+			if (!parentInfo.isArray()) {
 				if (!parentInfo.startObjectWritten) {
 					target.startObject();
 					parentInfo.startObjectWritten = true;
@@ -147,7 +147,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 			} else if (autoEndArray && !fieldName.equals(parentInfo.getArrayName())) {
 				writeEndArray();
 			}
-			if (parentInfo.getArrayName() == null) {
+			if (!parentInfo.isArray()) {
 				target.name(fieldName);
 			} else {
 				parentInfo.incArraySize();
@@ -174,7 +174,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 				}
 				target.value(getScope().getInfo().getText());
 			}
-			if (autoEndArray && getScope().getInfo().getArrayName() != null) {
+			if (autoEndArray && getScope().getInfo().isArray()) {
 				writeEndArray();
 			}
 			if (getScope().getInfo().startObjectWritten) {
@@ -258,7 +258,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	public void writeEndDocument() throws XMLStreamException {
 		super.writeEndDocument();
 		try {
-			if (getScope().getInfo().getArrayName() != null) {
+			if (getScope().getInfo().isArray()) {
 				target.endArray();
 			}
 			target.endObject();
@@ -269,7 +269,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	}
 
 	public void writeStartArray(String fieldName) throws XMLStreamException {
-		if (autoEndArray && getScope().getInfo().getArrayName() != null) {
+		if (autoEndArray && getScope().getInfo().isArray()) {
 			writeEndArray();
 		}
 		getScope().getInfo().startArray(fieldName);

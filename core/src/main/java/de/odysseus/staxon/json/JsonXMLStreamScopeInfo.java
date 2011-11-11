@@ -20,7 +20,7 @@ class JsonXMLStreamScopeInfo {
 	private int arraySize = -1;
 
 	void startArray(String arrayName) {
-		if (this.arrayName != null) {
+		if (isArray()) {
 			throw new IllegalStateException("Cannot start array: " + arrayName);
 		}
 		this.arrayName = arrayName;
@@ -28,7 +28,7 @@ class JsonXMLStreamScopeInfo {
 	}
 
 	void incArraySize() {
-		if (this.arrayName == null) {
+		if (!isArray()) {
 			throw new IllegalStateException("Not in an array");
 		}
 		arraySize++;
@@ -41,9 +41,13 @@ class JsonXMLStreamScopeInfo {
 	int getArraySize() {
 		return arraySize;
 	}
+	
+	boolean isArray() {
+		return arraySize >= 0;
+	}
 
 	void endArray() {
-		if (this.arrayName == null) {
+		if (!isArray()) {
 			throw new IllegalStateException("Cannot end array: " + arrayName);
 		}
 		this.arrayName = null;

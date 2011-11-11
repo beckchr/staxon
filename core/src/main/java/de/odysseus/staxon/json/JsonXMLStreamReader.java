@@ -124,7 +124,7 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 			return consume();
 		case START_ARRAY:
 			source.startArray();
-			if (scope.getInfo().getArrayName() != null) {
+			if (scope.getInfo().isArray()) {
 				throw new IOException("Array start inside array");
 			}
 			if (scope.getInfo().currentTagName == null) {
@@ -140,10 +140,12 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 			if (scope.isRoot() && scope.getInfo().currentTagName == null) {
 				readStartDocument(null, null, null);
 			} else {
-				if (scope.getInfo().getArrayName() != null) {
+				if (scope.getInfo().isArray()) {
 					scope.getInfo().incArraySize();
 				}
-				readStartElementTag(scope.getInfo().currentTagName);
+				if (scope.getInfo().currentTagName != null) {
+					readStartElementTag(scope.getInfo().currentTagName);
+				}
 			}
 			return consume();
 		case END_OBJECT:
@@ -158,7 +160,7 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 		case VALUE:
 			String text = source.value();
 			String name = scope.getInfo().currentTagName;
-			if (scope.getInfo().getArrayName() != null) {
+			if (scope.getInfo().isArray()) {
 				scope.getInfo().incArraySize();
 				name = scope.getInfo().getArrayName();
 			}
@@ -170,7 +172,7 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 			return true;
 		case END_ARRAY:
 			source.endArray();
-			if (scope.getInfo().getArrayName() == null) {
+			if (!scope.getInfo().isArray()) {
 				throw new IllegalStateException("Array end without matching start");
 			}
 			scope.getInfo().endArray();
