@@ -64,6 +64,10 @@ public class AddRootSource implements JsonStreamSource {
 
 	@Override
 	public void endObject() throws IOException {
+		if (state == State.END_DOC) {
+			state = null;
+			return;
+		}
 		if (depth == 1 && state == State.DELEGATE && delegate.peek() == JsonStreamToken.NONE) {
 			state = State.END_DOC;
 		}
@@ -85,6 +89,9 @@ public class AddRootSource implements JsonStreamSource {
 
 	@Override
 	public JsonStreamToken peek() throws IOException {
+		if (state == null) {
+			return JsonStreamToken.NONE;
+		}
 		switch (state) {
 		case START_DOC: return JsonStreamToken.START_OBJECT;
 		case ROOT_NAME: return JsonStreamToken.NAME;
