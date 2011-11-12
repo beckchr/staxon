@@ -46,6 +46,8 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 	private final JsonStreamSource source;
 	private final boolean multiplePI;
 	private final char namespaceSeparator;
+	
+	private boolean documentArray = false;
 
 	/**
 	 * Create reader instance.
@@ -127,17 +129,21 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 			if (scope.getInfo().isArray()) {
 				throw new IOException("Array start inside array");
 			}
-			if (scope.getInfo().currentTagName == null) {
-				throw new IOException("Array name missing");
+			if (scope.isRoot() && !isStartDocumentRead()) {
+				documentArray = true;
+			} else {
+				if (scope.getInfo().currentTagName == null) {
+					throw new IOException("Array name missing");
+				}
+				scope.getInfo().startArray(scope.getInfo().currentTagName);
 			}
-			scope.getInfo().startArray(scope.getInfo().currentTagName);
 			if (multiplePI) {
 				readPI(JsonXMLStreamConstants.MULTIPLE_PI_TARGET, scope.getInfo().currentTagName);
 			}
 			return consume();
 		case START_OBJECT:
 			source.startObject();
-			if (scope.isRoot() && scope.getInfo().currentTagName == null) {
+			if (scope.isRoot() && !isStartDocumentRead()) {
 				readStartDocument(null, null, null);
 			} else {
 				if (scope.getInfo().isArray()) {
@@ -150,9 +156,9 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 			return consume();
 		case END_OBJECT:
 			source.endObject();
-			if (scope.isRoot()) {
+			if (scope.isRoot() && isStartDocumentRead()) {
 				readEndDocument();
-				return false;
+				return documentArray;
 			} else {
 				readEndElementTag();
 				return true;
@@ -164,14 +170,21 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 				scope.getInfo().incArraySize();
 				name = scope.getInfo().getArrayName();
 			}
-			readStartElementTag(name);
-			if (text != null) {
+			if (getScope().isRoot() && !isStartDocumentRead()) { // hack: allow to read simple value
 				readData(text, XMLStreamConstants.CHARACTERS);
+			} else {
+				readStartElementTag(name);
+				if (text != null) {
+					readData(text, XMLStreamConstants.CHARACTERS);
+				}
+				readEndElementTag();
 			}
-			readEndElementTag();
 			return true;
 		case END_ARRAY:
 			source.endArray();
+			if (getScope().isRoot() && documentArray) {
+				return false;
+			}
 			if (!scope.getInfo().isArray()) {
 				throw new IllegalStateException("Array end without matching start");
 			}

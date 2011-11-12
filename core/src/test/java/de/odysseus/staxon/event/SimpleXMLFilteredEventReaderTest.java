@@ -83,7 +83,7 @@ public class SimpleXMLFilteredEventReaderTest {
 
 		reader = createXmlEventReader("<alice></alice>", new TypeFilter(XMLStreamConstants.END_ELEMENT));
 		Assert.assertEquals(XMLStreamConstants.START_ELEMENT, reader.nextEvent().getEventType());
-		Assert.assertEquals(XMLStreamConstants.END_DOCUMENT, reader.nextEvent().getEventType());
+		Assert.assertFalse(reader.hasNext());
 	}
 
 	@Test
@@ -127,24 +127,26 @@ public class SimpleXMLFilteredEventReaderTest {
 	public void testComment() throws XMLStreamException {
 		XMLEventReader reader = createXmlEventReader("<!--james-->", ACCEPT_ALL);
 		Assert.assertEquals(XMLStreamConstants.COMMENT, reader.nextEvent().getEventType());
+		Assert.assertFalse(reader.hasNext());
 	}
 
 	@Test
 	public void testComment2() throws XMLStreamException {
 		XMLEventReader reader = createXmlEventReader("<!--james-->", new TypeFilter(XMLStreamConstants.COMMENT));
-		Assert.assertEquals(XMLStreamConstants.END_DOCUMENT, reader.nextEvent().getEventType());
+		Assert.assertFalse(reader.hasNext());
 	}
 
 	@Test
 	public void testProcessingInstruction() throws XMLStreamException {
 		XMLEventReader reader = createXmlEventReader("<?joe?>", ACCEPT_ALL);
 		Assert.assertEquals(XMLStreamConstants.PROCESSING_INSTRUCTION, reader.nextEvent().getEventType());
+		Assert.assertFalse(reader.hasNext());
 	}
 
 	@Test
 	public void testProcessingInstruction2() throws XMLStreamException {
 		XMLEventReader reader = createXmlEventReader("<?joe?>", new TypeFilter(XMLStreamConstants.PROCESSING_INSTRUCTION));
-		Assert.assertEquals(XMLStreamConstants.END_DOCUMENT, reader.nextEvent().getEventType());
+		Assert.assertFalse(reader.hasNext());
 	}
 
 	@Test

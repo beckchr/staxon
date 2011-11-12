@@ -155,7 +155,26 @@ public class RemoveRootTargetTest {
 		writer.writeStartElement("alice");
 		writer.writeCharacters("bob");
 		writer.writeEndElement();
-		writer.writeEndDocument(); // flush?
+		writer.writeEndDocument();
+		writer.close();
+		Assert.assertEquals("[\"bob\",\"bob\"]", result.toString());
+	}
+
+	@Test
+	public void testDocumentArray() throws Exception {
+		StringWriter result = new StringWriter();
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result, "alice"), true, ':', true);
+		writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET);
+		writer.writeStartDocument();
+		writer.writeStartElement("alice");
+		writer.writeCharacters("bob");
+		writer.writeEndElement();
+		writer.writeEndDocument();
+		writer.writeStartDocument();
+		writer.writeStartElement("alice");
+		writer.writeCharacters("bob");
+		writer.writeEndElement();
+		writer.writeEndDocument();
 		writer.close();
 		Assert.assertEquals("[\"bob\",\"bob\"]", result.toString());
 	}

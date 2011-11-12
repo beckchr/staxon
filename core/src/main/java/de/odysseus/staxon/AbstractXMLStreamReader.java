@@ -121,10 +121,11 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	private XMLStreamReaderScope<T> scope;
 	private boolean moreTokens;
 	private Event event;
-	
+	private boolean startDocumentRead;
+
 	private String encodingScheme;
 	private String version;
-	private Boolean standalone;
+	private Boolean standalone;	
 	
 	/**
 	 * Create new reader instance.
@@ -145,6 +146,13 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	 */
 	protected XMLStreamReaderScope<T> getScope() {
 		return scope;
+	}
+	
+	/**
+	 * @return <code>true</code> if <code>START_DOCUMENT</code> event has been read
+	 */
+	protected boolean isStartDocumentRead() {
+		return startDocumentRead;
 	}
 
 	/**
@@ -184,8 +192,13 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	 * @param encodingScheme encoding scheme (may be <code>null</code>)
 	 * @param standalone standalone flag (may be <code>null</code>)
 	 */
-	protected void readStartDocument(String version, String encodingScheme, Boolean standalone) {
+	protected void readStartDocument(String version, String encodingScheme, Boolean standalone) throws XMLStreamException {
+		if (startDocumentRead || !scope.isRoot()) {
+			throw new XMLStreamException("Cannot start document");
+		}
 		queue.add(new Event(XMLStreamConstants.START_DOCUMENT, scope, null));
+		startDocumentRead = true;
+
 		this.version = version;
 		this.encodingScheme = encodingScheme;
 		this.standalone = standalone;
@@ -287,9 +300,14 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	/**
 	 * Read end document.
 	 */
-	protected void readEndDocument() {
+	protected void readEndDocument() throws XMLStreamException {
+		if (!startDocumentRead || !scope.isRoot()) {
+			throw new XMLStreamException("Cannot start document");
+		}
 		queue.add(new Event(XMLStreamConstants.END_DOCUMENT, scope, null));
+		startDocumentRead = false;
 	}
+
 	@Override
 	public void require(int eventType, String namespaceURI, String localName) throws XMLStreamException {
 		if (eventType != getEventType()) {

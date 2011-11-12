@@ -22,6 +22,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class JsonXMLStreamReaderTest {
@@ -207,6 +208,52 @@ public class JsonXMLStreamReaderTest {
 		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
 		reader.next();
 		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
+		reader.close();
+	}
+
+	@Test
+	public void testSimpleValueArray() throws Exception {
+		String input = "[\"edgar\",\"david\"]";
+		XMLStreamReader reader = new JsonXMLInputFactory().createXMLStreamReader(new StringReader(input));
+		verify(reader, XMLStreamConstants.PROCESSING_INSTRUCTION, null, null);
+		Assert.assertEquals(JsonXMLStreamConstants.MULTIPLE_PI_TARGET, reader.getPITarget());
+		Assert.assertNull(reader.getPIData());
+		reader.next();
+		verify(reader, XMLStreamConstants.CHARACTERS, null, "edgar");
+		reader.next();
+		verify(reader, XMLStreamConstants.CHARACTERS, null, "david");
+		Assert.assertFalse(reader.hasNext());
+		reader.close();
+	}
+
+	@Test
+	public void testDocumentArray() throws Exception {
+		String input = "[{\"alice\":\"bob\"},{\"alice\":\"bob\"}]";
+		XMLStreamReader reader = new JsonXMLInputFactory().createXMLStreamReader(new StringReader(input));
+		verify(reader, XMLStreamConstants.PROCESSING_INSTRUCTION, null, null);
+		Assert.assertEquals(JsonXMLStreamConstants.MULTIPLE_PI_TARGET, reader.getPITarget());
+		Assert.assertNull(reader.getPIData());
+		reader.next();
+		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.CHARACTERS, null, "bob");
+		reader.next();
+		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
+		reader.next();
+		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.CHARACTERS, null, "bob");
+		reader.next();
+		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
+		Assert.assertFalse(reader.hasNext());
 		reader.close();
 	}
 }

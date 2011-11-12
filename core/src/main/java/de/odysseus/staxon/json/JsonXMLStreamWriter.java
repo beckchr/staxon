@@ -101,6 +101,8 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	private final char namespaceSeparator;
 	private final boolean namespaceDeclarations;
 
+	private boolean documentArray = false;
+	
 	/**
 	 * Create writer instance.
 	 * @param target stream target
@@ -132,8 +134,10 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 			parentInfo.setText(null);
 		}
 		String fieldName = getFieldName(prefix, localName);
-		if (getScope().isRoot() && getScope().getLastChild() != null && !fieldName.equals(parentInfo.getArrayName())) {
-			throw new XMLStreamException("Multiple roots within document");
+		if (getScope().isRoot() && getScope().getLastChild() != null && !documentArray) {
+			if (!fieldName.equals(parentInfo.getArrayName())) {
+				throw new XMLStreamException("Multiple roots within document");
+			}
 		}
 		if (parentInfo.pendingStartArray) {
 			writeStartArray(fieldName);
@@ -232,6 +236,14 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 					throw new XMLStreamException("Mixed content is not supported: '" + getScope().getInfo().getText() + "'");
 				}
 			} else {
+				if (getScope().isRoot() && !isStartDocumentWritten()) { // hack: allow to write simple value
+					try {
+						target.value(data);
+					} catch (IOException e) {
+						throw new XMLStreamException("Cannot write data", e);
+					}
+					break;
+				}
 				getScope().getInfo().addText(data);
 			}
 			break;
@@ -299,6 +311,9 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	public void close() throws XMLStreamException {
 		super.close();
 		try {
+			if (documentArray) {
+				target.endArray();
+			}
 			target.close();
 		} catch (IOException e) {
 			throw new XMLStreamException("Close failed", e);
@@ -317,10 +332,23 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	@Override
 	protected void writePI(String target, String data) throws XMLStreamException {
 		if (multiplePI && JsonXMLStreamConstants.MULTIPLE_PI_TARGET.equals(target)) {
-			if (data == null || data.trim().isEmpty()) {
-				getScope().getInfo().pendingStartArray = true;
+			if (getScope().isRoot() && !isStartDocumentWritten()) {
+				if (data == null || data.trim().isEmpty()) {
+					try {
+						this.target.startArray();
+						this.documentArray = true;
+					} catch (IOException e) {
+						throw new XMLStreamException("Cannot start document array", e);
+					}
+				} else {
+					throw new XMLStreamException("Cannot specify name in document array: " + data);
+				}
 			} else {
-				writeStartArray(data.trim());
+				if (data == null || data.trim().isEmpty()) {
+					getScope().getInfo().pendingStartArray = true;
+				} else {
+					writeStartArray(data.trim());
+				}
 			}
 		}
 	}

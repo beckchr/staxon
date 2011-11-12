@@ -63,6 +63,13 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 	protected XMLStreamWriterScope<T> getScope() {
 		return scope;
 	}
+	
+	/**
+	 * @return <code>true</code> if <code>START_DOCUMENT</code> event has been written
+	 */
+	protected boolean isStartDocumentWritten() {
+		return startDocumentWritten;
+	}
 
 	/**
 	 * Write open start element tag.
@@ -278,6 +285,9 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 
 	@Override
 	public void writeEndDocument() throws XMLStreamException {
+		if (!startDocumentWritten || !scope.isRoot()) {
+			throw new XMLStreamException("Cannot start document");
+		}
 		if (!scope.isRoot()) {
 			ensureStartTagClosed();
 			while (!scope.isRoot()) {

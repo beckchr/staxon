@@ -70,7 +70,9 @@ public class SimpleXMLStreamReader extends AbstractXMLStreamReader<String> {
 		skipWhitespace();
 
 		if (ch == -1) {
-			readEndDocument();
+			if (isStartDocumentRead()) {
+				readEndDocument();
+			}
 			return false;
 		}
 

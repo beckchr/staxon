@@ -178,6 +178,48 @@ public class JsonXMLStreamWriterTest {
 		Assert.assertEquals("{\"alice\":[\"bob\",\"bob\"]}", result.toString());
 	}
 
+	/**
+	 * <code>&lt;alice&gt;bob&lt;/alice&gt;&lt;alice&gt;bob&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testDocumentArray() throws Exception {
+		StringWriter result = new StringWriter();
+		XMLStreamWriter writer = new JsonXMLOutputFactory().createXMLStreamWriter(result);
+		writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET);
+		writer.writeStartDocument();
+		writer.writeStartElement("alice");
+		writer.writeCharacters("bob");
+		writer.writeEndElement();
+		writer.writeEndDocument(); // flush?
+		writer.writeStartDocument();
+		writer.writeStartElement("alice");
+		writer.writeCharacters("bob");
+		writer.writeEndElement();
+		writer.writeEndDocument(); // flush?
+		writer.close();
+		Assert.assertEquals("[{\"alice\":\"bob\"},{\"alice\":\"bob\"}]", result.toString());
+	}
+
+	@Test
+	public void testSimpleValue() throws Exception {
+		StringWriter result = new StringWriter();
+		XMLStreamWriter writer = new JsonXMLOutputFactory().createXMLStreamWriter(result);
+		writer.writeCharacters("bob");
+		writer.close();
+		Assert.assertEquals("\"bob\"", result.toString());
+	}
+
+	@Test
+	public void testSimpleValueArray() throws Exception {
+		StringWriter result = new StringWriter();
+		XMLStreamWriter writer = new JsonXMLOutputFactory().createXMLStreamWriter(result);
+		writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET);
+		writer.writeCharacters("edgar");
+		writer.writeCharacters("david");
+		writer.close();
+		Assert.assertEquals("[\"edgar\",\"david\"]", result.toString());
+	}
+
 	@Test(expected = XMLStreamException.class)
 	public void testElementMultipleRoots() throws XMLStreamException {
 		XMLStreamWriter writer = new JsonXMLOutputFactory().createXMLStreamWriter(new StringWriter());

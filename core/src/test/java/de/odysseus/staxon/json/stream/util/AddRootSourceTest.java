@@ -122,6 +122,47 @@ public class AddRootSourceTest {
 		reader.close();
 	}
 
+	@Test
+	public void testRootArray() throws Exception {
+		String input = "[\"charlie\",\"david\"]";
+		XMLStreamReader reader = new JsonXMLStreamReader(createSource(new StringReader(input), "bob"), true, ':');
+		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
+		reader.next();
+		verify(reader, XMLStreamConstants.PROCESSING_INSTRUCTION, null, null);
+		Assert.assertEquals(JsonXMLStreamConstants.MULTIPLE_PI_TARGET, reader.getPITarget());
+		Assert.assertEquals("bob", reader.getPIData());
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "bob", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.CHARACTERS, null, "charlie");
+		reader.next();
+		verify(reader, XMLStreamConstants.END_ELEMENT, "bob", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "bob", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.CHARACTERS, null, "david");
+		reader.next();
+		verify(reader, XMLStreamConstants.END_ELEMENT, "bob", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
+		reader.close();
+	}
+
+	@Test
+	public void testEmptyArray() throws Exception {
+		String input = "[]";
+		XMLStreamReader reader = new JsonXMLStreamReader(createSource(new StringReader(input), "bob"), true, ':');
+		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
+		reader.next();
+		verify(reader, XMLStreamConstants.PROCESSING_INSTRUCTION, null, null);
+		Assert.assertEquals(JsonXMLStreamConstants.MULTIPLE_PI_TARGET, reader.getPITarget());
+		Assert.assertEquals("bob", reader.getPIData());
+		reader.next();
+		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
+		reader.close();
+	}
+
+
 	/**
 	 * <code>&lt;alice charlie="david"&gt;bob&lt;/alice&gt;</code>
 	 */
