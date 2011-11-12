@@ -72,10 +72,15 @@ public class JsonXMLObjectProvider extends AbstractJsonXMLProvider {
 		try {
 			JAXBContext context = store.getContext(type, mediaType);
 			XMLStreamReader reader = factory.createXMLStreamReader(entityStream);
-			reader.require(XMLStreamConstants.START_DOCUMENT, null, null);
-			Unmarshaller unmarshaller = context.createUnmarshaller();
-			Object result = unmarshal(type, config, unmarshaller, reader);
-			reader.require(XMLStreamConstants.END_DOCUMENT, null, null);
+			Object result;
+			if (reader.isCharacters() && reader.getText() == null) { // hack: read null
+				result = null;
+			} else {
+				reader.require(XMLStreamConstants.START_DOCUMENT, null, null);
+				Unmarshaller unmarshaller = context.createUnmarshaller();
+				result = unmarshal(type, config, unmarshaller, reader);
+				reader.require(XMLStreamConstants.END_DOCUMENT, null, null);
+			}
 			reader.close();
 			return result;
 		} catch (XMLStreamException e) {
@@ -99,12 +104,16 @@ public class JsonXMLObjectProvider extends AbstractJsonXMLProvider {
 		try {
 			JAXBContext context = store.getContext(type, mediaType);
 			XMLStreamWriter writer = factory.createXMLStreamWriter(entityStream);
-			if (config.multiplePaths().length > 0) {
-				writer = new XMLMultipleStreamWriter(writer, config.multiplePaths());
+			if (entry == null) { // hack: write null
+				writer.writeCharacters(null);
+			} else {
+				if (config.multiplePaths().length > 0) {
+					writer = new XMLMultipleStreamWriter(writer, config.multiplePaths());
+				}
+				Marshaller marshaller = context.createMarshaller();
+				marshaller.setProperty(Marshaller.JAXB_ENCODING, getEncoding(mediaType));
+				marshal(type, config, marshaller, writer, entry);
 			}
-			Marshaller marshaller = context.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_ENCODING, getEncoding(mediaType));
-			marshal(type, config, marshaller, writer, entry);
 			writer.close();
 		} catch (XMLStreamException e) {
 			throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);

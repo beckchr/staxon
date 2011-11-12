@@ -25,6 +25,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -46,7 +47,6 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -156,15 +156,26 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider {
 		try {
 			JAXBContext context = store.getContext(componentType, mediaType);
 			XMLStreamReader reader = factory.createXMLStreamReader(entityStream);
+			boolean documentArray = reader.getPITarget() == JsonXMLStreamConstants.MULTIPLE_PI_TARGET;
 			Unmarshaller unmarshaller = context.createUnmarshaller();
-			reader.require(XMLStreamConstants.START_DOCUMENT, null, null);
-			while (reader.hasNext() && !reader.isStartElement()) {
+			while (reader.hasNext() && !reader.isStartElement() && !reader.isCharacters()) {
 				reader.next();
 			}
-			while (reader.hasNext()) {
-				collection.add(unmarshal(componentType, config, unmarshaller, reader));
+			while (reader.hasNext() || reader.isCharacters() && reader.getText() == null) {
+				if (reader.isCharacters() && reader.getText() == null) { // hack: read null
+					collection.add(null);
+					if (reader.hasNext()) {
+						reader.next();
+					} else {
+						break;
+					}
+				} else {
+					collection.add(unmarshal(componentType, config, unmarshaller, reader));
+					if (documentArray && reader.hasNext()) { // move to next document
+						reader.next();
+					}
+				}
 			}
-			reader.require(XMLStreamConstants.END_DOCUMENT, null, null);
 			reader.close();
 			if (type.isArray()) {
 				return toArray((List<?>) collection, componentType);
@@ -193,28 +204,36 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider {
 		try {
 			JAXBContext context = store.getContext(componentType, mediaType);
 			XMLStreamWriter writer = factory.createXMLStreamWriter(entityStream);
-			if (config.multiplePaths().length > 0) {
-				writer = new XMLMultipleStreamWriter(writer, config.multiplePaths());
-			}
-			Marshaller marshaller = context.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
-			marshaller.setProperty(Marshaller.JAXB_ENCODING, getEncoding(mediaType));
-			writer.writeStartDocument();
-			if (config.virtualRoot().length() > 0) {
-				writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET, config.virtualRoot());
+			if (entry == null) { // hack: write null
+				writer.writeCharacters(null);
 			} else {
-				writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET);
-			}
-			if (type.isArray()) {
-				for (Object value : (Object[]) entry) {
-					marshal(componentType, config, marshaller, writer, value);
+				if (config.multiplePaths().length > 0) {
+					writer = new XMLMultipleStreamWriter(writer, config.multiplePaths());
 				}
-			} else {
-				for (Object value : (Collection<?>) entry) {
-					marshal(componentType, config, marshaller, writer, value);
+				boolean documentArray = false;
+				Marshaller marshaller = context.createMarshaller();
+				if (documentArray) {
+					writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET);
+				} else {
+					writer.writeStartDocument();
+					if (config.virtualRoot().length() > 0) {
+						writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET, config.virtualRoot());
+					} else {
+						writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET);
+					}
+					marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
+				}
+				for (Object value : type.isArray() ? Arrays.asList((Object[]) entry) : (Collection<?>) entry) {
+					if (value == null) { // hack: write null
+						writer.writeCharacters(null);
+					} else {							
+						marshal(componentType, config, marshaller, writer, value);
+					}
+				}
+				if (!documentArray) {
+					writer.writeEndDocument();
 				}
 			}
-			writer.writeEndDocument();
 			writer.close();
 		} catch (XMLStreamException e) {
 			throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);

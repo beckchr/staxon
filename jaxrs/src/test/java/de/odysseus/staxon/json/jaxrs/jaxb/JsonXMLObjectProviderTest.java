@@ -19,6 +19,9 @@ public class JsonXMLObjectProviderTest {
 	@JsonXML
 	static class JsonXMLDefault {}
 
+	@JsonXML(virtualRoot = "sampleRootElement")
+	static class JsonXMLVirtualSampleRootElement {}
+
 	@Test
 	public void testIsWritable() {
 		JsonXMLObjectProvider provider = new JsonXMLObjectProvider(null);
@@ -104,6 +107,63 @@ public class JsonXMLObjectProviderTest {
 				null, annotations, MediaType.APPLICATION_JSON_TYPE, null, output, sampleType);
 
 		String json = "{\"sampleType\":{\"element\":\"hi!\"}}";
+		Assert.assertEquals(json, new String(output.toByteArray(), encoding));
+	}
+	
+	@Test
+	public void testReadNull() throws Exception {
+		JsonXMLObjectProvider provider = new JsonXMLObjectProvider(null);
+		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
+		Annotation[] annotations = new Annotation[0];
+		String json = "null";
+		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes(encoding));
+
+		SampleRootElement sampleRootElement = (SampleRootElement)provider.read(SampleRootElement.class,
+				null, annotations, MediaType.APPLICATION_JSON_TYPE, null, input);
+
+		Assert.assertNull(sampleRootElement);
+	}
+
+	@Test
+	public void testReadNullWithVirtualRoot() throws Exception {
+		JsonXMLObjectProvider provider = new JsonXMLObjectProvider(null);
+		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
+		Annotation[] annotations = new Annotation[]{JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class)};
+		String json = "null";
+		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes(encoding));
+
+		SampleRootElement sampleRootElement = (SampleRootElement)provider.read(SampleRootElement.class,
+				null, annotations, MediaType.APPLICATION_JSON_TYPE, null, input);
+
+		Assert.assertNotNull(sampleRootElement);
+	}
+
+	@Test
+	public void testWriteNull() throws Exception {
+		JsonXMLObjectProvider provider = new JsonXMLObjectProvider(null);
+		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
+		Annotation[] annotations = new Annotation[0];
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+		provider.write(SampleRootElement.class,
+				null, annotations, MediaType.APPLICATION_JSON_TYPE, null, output, null);
+
+		String json = "null";
+		Assert.assertEquals(json, new String(output.toByteArray(), encoding));
+	}
+
+
+	@Test
+	public void testWriteNullWithVirtualRoot() throws Exception {
+		JsonXMLObjectProvider provider = new JsonXMLObjectProvider(null);
+		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
+		Annotation[] annotations = new Annotation[]{JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class)};
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+		provider.write(SampleRootElement.class,
+				null, annotations, MediaType.APPLICATION_JSON_TYPE, null, output, null);
+
+		String json = "null";
 		Assert.assertEquals(json, new String(output.toByteArray(), encoding));
 	}
 }
