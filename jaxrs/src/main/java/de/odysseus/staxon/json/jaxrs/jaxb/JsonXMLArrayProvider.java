@@ -16,8 +16,8 @@
 package de.odysseus.staxon.json.jaxrs.jaxb;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
@@ -145,7 +145,7 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider {
 			Annotation[] annotations,
 			MediaType mediaType,
 			MultivaluedMap<String, String> httpHeaders,
-			InputStream entityStream) throws IOException, WebApplicationException {
+			Reader entityStream) throws IOException, WebApplicationException {
 		Collection<Object> collection = type.isArray() ? new ArrayList<Object>() : createCollection(type);
 		if (collection == null) {
 			throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
@@ -196,7 +196,7 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider {
 			Annotation[] annotations,
 			MediaType mediaType,
 			MultivaluedMap<String, Object> httpHeaders,
-			OutputStream entityStream,
+			Writer entityStream,
 			Object entry) throws IOException, WebApplicationException {
 		Class<?> componentType = getComponentType(type, genericType);
 		JsonXML config = getJsonXML(componentType, annotations);

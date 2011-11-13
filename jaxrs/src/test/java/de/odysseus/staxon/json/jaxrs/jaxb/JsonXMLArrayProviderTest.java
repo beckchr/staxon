@@ -1,7 +1,7 @@
 package de.odysseus.staxon.json.jaxrs.jaxb;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -71,15 +71,13 @@ public class JsonXMLArrayProviderTest {
 	@Test
 	public void testReadRootElementList() throws Exception {
 		JsonXMLArrayProvider provider = new JsonXMLArrayProvider(null);
-		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
 		Annotation[] annotations = new Annotation[0];
 		Type type = getClass().getDeclaredField("sampleRootElementList").getGenericType();
 		String json = "{\"sampleRootElement\":[{\"@attribute\":\"hello\"},{\"@attribute\":\"world\"}]}";
-		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes(encoding));
 
 		@SuppressWarnings("unchecked")
 		List<SampleRootElement> list = (List<SampleRootElement>)provider.read(List.class,
-				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, input);
+				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, new StringReader(json));
 
 		Assert.assertEquals(2, list.size());
 		Assert.assertEquals("hello", list.get(0).attribute);
@@ -89,15 +87,13 @@ public class JsonXMLArrayProviderTest {
 	@Test
 	public void testReadRootElementList_DocumentArray() throws Exception {
 		JsonXMLArrayProvider provider = new JsonXMLArrayProvider(null);
-		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
 		Annotation[] annotations = new Annotation[0];
 		Type type = getClass().getDeclaredField("sampleRootElementList").getGenericType();
 		String json = "[{\"sampleRootElement\":{\"@attribute\":\"hello\"}},{\"sampleRootElement\":{\"@attribute\":\"world\"}}]";
-		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes(encoding));
 
 		@SuppressWarnings("unchecked")
 		List<SampleRootElement> list = (List<SampleRootElement>)provider.read(List.class,
-				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, input);
+				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, new StringReader(json));
 
 		Assert.assertEquals(2, list.size());
 		Assert.assertEquals("hello", list.get(0).attribute);
@@ -107,15 +103,13 @@ public class JsonXMLArrayProviderTest {
 	@Test
 	public void testReadSampleTypeList() throws Exception {
 		JsonXMLArrayProvider provider = new JsonXMLArrayProvider(null);
-		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
 		Annotation[] annotations = new Annotation[]{JsonXMLDefault.class.getAnnotation(JsonXML.class)};
 		Type type = getClass().getDeclaredField("sampleTypeList").getGenericType();
 		String json = "{\"sampleType\":[{\"element\":\"hello\"},{\"element\":\"world\"}]}";
-		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes(encoding));
 
 		@SuppressWarnings("unchecked")
 		List<SampleType> list = (List<SampleType>)provider.read(List.class,
-				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, input);
+				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, new StringReader(json));
 
 		Assert.assertEquals(2, list.size());
 		Assert.assertEquals("hello", list.get(0).element);
@@ -125,15 +119,13 @@ public class JsonXMLArrayProviderTest {
 	@Test
 	public void testReadSampleTypeList_DocumentArray() throws Exception {
 		JsonXMLArrayProvider provider = new JsonXMLArrayProvider(null);
-		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
 		Annotation[] annotations = new Annotation[]{JsonXMLDefault.class.getAnnotation(JsonXML.class)};
 		Type type = getClass().getDeclaredField("sampleTypeList").getGenericType();
 		String json = "[{\"sampleType\":{\"element\":\"hello\"}},{\"sampleType\":{\"element\":\"world\"}}]";
-		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes(encoding));
 
 		@SuppressWarnings("unchecked")
 		List<SampleType> list = (List<SampleType>)provider.read(List.class,
-				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, input);
+				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, new StringReader(json));
 
 		Assert.assertEquals(2, list.size());
 		Assert.assertEquals("hello", list.get(0).element);
@@ -143,15 +135,13 @@ public class JsonXMLArrayProviderTest {
 	@Test
 	public void testReadSampleTypeListWithNullValues() throws Exception {
 		JsonXMLArrayProvider provider = new JsonXMLArrayProvider(null);
-		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
 		Annotation[] annotations = new Annotation[]{JsonXMLDefault.class.getAnnotation(JsonXML.class)};
 		Type type = getClass().getDeclaredField("sampleTypeList").getGenericType();
 		String json = "[null,{\"sampleType\":{\"element\":\"hi!\"}},null]";
-		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes(encoding));
 
 		@SuppressWarnings("unchecked")
 		List<SampleType> list = (List<SampleType>)provider.read(List.class,
-				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, input);
+				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, new StringReader(json));
 
 		Assert.assertEquals(3, list.size());
 		Assert.assertNull(list.get(0));
@@ -162,15 +152,13 @@ public class JsonXMLArrayProviderTest {
 	@Test
 	public void testReadEmptyList() throws Exception {
 		JsonXMLArrayProvider provider = new JsonXMLArrayProvider(null);
-		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
 		Annotation[] annotations = new Annotation[0];
 		Type type = getClass().getDeclaredField("sampleRootElementList").getGenericType();
 		String json = "{}";
-		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes(encoding));
 
 		@SuppressWarnings("unchecked")
 		List<SampleRootElement> list = (List<SampleRootElement>)provider.read(List.class,
-				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, input);
+				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, new StringReader(json));
 
 		Assert.assertEquals(0, list.size());
 	}
@@ -178,15 +166,13 @@ public class JsonXMLArrayProviderTest {
 	@Test
 	public void testReadEmptyList2() throws Exception {
 		JsonXMLArrayProvider provider = new JsonXMLArrayProvider(null);
-		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
 		Annotation[] annotations = new Annotation[0];
 		Type type = getClass().getDeclaredField("sampleRootElementList").getGenericType();
 		String json = "{\"sampleRootElement\":[]}";
-		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes(encoding));
 
 		@SuppressWarnings("unchecked")
 		List<SampleRootElement> list = (List<SampleRootElement>)provider.read(List.class,
-				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, input);
+				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, new StringReader(json));
 
 		Assert.assertEquals(0, list.size());
 	}
@@ -194,15 +180,13 @@ public class JsonXMLArrayProviderTest {
 	@Test
 	public void testReadEmptyList3() throws Exception {
 		JsonXMLArrayProvider provider = new JsonXMLArrayProvider(null);
-		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
 		Annotation[] annotations = new Annotation[0];
 		Type type = getClass().getDeclaredField("sampleRootElementList").getGenericType();
 		String json = "[]";
-		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes(encoding));
 
 		@SuppressWarnings("unchecked")
 		List<SampleRootElement> list = (List<SampleRootElement>)provider.read(List.class,
-				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, input);
+				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, new StringReader(json));
 
 		Assert.assertEquals(0, list.size());
 	}
@@ -210,15 +194,13 @@ public class JsonXMLArrayProviderTest {
 	@Test
 	public void testReadEmptyListWithVirtualRoot() throws Exception {
 		JsonXMLArrayProvider provider = new JsonXMLArrayProvider(null);
-		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
 		Annotation[] annotations = new Annotation[]{JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class)};
 		Type type = getClass().getDeclaredField("sampleRootElementList").getGenericType();
 		String json = "[]";
-		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes(encoding));
 
 		@SuppressWarnings("unchecked")
 		List<SampleRootElement> list = (List<SampleRootElement>)provider.read(List.class,
-				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, input);
+				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, new StringReader(json));
 
 		Assert.assertEquals(0, list.size());
 	}
@@ -226,10 +208,8 @@ public class JsonXMLArrayProviderTest {
 	@Test
 	public void testWriteSampleRootElementList() throws Exception {
 		JsonXMLArrayProvider provider = new JsonXMLArrayProvider(null);
-		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
 		Annotation[] annotations = new Annotation[0];
 		Type type = getClass().getDeclaredField("sampleRootElementList").getGenericType();
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		
 		List<SampleRootElement> list = new ArrayList<SampleRootElement>();
 		list.add(new SampleRootElement());
@@ -237,20 +217,19 @@ public class JsonXMLArrayProviderTest {
 		list.add(new SampleRootElement());
 		list.get(1).attribute = "world";
 
+		StringWriter writer = new StringWriter();
 		provider.write(List.class,
-				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, output, list);
+				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, writer, list);
 
 		String json = "{\"sampleRootElement\":[{\"@attribute\":\"hello\"},{\"@attribute\":\"world\"}]}";
-		Assert.assertEquals(json, new String(output.toByteArray(), encoding));
+		Assert.assertEquals(json, writer.toString());
 	}
 
 	@Test
 	public void testWriteSampleTypeList() throws Exception {
 		JsonXMLArrayProvider provider = new JsonXMLArrayProvider(null);
-		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
 		Annotation[] annotations = new Annotation[]{JsonXMLDefault.class.getAnnotation(JsonXML.class)};
 		Type type = getClass().getDeclaredField("sampleTypeList").getGenericType();
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		
 		List<SampleType> list = new ArrayList<SampleType>();
 		list.add(new SampleType());
@@ -258,44 +237,43 @@ public class JsonXMLArrayProviderTest {
 		list.add(new SampleType());
 		list.get(1).element = "world";
 
+		StringWriter writer = new StringWriter();
 		provider.write(List.class,
-				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, output, list);
+				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, writer, list);
 
 		String json = "{\"sampleType\":[{\"element\":\"hello\"},{\"element\":\"world\"}]}";
-		Assert.assertEquals(json, new String(output.toByteArray(), encoding));
+		Assert.assertEquals(json, writer.toString());
 	}
 
 	@Test
 	public void testWriteEmptyList() throws Exception {
 		JsonXMLArrayProvider provider = new JsonXMLArrayProvider(null);
-		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
 		Annotation[] annotations = new Annotation[0];
 		Type type = getClass().getDeclaredField("sampleRootElementList").getGenericType();
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		
 		List<SampleRootElement> list = new ArrayList<SampleRootElement>();
 
+		StringWriter writer = new StringWriter();
 		provider.write(List.class,
-				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, output, list);
+				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, writer, list);
 
 		String json = "{}";
-		Assert.assertEquals(json, new String(output.toByteArray(), encoding));
+		Assert.assertEquals(json, writer.toString());
 	}
 
 	@Test
 	public void testWriteEmptyListWithVirtualRoot() throws Exception {
 		JsonXMLArrayProvider provider = new JsonXMLArrayProvider(null);
-		String encoding = provider.getEncoding(MediaType.APPLICATION_JSON_TYPE);
 		Annotation[] annotations = new Annotation[]{JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class)};
 		Type type = getClass().getDeclaredField("sampleRootElementList").getGenericType();
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		
 		List<SampleRootElement> list = new ArrayList<SampleRootElement>();
 
+		StringWriter writer = new StringWriter();
 		provider.write(List.class,
-				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, output, list);
+				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, writer, list);
 
 		String json = "[]";
-		Assert.assertEquals(json, new String(output.toByteArray(), encoding));
+		Assert.assertEquals(json, writer.toString());
 	}
 }

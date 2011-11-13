@@ -16,8 +16,8 @@
 package de.odysseus.staxon.json.jaxrs.jaxb;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
@@ -66,7 +66,7 @@ public class JsonXMLObjectProvider extends AbstractJsonXMLProvider {
 			Annotation[] annotations,
 			MediaType mediaType,
 			MultivaluedMap<String, String> httpHeaders,
-			InputStream entityStream) throws IOException, WebApplicationException {
+			Reader entityStream) throws IOException, WebApplicationException {
 		JsonXML config = getJsonXML(type, annotations);
 		XMLInputFactory factory = createInputFactory(config);
 		try {
@@ -97,7 +97,7 @@ public class JsonXMLObjectProvider extends AbstractJsonXMLProvider {
 			Annotation[] annotations,
 			MediaType mediaType,
 			MultivaluedMap<String, Object> httpHeaders,
-			OutputStream entityStream,
+			Writer entityStream,
 			Object entry) throws IOException, WebApplicationException {
 		JsonXML config = getJsonXML(type, annotations);
 		XMLOutputFactory factory = createOutputFactory(config);
@@ -111,7 +111,6 @@ public class JsonXMLObjectProvider extends AbstractJsonXMLProvider {
 					writer = new XMLMultipleStreamWriter(writer, config.multiplePaths());
 				}
 				Marshaller marshaller = context.createMarshaller();
-				marshaller.setProperty(Marshaller.JAXB_ENCODING, getEncoding(mediaType));
 				marshal(type, config, marshaller, writer, entry);
 			}
 			writer.close();

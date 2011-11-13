@@ -17,8 +17,8 @@ package de.odysseus.staxon.json.jaxrs.jaxb;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -57,13 +57,13 @@ public class AbstractJsonXMLProviderTest {
 		}
 		@Override
 		public Object read(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType,
-				MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException,
+				MultivaluedMap<String, String> httpHeaders, Reader entityStream) throws IOException,
 				WebApplicationException {
 			throw new UnsupportedOperationException();
 		}
 		@Override
 		public void write(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType,
-				MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream, Object entry)
+				MultivaluedMap<String, Object> httpHeaders, Writer entityStream, Object entry)
 				throws IOException, WebApplicationException {
 			throw new UnsupportedOperationException();
 		}
@@ -131,12 +131,12 @@ public class AbstractJsonXMLProviderTest {
 	}
 	
 	@Test
-	public void testGetEncoding() {
-		Assert.assertEquals("UTF-8", new TestProvider().getEncoding(MediaType.APPLICATION_JSON_TYPE));
+	public void testGetCharset() {
+		Assert.assertEquals("UTF-8", new TestProvider().getCharset(MediaType.APPLICATION_JSON_TYPE));
 		Map<String, String> parameters = new HashMap<String, String>();		
 		parameters.put("charset", "ASCII");
 		MediaType customMediaType = new MediaType("application", "json", parameters);
-		Assert.assertEquals("ASCII", new TestProvider().getEncoding(customMediaType));
+		Assert.assertEquals("ASCII", new TestProvider().getCharset(customMediaType));
 	}
 	
 	@Test
@@ -197,7 +197,7 @@ public class AbstractJsonXMLProviderTest {
 		Object entry = new SampleRootElement();
 		Class<?> type = SampleRootElement.class;
 		AbstractJsonXMLProvider provider = new TestProvider();
-		String encoding = provider.getEncoding(mediaType);
+		String encoding = provider.getCharset(mediaType);
 
 		XMLStreamWriter writer = provider.createOutputFactory(config).createXMLStreamWriter(entityStream);
 		writer.setPrefix("test", "urn:staxon-jaxrs:test");
@@ -216,7 +216,7 @@ public class AbstractJsonXMLProviderTest {
 		Object entry = new SampleType();
 		Class<?> type = SampleType.class;
 		AbstractJsonXMLProvider provider = new TestProvider();
-		String encoding = provider.getEncoding(mediaType);
+		String encoding = provider.getCharset(mediaType);
 
 		XMLStreamWriter writer = provider.createOutputFactory(config).createXMLStreamWriter(entityStream);
 		Marshaller marshaller = JAXBContext.newInstance(type).createMarshaller();
@@ -234,7 +234,7 @@ public class AbstractJsonXMLProviderTest {
 		Object entry = new SampleTypeWithNamespace();
 		Class<?> type = SampleTypeWithNamespace.class;
 		AbstractJsonXMLProvider provider = new TestProvider();
-		String encoding = provider.getEncoding(mediaType);
+		String encoding = provider.getCharset(mediaType);
 
 		XMLStreamWriter writer = provider.createOutputFactory(config).createXMLStreamWriter(entityStream);
 		Marshaller marshaller = JAXBContext.newInstance(type).createMarshaller();

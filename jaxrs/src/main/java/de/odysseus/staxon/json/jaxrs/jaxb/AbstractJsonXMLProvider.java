@@ -17,7 +17,11 @@ package de.odysseus.staxon.json.jaxrs.jaxb;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -91,7 +95,7 @@ abstract class AbstractJsonXMLProvider implements MessageBodyReader<Object>, Mes
 		return type.isAnnotationPresent(XmlRootElement.class) || type.isAnnotationPresent(XmlType.class);
 	}
 
-	protected String getEncoding(MediaType mediaType) {	
+	protected String getCharset(MediaType mediaType) {	
 		Map<String, String> parameters = mediaType.getParameters();
 		return parameters.containsKey("charset") ? parameters.get("charset") : "UTF-8";
 	}
@@ -214,7 +218,7 @@ abstract class AbstractJsonXMLProvider implements MessageBodyReader<Object>, Mes
 			Annotation[] annotations,
 			MediaType mediaType,
 			MultivaluedMap<String, String> httpHeaders,
-			InputStream entityStream) throws IOException, WebApplicationException;
+			Reader entityStream) throws IOException, WebApplicationException;
 
 	@Override
 	public final Object readFrom(
@@ -224,7 +228,8 @@ abstract class AbstractJsonXMLProvider implements MessageBodyReader<Object>, Mes
 			MediaType mediaType,
 			MultivaluedMap<String, String> httpHeaders,
 			InputStream entityStream) throws IOException, WebApplicationException {
-		return read(type, genericType, annotations, mediaType, httpHeaders, entityStream);
+		Reader reader = new InputStreamReader(entityStream, getCharset(mediaType));
+		return read(type, genericType, annotations, mediaType, httpHeaders, reader);
 	}
 	
 	public abstract void write(
@@ -233,7 +238,7 @@ abstract class AbstractJsonXMLProvider implements MessageBodyReader<Object>, Mes
 			Annotation[] annotations,
 			MediaType mediaType,
 			MultivaluedMap<String, Object> httpHeaders,
-			OutputStream entityStream,
+			Writer entityStream,
 			Object entry) throws IOException, WebApplicationException;
 
 	@Override
@@ -245,6 +250,7 @@ abstract class AbstractJsonXMLProvider implements MessageBodyReader<Object>, Mes
 			MediaType mediaType,
 			MultivaluedMap<String, Object> httpHeaders,
 			OutputStream entityStream) throws IOException, WebApplicationException {
-		write(type, genericType, annotations, mediaType, httpHeaders, entityStream, entry);
+		Writer writer = new OutputStreamWriter(entityStream, getCharset(mediaType));
+		write(type, genericType, annotations, mediaType, httpHeaders, writer, entry);
 	}
 }
