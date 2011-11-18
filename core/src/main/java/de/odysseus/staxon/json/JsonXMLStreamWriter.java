@@ -231,20 +231,23 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 		switch(type) {
 		case XMLStreamConstants.CHARACTERS:
 		case XMLStreamConstants.CDATA:
-			if (getScope().getLastChild() != null) {
-				if (!skipSpace || !isWhitespace(data)) {
-					throw new XMLStreamException("Mixed content is not supported: '" + getScope().getInfo().getText() + "'");
+			if (getScope().isRoot() && !isStartDocumentWritten()) { // hack: allow to write simple value
+				try {
+					target.value(data);
+				} catch (IOException e) {
+					throw new XMLStreamException("Cannot write data", e);
 				}
 			} else {
-				if (getScope().isRoot() && !isStartDocumentWritten()) { // hack: allow to write simple value
-					try {
-						target.value(data);
-					} catch (IOException e) {
-						throw new XMLStreamException("Cannot write data", e);
-					}
-					break;
+				if (data == null) {
+					throw new XMLStreamException("Cannot write null data");
 				}
-				getScope().getInfo().addText(data);
+				if (getScope().getLastChild() != null) {
+					if (!skipSpace || !isWhitespace(data)) {
+						throw new XMLStreamException("Mixed content is not supported: '" + getScope().getInfo().getText() + "'");
+					}
+				} else {
+					getScope().getInfo().addText(data);
+				}
 			}
 			break;
 		case XMLStreamConstants.COMMENT: // ignore comments
