@@ -19,6 +19,7 @@ The availability of a StAX implementation acts as a door opener for JSON to powe
 
 - Supports [Jackson](http://jackson.codehaus.org/) and [Gson](http://code.google.com/p/google-gson/) as JSON streaming backends
 - Full XML namespace support
+- Support for JAXB and JAX-RS
 - Start JSON arrays via XML processing instruction
 - Memory efficient, even for very large documents
 - It's pretty fast ([benchmark](https://github.com/beckchr/staxon/wiki/Benchmark))…
