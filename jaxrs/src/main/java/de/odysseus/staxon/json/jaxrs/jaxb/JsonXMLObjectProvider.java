@@ -30,33 +30,22 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.Providers;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamWriter;
 
-import de.odysseus.staxon.json.jaxrs.JsonXML;
-import de.odysseus.staxon.json.util.XMLMultipleStreamWriter;
+import de.odysseus.staxon.json.jaxb.JsonXML;
 
 @Provider
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class JsonXMLObjectProvider extends AbstractJsonXMLProvider {
-	private final JsonXMLContextStore store;
-	
 	public JsonXMLObjectProvider(@Context Providers providers) {
-		this.store = new JsonXMLContextStore(providers);
+		super(providers);
 	}
 
 	@Override
-	protected boolean isReadWritable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-		return isSupported(mediaType) && getJsonXML(type, annotations) != null && isMappable(type);
+	protected boolean isReadWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+		return isSupported(mediaType) && getJsonXML(type, annotations) != null && isBindable(type);
 	}
 
 	@Override
@@ -66,23 +55,10 @@ public class JsonXMLObjectProvider extends AbstractJsonXMLProvider {
 			Annotation[] annotations,
 			MediaType mediaType,
 			MultivaluedMap<String, String> httpHeaders,
-			Reader entityStream) throws IOException, WebApplicationException {
+			Reader stream) throws IOException, WebApplicationException {
 		JsonXML config = getJsonXML(type, annotations);
-		XMLInputFactory factory = createInputFactory(config);
 		try {
-			JAXBContext context = store.getContext(type, mediaType);
-			XMLStreamReader reader = factory.createXMLStreamReader(entityStream);
-			Object result;
-			if (reader.isCharacters() && reader.getText() == null) { // hack: read null
-				result = null;
-			} else {
-				reader.require(XMLStreamConstants.START_DOCUMENT, null, null);
-				Unmarshaller unmarshaller = context.createUnmarshaller();
-				result = unmarshal(type, config, unmarshaller, reader);
-				reader.require(XMLStreamConstants.END_DOCUMENT, null, null);
-			}
-			reader.close();
-			return result;
+			return readObject(type, config, getContext(type, mediaType), stream);
 		} catch (XMLStreamException e) {
 			throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
 		} catch (JAXBException e) {
@@ -97,23 +73,11 @@ public class JsonXMLObjectProvider extends AbstractJsonXMLProvider {
 			Annotation[] annotations,
 			MediaType mediaType,
 			MultivaluedMap<String, Object> httpHeaders,
-			Writer entityStream,
-			Object entry) throws IOException, WebApplicationException {
+			Writer stream,
+			Object value) throws IOException, WebApplicationException {
 		JsonXML config = getJsonXML(type, annotations);
-		XMLOutputFactory factory = createOutputFactory(config);
 		try {
-			JAXBContext context = store.getContext(type, mediaType);
-			XMLStreamWriter writer = factory.createXMLStreamWriter(entityStream);
-			if (entry == null) { // hack: write null
-				writer.writeCharacters(null);
-			} else {
-				if (config.multiplePaths().length > 0) {
-					writer = new XMLMultipleStreamWriter(writer, config.multiplePaths());
-				}
-				Marshaller marshaller = context.createMarshaller();
-				marshal(type, config, marshaller, writer, entry);
-			}
-			writer.close();
+			writeObject(type, config, getContext(type, mediaType), stream, value);
 		} catch (XMLStreamException e) {
 			throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
 		} catch (JAXBException e) {

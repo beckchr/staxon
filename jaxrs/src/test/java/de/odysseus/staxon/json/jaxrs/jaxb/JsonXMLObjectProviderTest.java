@@ -11,7 +11,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import de.odysseus.staxon.json.jaxrs.JsonXML;
+import de.odysseus.staxon.json.jaxb.JsonXML;
 import de.odysseus.staxon.json.jaxrs.jaxb.model.SampleRootElement;
 import de.odysseus.staxon.json.jaxrs.jaxb.model.SampleType;
 
@@ -23,27 +23,15 @@ public class JsonXMLObjectProviderTest {
 	static class JsonXMLVirtualSampleRootElement {}
 
 	@Test
-	public void testIsWritable() {
+	public void testIsReadWriteable() {
 		JsonXMLObjectProvider provider = new JsonXMLObjectProvider(null);
 		Annotation[] jsonXMLAnnotations = new Annotation[]{JsonXMLDefault.class.getAnnotation(JsonXML.class)};
 
-		Assert.assertTrue(provider.isWriteable(SampleRootElement.class, null, jsonXMLAnnotations, MediaType.APPLICATION_JSON_TYPE));
-		Assert.assertTrue(provider.isWriteable(SampleType.class, null, jsonXMLAnnotations, MediaType.APPLICATION_JSON_TYPE));
-		Assert.assertFalse(provider.isWriteable(Object.class, null, jsonXMLAnnotations, MediaType.APPLICATION_JSON_TYPE));
-		Assert.assertFalse(provider.isWriteable(SampleType.class, null, new Annotation[0], MediaType.APPLICATION_JSON_TYPE));
-		Assert.assertFalse(provider.isWriteable(SampleRootElement.class, null, jsonXMLAnnotations, MediaType.APPLICATION_XML_TYPE));
-	}
-
-	@Test
-	public void testIsReadable() {
-		JsonXMLObjectProvider provider = new JsonXMLObjectProvider(null);
-		Annotation[] jsonXMLAnnotations = new Annotation[]{JsonXMLDefault.class.getAnnotation(JsonXML.class)};
-
-		Assert.assertTrue(provider.isReadable(SampleRootElement.class, null, jsonXMLAnnotations, MediaType.APPLICATION_JSON_TYPE));
-		Assert.assertTrue(provider.isReadable(SampleType.class, null, jsonXMLAnnotations, MediaType.APPLICATION_JSON_TYPE));
-		Assert.assertFalse(provider.isReadable(Object.class, null, jsonXMLAnnotations, MediaType.APPLICATION_JSON_TYPE));
-		Assert.assertFalse(provider.isReadable(SampleType.class, null, new Annotation[0], MediaType.APPLICATION_JSON_TYPE));
-		Assert.assertFalse(provider.isReadable(SampleRootElement.class, null, jsonXMLAnnotations, MediaType.APPLICATION_XML_TYPE));
+		Assert.assertTrue(provider.isReadWriteable(SampleRootElement.class, null, jsonXMLAnnotations, MediaType.APPLICATION_JSON_TYPE));
+		Assert.assertTrue(provider.isReadWriteable(SampleType.class, null, jsonXMLAnnotations, MediaType.APPLICATION_JSON_TYPE));
+		Assert.assertFalse(provider.isReadWriteable(Object.class, null, jsonXMLAnnotations, MediaType.APPLICATION_JSON_TYPE));
+		Assert.assertFalse(provider.isReadWriteable(SampleType.class, null, new Annotation[0], MediaType.APPLICATION_JSON_TYPE));
+		Assert.assertFalse(provider.isReadWriteable(SampleRootElement.class, null, jsonXMLAnnotations, MediaType.APPLICATION_XML_TYPE));
 	}
 
 	@Test

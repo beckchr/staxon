@@ -41,28 +41,17 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.Providers;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamWriter;
 
-import de.odysseus.staxon.json.JsonXMLStreamConstants;
-import de.odysseus.staxon.json.jaxrs.JsonXML;
-import de.odysseus.staxon.json.util.XMLMultipleStreamWriter;
+import de.odysseus.staxon.json.jaxb.JsonXML;
 
 @Provider
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class JsonXMLArrayProvider extends AbstractJsonXMLProvider {
-	private final JsonXMLContextStore store;
-
 	public JsonXMLArrayProvider(@Context Providers providers) {
-		this.store = new JsonXMLContextStore(providers);
+		super(providers);
 	}
 
 	protected Class<?> getRawType(Type type) {
@@ -130,12 +119,12 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider {
 	}
 
 	@Override
-	protected boolean isReadWritable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+	protected boolean isReadWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
 		if (!isSupported(mediaType)) {
 			return false;
 		}
 		Class<?> componentType = getComponentType(type, genericType);
-		return componentType != null && getJsonXML(componentType, annotations) != null && isMappable(componentType);
+		return componentType != null && getJsonXML(componentType, annotations) != null && isBindable(componentType);
 	}
 
 	@Override
@@ -145,47 +134,28 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider {
 			Annotation[] annotations,
 			MediaType mediaType,
 			MultivaluedMap<String, String> httpHeaders,
-			Reader entityStream) throws IOException, WebApplicationException {
-		Collection<Object> collection = type.isArray() ? new ArrayList<Object>() : createCollection(type);
-		if (collection == null) {
-			throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
-		}
+			Reader stream) throws IOException, WebApplicationException {
 		Class<?> componentType = getComponentType(type, genericType);
-		JsonXML config = getJsonXML(componentType, annotations);
-		XMLInputFactory factory = createInputFactory(config);
+		JsonXML config = getJsonXML(componentType, annotations);	
+		List<?> list;
 		try {
-			JAXBContext context = store.getContext(componentType, mediaType);
-			XMLStreamReader reader = factory.createXMLStreamReader(entityStream);
-			boolean documentArray = reader.getPITarget() == JsonXMLStreamConstants.MULTIPLE_PI_TARGET;
-			Unmarshaller unmarshaller = context.createUnmarshaller();
-			while (reader.hasNext() && !reader.isStartElement() && !reader.isCharacters()) {
-				reader.next();
-			}
-			while (reader.hasNext() || reader.isCharacters() && reader.getText() == null) {
-				if (reader.isCharacters() && reader.getText() == null) { // hack: read null
-					collection.add(null);
-					if (reader.hasNext()) {
-						reader.next();
-					} else {
-						break;
-					}
-				} else {
-					collection.add(unmarshal(componentType, config, unmarshaller, reader));
-					if (documentArray && reader.hasNext()) { // move to next document
-						reader.next();
-					}
-				}
-			}
-			reader.close();
-			if (type.isArray()) {
-				return toArray((List<?>) collection, componentType);
-			} else {
-				return collection;
-			}
+			list = readArray(componentType, config, getContext(componentType, mediaType), stream);
 		} catch (XMLStreamException e) {
 			throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
 		} catch (JAXBException e) {
 			throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
+		}
+		if (list == null) {
+			return null;
+		} else if (type.isArray()) {
+			return toArray(list, componentType);
+		} else {
+			Collection<Object> collection = createCollection(type);
+			if (collection == null) {
+				throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+			}
+			collection.addAll(list);
+			return collection;
 		}
 	}
 
@@ -196,45 +166,20 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider {
 			Annotation[] annotations,
 			MediaType mediaType,
 			MultivaluedMap<String, Object> httpHeaders,
-			Writer entityStream,
+			Writer stream,
 			Object entry) throws IOException, WebApplicationException {
 		Class<?> componentType = getComponentType(type, genericType);
 		JsonXML config = getJsonXML(componentType, annotations);
-		XMLOutputFactory factory = createOutputFactory(config);
+		Collection<?> collection;
+		if (entry == null) {
+			collection = null;
+		} else if (type.isArray()) {
+			collection = Arrays.asList((Object[]) entry);
+		} else {
+			collection = (Collection<?>) entry;
+		}
 		try {
-			JAXBContext context = store.getContext(componentType, mediaType);
-			XMLStreamWriter writer = factory.createXMLStreamWriter(entityStream);
-			if (entry == null) { // hack: write null
-				writer.writeCharacters(null);
-			} else {
-				if (config.multiplePaths().length > 0) {
-					writer = new XMLMultipleStreamWriter(writer, config.multiplePaths());
-				}
-				boolean documentArray = false;
-				Marshaller marshaller = context.createMarshaller();
-				if (documentArray) {
-					writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET);
-				} else {
-					writer.writeStartDocument();
-					if (config.virtualRoot().length() > 0) {
-						writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET, config.virtualRoot());
-					} else {
-						writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET);
-					}
-					marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
-				}
-				for (Object value : type.isArray() ? Arrays.asList((Object[]) entry) : (Collection<?>) entry) {
-					if (value == null) { // hack: write null
-						writer.writeCharacters(null);
-					} else {							
-						marshal(componentType, config, marshaller, writer, value);
-					}
-				}
-				if (!documentArray) {
-					writer.writeEndDocument();
-				}
-			}
-			writer.close();
+			writeArray(componentType, config, getContext(componentType, mediaType), stream, collection);
 		} catch (XMLStreamException e) {
 			throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
 		} catch (JAXBException e) {

@@ -13,7 +13,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import de.odysseus.staxon.json.jaxrs.JsonXML;
+import de.odysseus.staxon.json.jaxb.JsonXML;
 import de.odysseus.staxon.json.jaxrs.jaxb.model.SampleRootElement;
 import de.odysseus.staxon.json.jaxrs.jaxb.model.SampleType;
 
@@ -33,39 +33,21 @@ public class JsonXMLArrayProviderTest {
 	static Object[] objectArray = new Object[0];
 	
 	@Test
-	public void testIsWritable() throws NoSuchFieldException {
+	public void testIsReadWriteable() throws NoSuchFieldException {
 		JsonXMLArrayProvider provider = new JsonXMLArrayProvider(null);
 		Annotation[] annotations = new Annotation[]{JsonXMLDefault.class.getAnnotation(JsonXML.class)};
 
 		Type type = getClass().getDeclaredField("sampleRootElementList").getGenericType();
-		Assert.assertTrue(provider.isWriteable(List.class, type, annotations, MediaType.APPLICATION_JSON_TYPE));
+		Assert.assertTrue(provider.isReadWriteable(List.class, type, annotations, MediaType.APPLICATION_JSON_TYPE));
 		type = getClass().getDeclaredField("sampleTypeList").getGenericType();
-		Assert.assertTrue(provider.isWriteable(List.class, type, annotations, MediaType.APPLICATION_JSON_TYPE));
+		Assert.assertTrue(provider.isReadWriteable(List.class, type, annotations, MediaType.APPLICATION_JSON_TYPE));
 		type = getClass().getDeclaredField("objectList").getGenericType();
-		Assert.assertFalse(provider.isWriteable(List.class, type, annotations, MediaType.APPLICATION_JSON_TYPE));
+		Assert.assertFalse(provider.isReadWriteable(List.class, type, annotations, MediaType.APPLICATION_JSON_TYPE));
 		type = getClass().getDeclaredField("sampleTypeIterable").getGenericType();
-		Assert.assertFalse(provider.isWriteable(Iterable.class, type, annotations, MediaType.APPLICATION_JSON_TYPE));
+		Assert.assertFalse(provider.isReadWriteable(Iterable.class, type, annotations, MediaType.APPLICATION_JSON_TYPE));
 		type = getClass().getDeclaredField("sampleTypeList").getGenericType();
-		Assert.assertFalse(provider.isWriteable(List.class, type, new Annotation[0], MediaType.APPLICATION_JSON_TYPE));
-		Assert.assertFalse(provider.isWriteable(List.class, type, annotations, MediaType.APPLICATION_XML_TYPE));
-	}
-
-	@Test
-	public void testIsReadable() throws NoSuchFieldException {
-		JsonXMLArrayProvider provider = new JsonXMLArrayProvider(null);
-		Annotation[] annotations = new Annotation[]{JsonXMLDefault.class.getAnnotation(JsonXML.class)};
-
-		Type type = getClass().getDeclaredField("sampleRootElementList").getGenericType();
-		Assert.assertTrue(provider.isReadable(List.class, type, annotations, MediaType.APPLICATION_JSON_TYPE));
-		type = getClass().getDeclaredField("sampleTypeList").getGenericType();
-		Assert.assertTrue(provider.isReadable(List.class, type, annotations, MediaType.APPLICATION_JSON_TYPE));
-		type = getClass().getDeclaredField("objectList").getGenericType();
-		Assert.assertFalse(provider.isReadable(List.class, type, annotations, MediaType.APPLICATION_JSON_TYPE));
-		type = getClass().getDeclaredField("sampleTypeIterable").getGenericType();
-		Assert.assertFalse(provider.isReadable(Iterable.class, type, annotations, MediaType.APPLICATION_JSON_TYPE));
-		type = getClass().getDeclaredField("sampleTypeList").getGenericType();
-		Assert.assertFalse(provider.isReadable(List.class, type, new Annotation[0], MediaType.APPLICATION_JSON_TYPE));
-		Assert.assertFalse(provider.isReadable(List.class, type, annotations, MediaType.APPLICATION_XML_TYPE));
+		Assert.assertFalse(provider.isReadWriteable(List.class, type, new Annotation[0], MediaType.APPLICATION_JSON_TYPE));
+		Assert.assertFalse(provider.isReadWriteable(List.class, type, annotations, MediaType.APPLICATION_XML_TYPE));
 	}
 
 	@Test
@@ -221,7 +203,7 @@ public class JsonXMLArrayProviderTest {
 		provider.write(List.class,
 				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, writer, list);
 
-		String json = "{\"sampleRootElement\":[{\"@attribute\":\"hello\"},{\"@attribute\":\"world\"}]}";
+		String json = "[{\"sampleRootElement\":{\"@attribute\":\"hello\"}},{\"sampleRootElement\":{\"@attribute\":\"world\"}}]";
 		Assert.assertEquals(json, writer.toString());
 	}
 
@@ -241,7 +223,7 @@ public class JsonXMLArrayProviderTest {
 		provider.write(List.class,
 				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, writer, list);
 
-		String json = "{\"sampleType\":[{\"element\":\"hello\"},{\"element\":\"world\"}]}";
+		String json = "[{\"sampleType\":{\"element\":\"hello\"}},{\"sampleType\":{\"element\":\"world\"}}]";
 		Assert.assertEquals(json, writer.toString());
 	}
 
@@ -257,7 +239,7 @@ public class JsonXMLArrayProviderTest {
 		provider.write(List.class,
 				type, annotations, MediaType.APPLICATION_JSON_TYPE, null, writer, list);
 
-		String json = "{}";
+		String json = "[]";
 		Assert.assertEquals(json, writer.toString());
 	}
 
