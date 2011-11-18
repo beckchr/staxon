@@ -88,6 +88,7 @@ StAXON consists of the following modules:
 - `staxon` - core library, containing a default JSON streaming backend (required)
 - `staxon-gson` - streaming backend for [Gson](http://code.google.com/p/google-gson/) JSON processor (optional)
 - `staxon-jackson` - streaming backend for [Jackson](http://jackson.codehaus.org/) JSON processor (optional)
+- `staxon-jaxrs` - JAX-RS support, produce/consume JSON from/to JAXB-annotated classes (optional)
 
 You _must_ have the StAXON core library on your classpath. Additionally, you _may_ choose to use the Gson _or_ the
 Jackson streaming backend. However, unless you want to avoid a dependency to an external JSON processor, it is
@@ -101,43 +102,48 @@ Releases are synced to Maven Central. Add a dependency to StAXON in your POM fil
 		<dependency>
 			<groupId>de.odysseus.staxon</groupId>
 			<artifactId>staxon</artifactId>
-			<version>0.9.1</version>
+			<version>0.9.2</version>
 		</dependency>
 
 		<!-- or, to use the Jackson streaming backend -->
 		<dependency>
 			<groupId>de.odysseus.staxon</groupId>
 			<artifactId>staxon-jackson</artifactId>
-			<version>0.9.1</version>
+			<version>0.9.2</version>
 		</dependency>
 
 		<!-- or, to use the Gson streaming backend
 		<dependency>
 			<groupId>de.odysseus.staxon</groupId>
 			<artifactId>staxon-gson</artifactId>
-			<version>0.9.1</version>
+			<version>0.9.2</version>
 		</dependency>
 		-->		
 	</dependencies>
 
 ## Downloads
 
-Manually download the latest release: StAXON 0.9.1 (2011/10/29):
+Manually download the latest release: StAXON 0.9.2 (2011/11/18):
 
 Core library:
 
-- [staxon-0.9.1.jar](http://repo1.maven.org/maven2/de/odysseus/staxon/staxon/0.9.1/staxon-0.9.1.jar)
-- [staxon-0.9.1-sources.jar](http://repo1.maven.org/maven2/de/odysseus/staxon/staxon/0.9.1//staxon-0.9.1-sources.jar)
+- [staxon-0.9.2.jar](http://repo1.maven.org/maven2/de/odysseus/staxon/staxon/0.9.2/staxon-0.9.2.jar)
+- [staxon-0.9.2-sources.jar](http://repo1.maven.org/maven2/de/odysseus/staxon/staxon/0.9.2//staxon-0.9.2-sources.jar)
 
 Gson backend:
 
-- [staxon-gson-0.9.1.jar](http://repo1.maven.org/maven2/de/odysseus/staxon/staxon-gson/0.9.1/staxon-gson-0.9.1.jar)
-- [staxon-gson-0.9.1-sources.jar](http://repo1.maven.org/maven2/de/odysseus/staxon/staxon-gson/0.9.1/staxon-gson-0.9.1-sources.jar)
+- [staxon-gson-0.9.2.jar](http://repo1.maven.org/maven2/de/odysseus/staxon/staxon-gson/0.9.2/staxon-gson-0.9.2.jar)
+- [staxon-gson-0.9.2-sources.jar](http://repo1.maven.org/maven2/de/odysseus/staxon/staxon-gson/0.9.2/staxon-gson-0.9.2-sources.jar)
 
 Jackson backend:
 
-- [staxon-jackson-0.9.1.jar](http://repo1.maven.org/maven2/de/odysseus/staxon/staxon-jackson/0.9.1/staxon-jackson-0.9.1.jar)
-- [staxon-jackson-0.9.1-sources.jar](http://repo1.maven.org/maven2/de/odysseus/staxon/staxon-jackson/0.9.1/staxon-jackson-0.9.1-sources.jar)
+- [staxon-jackson-0.9.2.jar](http://repo1.maven.org/maven2/de/odysseus/staxon/staxon-jackson/0.9.2/staxon-jackson-0.9.2.jar)
+- [staxon-jackson-0.9.2-sources.jar](http://repo1.maven.org/maven2/de/odysseus/staxon/staxon-jackson/0.9.2/staxon-jackson-0.9.2-sources.jar)
+
+JAX-RS support:
+
+- [staxon-jaxrs-0.9.2.jar](http://repo1.maven.org/maven2/de/odysseus/staxon/staxon-jaxrs/0.9.2/staxon-jaxrs-0.9.2.jar)
+- [staxon-jaxrs-0.9.2-sources.jar](http://repo1.maven.org/maven2/de/odysseus/staxon/staxon-jaxrs/0.9.2/staxon-jaxrs-0.9.2-sources.jar)
 
 ## Development
 
