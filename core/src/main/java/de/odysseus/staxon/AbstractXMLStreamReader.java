@@ -475,7 +475,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 
 	@Override
 	public int getNamespaceCount() {
-		return hasName() ? event.getScope().getNamespaceCount() : null;
+		return hasName() ? event.getScope().getNamespaceCount() : 0;
 	}
 
 	@Override

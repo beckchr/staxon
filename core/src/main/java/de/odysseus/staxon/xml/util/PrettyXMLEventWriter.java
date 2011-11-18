@@ -78,6 +78,7 @@ public class PrettyXMLEventWriter extends EventWriterDelegate {
 			handler.preEndDocument();
 			super.add(event);
 			handler.postEndDocument();
+			break;
 		case XMLStreamConstants.START_ELEMENT:
 			handler.preStartElement();
 			super.add(event);

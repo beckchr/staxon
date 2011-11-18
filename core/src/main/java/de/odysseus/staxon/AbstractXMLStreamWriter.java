@@ -276,7 +276,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 			version = "1.0";
 		}
 		if (encoding == null) {
-			writePI("xml", String.format("version=\"%s\"", version, encoding));
+			writePI("xml", String.format("version=\"%s\"", version));
 		} else {
 			writePI("xml", String.format("version=\"%s\" encoding=\"%s\"", version, encoding));
 		}
