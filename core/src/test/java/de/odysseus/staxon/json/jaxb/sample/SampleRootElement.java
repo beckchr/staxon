@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import de.odysseus.staxon.json.jaxb.JsonXML;
 
 @XmlRootElement
-@JsonXML
+@JsonXML(multiplePaths = "/elements")
 public class SampleRootElement {
 	@XmlAttribute
 	public String attribute;
