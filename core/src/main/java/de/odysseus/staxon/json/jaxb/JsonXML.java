@@ -38,17 +38,20 @@ import java.lang.annotation.Target;
 public @interface JsonXML {
 	/**
 	 * <p>JSON documents may have have multiple root properties. However,
-	 * XML requires a single root element. This property takes the name
-	 * of a "virtual" root element, which will be removed from the stream
-	 * when writing and added to the stream when reading.</p>
+	 * XML requires a single root element. This property whether to treat
+	 * the root as a "virtual" element, which will be removed from the stream
+	 * when writing and added to the stream when reading. The root element
+	 * name will be determined from an <code>@XmlRootElement</code> or
+	 * <code>@XmlType</code> annotation.</p>
 	 * 
-	 * <p>The default value is <code>""</code> (i.e. no virtual root).</p>
+	 * <p>The default value is <code>false</code> (i.e. no virtual root).</p>
 	 */
-	String virtualRoot() default "";
+	boolean virtualRoot() default false;
 	
 	/**
 	 * <p>Specify array paths. paths are absolute with at least two names,
-	 * where names are separated by `'/'` and may be prefixed.</p>
+	 * where names are separated by `'/'` and may be prefixed. The root
+	 * element is <em>not</em> included in a multiple path.</p>
 	 * <p>E.g. for</p>
 	 * <pre>
 	 * {
@@ -58,7 +61,7 @@ public @interface JsonXML {
 	 *   }
 	 * }
 	 * </pre>
-	 * <p>we would specify <code>"/alice/bob"</code> as multiple path.</p>
+	 * <p>we would specify <code>"/bob"</code> as multiple path.</p>
 	 */
 	String[] multiplePaths() default {};
 

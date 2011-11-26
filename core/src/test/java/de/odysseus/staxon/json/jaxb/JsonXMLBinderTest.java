@@ -26,11 +26,12 @@ import java.util.regex.Pattern;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlElementDecl;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
@@ -49,10 +50,10 @@ public class JsonXMLBinderTest {
 	@JsonXML
 	static class JsonXMLDefault {}
 
-	@JsonXML(autoArray = true, namespaceDeclarations = false, namespaceSeparator = '_', prettyPrint = true, virtualRoot = "root")
+	@JsonXML(autoArray = true, namespaceDeclarations = false, namespaceSeparator = '_', prettyPrint = true, virtualRoot = true)
 	static class JsonXMLCustom {}
 
-	@JsonXML(virtualRoot = "sampleRootElement")
+	@JsonXML(virtualRoot = true, multiplePaths = "/elements")
 	static class JsonXMLVirtualSampleRootElement {}
 
 	@XmlType
@@ -67,20 +68,20 @@ public class JsonXMLBinderTest {
 	
 	@Test
 	public void testCreateInputFactory() {
-		JsonXMLInputFactory factory = new JsonXMLBinder().createInputFactory(JsonXMLDefault.class.getAnnotation(JsonXML.class));
+		JsonXMLInputFactory factory = new JsonXMLBinder().createInputFactory(SampleRootElement.class, JsonXMLDefault.class.getAnnotation(JsonXML.class));
 		Assert.assertEquals(Boolean.TRUE, factory.getProperty(JsonXMLInputFactory.PROP_MULTIPLE_PI));
 		Assert.assertEquals(Character.valueOf(':'), factory.getProperty(JsonXMLInputFactory.PROP_NAMESPACE_SEPARATOR));
 		Assert.assertNull(factory.getProperty(JsonXMLInputFactory.PROP_VIRTUAL_ROOT));
 
-		factory = new JsonXMLBinder().createInputFactory(JsonXMLCustom.class.getAnnotation(JsonXML.class));
+		factory = new JsonXMLBinder().createInputFactory(SampleRootElement.class, JsonXMLCustom.class.getAnnotation(JsonXML.class));
 		Assert.assertEquals(Boolean.TRUE, factory.getProperty(JsonXMLInputFactory.PROP_MULTIPLE_PI));
 		Assert.assertEquals(Character.valueOf('_'), factory.getProperty(JsonXMLInputFactory.PROP_NAMESPACE_SEPARATOR));
-		Assert.assertEquals("root", factory.getProperty(JsonXMLInputFactory.PROP_VIRTUAL_ROOT));
+		Assert.assertEquals("sampleRootElement", factory.getProperty(JsonXMLInputFactory.PROP_VIRTUAL_ROOT));
 	}
 
 	@Test
 	public void testCreateOutputFactory() {
-		JsonXMLOutputFactory factory = new JsonXMLBinder().createOutputFactory(JsonXMLDefault.class.getAnnotation(JsonXML.class));
+		JsonXMLOutputFactory factory = new JsonXMLBinder().createOutputFactory(SampleRootElement.class, JsonXMLDefault.class.getAnnotation(JsonXML.class));
 		Assert.assertEquals(Boolean.TRUE, factory.getProperty(JsonXMLOutputFactory.PROP_MULTIPLE_PI));
 		Assert.assertEquals(Character.valueOf(':'), factory.getProperty(JsonXMLOutputFactory.PROP_NAMESPACE_SEPARATOR));
 		Assert.assertNull(factory.getProperty(JsonXMLOutputFactory.PROP_VIRTUAL_ROOT));
@@ -88,25 +89,47 @@ public class JsonXMLBinderTest {
 		Assert.assertEquals(Boolean.FALSE, factory.getProperty(JsonXMLOutputFactory.PROP_PRETTY_PRINT));
 		Assert.assertEquals(Boolean.FALSE, factory.getProperty(JsonXMLOutputFactory.PROP_AUTO_ARRAY));
 
-		factory = new JsonXMLBinder().createOutputFactory(JsonXMLCustom.class.getAnnotation(JsonXML.class));
+		factory = new JsonXMLBinder().createOutputFactory(SampleRootElement.class, JsonXMLCustom.class.getAnnotation(JsonXML.class));
 		Assert.assertEquals(Boolean.TRUE, factory.getProperty(JsonXMLOutputFactory.PROP_MULTIPLE_PI));
 		Assert.assertEquals(Character.valueOf('_'), factory.getProperty(JsonXMLOutputFactory.PROP_NAMESPACE_SEPARATOR));
-		Assert.assertEquals("root", factory.getProperty(JsonXMLOutputFactory.PROP_VIRTUAL_ROOT));
+		Assert.assertEquals("sampleRootElement", factory.getProperty(JsonXMLOutputFactory.PROP_VIRTUAL_ROOT));
 		Assert.assertEquals(Boolean.FALSE, factory.getProperty(JsonXMLOutputFactory.PROP_NAMESPACE_DECLARATIONS));
 		Assert.assertEquals(Boolean.TRUE, factory.getProperty(JsonXMLOutputFactory.PROP_PRETTY_PRINT));
 		Assert.assertEquals(Boolean.TRUE, factory.getProperty(JsonXMLOutputFactory.PROP_AUTO_ARRAY));
 	}
 	
 	@Test
-	public void testCreateJAXBElement() throws JAXBException {
+	public void testGetXmlElementDeclMethod() {
 		JsonXMLBinder provider = new JsonXMLBinder();
-		Assert.assertNull(provider.createJAXBElement(SampleRootElement.class, null, new SampleRootElement()));
-		Assert.assertNull(provider.createJAXBElement(EmptyType.class, null, new EmptyType()));
-		Assert.assertNotNull(provider.createJAXBElement(SampleType.class, null, new SampleType()));
-		Assert.assertNotNull(provider.createJAXBElement(SampleType.class, "sampleType", new SampleType()));
-		Assert.assertNull(provider.createJAXBElement(SampleType.class, "badName", new SampleType()));
+		Assert.assertNull(provider.getXmlElementDeclMethod(SampleRootElement.class));
+		Assert.assertNull(provider.getXmlElementDeclMethod(EmptyType.class));
+		Assert.assertNotNull(provider.getXmlElementDeclMethod(SampleType.class));
 	}
 	
+	@Test
+	public void testGetXmlTypeName() {
+		JsonXMLBinder provider = new JsonXMLBinder();
+		Assert.assertNull(provider.getXmlTypeName(SampleRootElement.class));
+		Assert.assertNull(provider.getXmlTypeName(EmptyType.class));
+		Assert.assertEquals(new QName("sampleType"), provider.getXmlTypeName(SampleType.class));
+		Assert.assertEquals(new QName("urn:staxon:jaxb:test", "sampleTypeWithNamespace"), provider.getXmlTypeName(SampleTypeWithNamespace.class));
+	}
+
+	@Test
+	public void testGetXmlRootElementName() {
+		JsonXMLBinder provider = new JsonXMLBinder();
+		Assert.assertEquals(new QName("sampleRootElement"), provider.getXmlRootElementName(SampleRootElement.class));
+		Assert.assertNull(provider.getXmlRootElementName(EmptyType.class));
+		Assert.assertNull(provider.getXmlRootElementName(SampleType.class));
+		Assert.assertNull(provider.getXmlRootElementName(SampleTypeWithNamespace.class));
+	}
+
+	@Test
+	public void testGetNamespaceURI_XmlRootElement() {
+		Assert.assertEquals(XMLConstants.NULL_NS_URI,
+				new JsonXMLBinder().getNamespaceURI(SampleRootElement.class.getAnnotation(XmlRootElement.class), null));
+	}
+
 	@Test
 	public void testGetNamespaceURI_XmlType() {
 		Assert.assertEquals(XMLConstants.NULL_NS_URI,
@@ -136,9 +159,9 @@ public class JsonXMLBinderTest {
 		sampleRootElement.attribute = "hello";
 		sampleRootElement.elements = Arrays.asList("world");	
 
-		XMLStreamWriter writer = new JsonXMLBinder().createOutputFactory(config).createXMLStreamWriter(result);
+		XMLStreamWriter writer = new JsonXMLBinder().createXMLStreamWriter(type, config, result);
 		Marshaller marshaller = JAXBContext.newInstance(type).createMarshaller();
-		new JsonXMLBinder().marshal(type, marshaller, writer, null, sampleRootElement);
+		new JsonXMLBinder().marshal(type, marshaller, writer, sampleRootElement);
 		writer.close();
 
 		String json = "{\"sampleRootElement\":{\"@attribute\":\"hello\",\"elements\":\"world\"}}";
@@ -154,12 +177,12 @@ public class JsonXMLBinderTest {
 		sampleRootElement.attribute = "hello";
 		sampleRootElement.elements = Arrays.asList("world");	
 
-		XMLStreamWriter writer = new JsonXMLBinder().createOutputFactory(config).createXMLStreamWriter(result);
+		XMLStreamWriter writer = new JsonXMLBinder().createXMLStreamWriter(type, config, result);
 		Marshaller marshaller = JAXBContext.newInstance(type).createMarshaller();
-		new JsonXMLBinder().marshal(type, marshaller, writer, null, sampleRootElement);
+		new JsonXMLBinder().marshal(type, marshaller, writer, sampleRootElement);
 		writer.close();
 
-		String json = "{\"@attribute\":\"hello\",\"elements\":\"world\"}";
+		String json = "{\"@attribute\":\"hello\",\"elements\":[\"world\"]}";
 		Assert.assertEquals(json, result.toString());
 	}
 	
@@ -171,9 +194,9 @@ public class JsonXMLBinderTest {
 		SampleType sampleType = new SampleType();
 		sampleType.element = "hi!";
 
-		XMLStreamWriter writer = new JsonXMLBinder().createOutputFactory(config).createXMLStreamWriter(result);
+		XMLStreamWriter writer = new JsonXMLBinder().createXMLStreamWriter(type, config, result);
 		Marshaller marshaller = JAXBContext.newInstance(type).createMarshaller();
-		new JsonXMLBinder().marshal(type, marshaller, writer, null, sampleType);
+		new JsonXMLBinder().marshal(type, marshaller, writer, sampleType);
 		writer.close();
 
 		String json = "{\"sampleType\":{\"element\":\"hi!\"}}";
@@ -187,9 +210,9 @@ public class JsonXMLBinderTest {
 		Class<?> type = SampleTypeWithNamespace.class;
 		SampleTypeWithNamespace sampleTypeWithNamespace = new SampleTypeWithNamespace();
 
-		XMLStreamWriter writer = new JsonXMLBinder().createOutputFactory(config).createXMLStreamWriter(result);
+		XMLStreamWriter writer = new JsonXMLBinder().createXMLStreamWriter(type, config, result);
 		Marshaller marshaller = JAXBContext.newInstance(type).createMarshaller();
-		new JsonXMLBinder().marshal(type, marshaller, writer, null, sampleTypeWithNamespace);
+		new JsonXMLBinder().marshal(type, marshaller, writer, sampleTypeWithNamespace);
 		writer.close();
 
 		Matcher prefixMatcher = Pattern.compile("@xmlns:([a-z1-9]+)").matcher(result.toString());
@@ -203,10 +226,11 @@ public class JsonXMLBinderTest {
 	public void testUnmarshallSampleRootElement() throws Exception {
 		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
 		String json = "{\"sampleRootElement\":{\"@attribute\":\"hello\",\"elements\":[\"world\"]}}";
+		Class<SampleRootElement> type = SampleRootElement.class;
 
-		XMLStreamReader reader = new JsonXMLBinder().createInputFactory(config).createXMLStreamReader(new StringReader(json));
-		Unmarshaller unmarshaller = JAXBContext.newInstance(SampleRootElement.class).createUnmarshaller();
-		SampleRootElement sampleRootElement = new JsonXMLBinder().unmarshal(SampleRootElement.class, unmarshaller, reader);
+		XMLStreamReader reader = new JsonXMLBinder().createXMLStreamReader(type, config, new StringReader(json));
+		Unmarshaller unmarshaller = JAXBContext.newInstance(type).createUnmarshaller();
+		SampleRootElement sampleRootElement = new JsonXMLBinder().unmarshal(type, unmarshaller, reader);
 
 		Assert.assertEquals("hello", sampleRootElement.attribute);
 		Assert.assertEquals("world", sampleRootElement.elements.get(0));
@@ -216,10 +240,11 @@ public class JsonXMLBinderTest {
 	public void testUnmarshallSampleRootElementWithVirtualRoot() throws Exception {
 		JsonXML config = JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class);
 		String json = "{\"@attribute\":\"hello\",\"elements\":[\"world\"]}";
+		Class<SampleRootElement> type = SampleRootElement.class;
 
-		XMLStreamReader reader = new JsonXMLBinder().createInputFactory(config).createXMLStreamReader(new StringReader(json));
-		Unmarshaller unmarshaller = JAXBContext.newInstance(SampleRootElement.class).createUnmarshaller();
-		SampleRootElement sampleRootElement = new JsonXMLBinder().unmarshal(SampleRootElement.class, unmarshaller, reader);
+		XMLStreamReader reader = new JsonXMLBinder().createXMLStreamReader(type, config, new StringReader(json));
+		Unmarshaller unmarshaller = JAXBContext.newInstance(type).createUnmarshaller();
+		SampleRootElement sampleRootElement = new JsonXMLBinder().unmarshal(type, unmarshaller, reader);
 
 		Assert.assertEquals("hello", sampleRootElement.attribute);
 		Assert.assertEquals("world", sampleRootElement.elements.get(0));
@@ -229,10 +254,11 @@ public class JsonXMLBinderTest {
 	public void testUnmarshallSampleType() throws Exception {
 		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
 		String json = "{\"sampleType\":{\"element\":\"hi!\"}}";
+		Class<SampleType> type = SampleType.class;
 
-		XMLStreamReader reader = new JsonXMLBinder().createInputFactory(config).createXMLStreamReader(new StringReader(json));
-		Unmarshaller unmarshaller = JAXBContext.newInstance(SampleType.class).createUnmarshaller();
-		SampleType sampleType = new JsonXMLBinder().unmarshal(SampleType.class, unmarshaller, reader);
+		XMLStreamReader reader = new JsonXMLBinder().createXMLStreamReader(type, config, new StringReader(json));
+		Unmarshaller unmarshaller = JAXBContext.newInstance(type).createUnmarshaller();
+		SampleType sampleType = new JsonXMLBinder().unmarshal(type, unmarshaller, reader);
 
 		Assert.assertEquals("hi!", sampleType.element);
 	}
@@ -241,8 +267,9 @@ public class JsonXMLBinderTest {
 	public void testUnmarshallSampleTypeWithNamespace() throws Exception {
 		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
 		String json = "{\"sampleTypeWithNamespace\":{\"@xmlns\":\"urn:staxon-jaxrs:test\"}}";
+		Class<SampleTypeWithNamespace> type = SampleTypeWithNamespace.class;
 
-		XMLStreamReader reader = new JsonXMLBinder().createInputFactory(config).createXMLStreamReader(new StringReader(json));
+		XMLStreamReader reader = new JsonXMLBinder().createXMLStreamReader(type, config, new StringReader(json));
 		Unmarshaller unmarshaller = JAXBContext.newInstance(SampleTypeWithNamespace.class).createUnmarshaller();
 
 		Assert.assertNotNull(new JsonXMLBinder().unmarshal(SampleTypeWithNamespace.class, unmarshaller, reader));

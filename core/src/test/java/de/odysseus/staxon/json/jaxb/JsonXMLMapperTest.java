@@ -31,7 +31,7 @@ public class JsonXMLMapperTest {
 	@JsonXML
 	static class JsonXMLDefault {}
 
-	@JsonXML(autoArray = true, namespaceDeclarations = false, namespaceSeparator = '_', prettyPrint = true, virtualRoot = "root")
+	@JsonXML(autoArray = true, namespaceDeclarations = false, namespaceSeparator = '_', prettyPrint = true, virtualRoot = true)
 	static class JsonXMLCustom {}
 
 	@XmlType

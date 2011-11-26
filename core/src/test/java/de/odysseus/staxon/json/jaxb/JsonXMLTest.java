@@ -31,6 +31,6 @@ public class JsonXMLTest {
 		Assert.assertEquals(':', config.namespaceSeparator());
 		Assert.assertEquals(0, config.multiplePaths().length);
 		Assert.assertFalse(config.prettyPrint());
-		Assert.assertEquals("", config.virtualRoot());
+		Assert.assertFalse(config.virtualRoot());
 	}
 }

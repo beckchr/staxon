@@ -29,10 +29,12 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlElementDecl;
+import javax.xml.bind.annotation.XmlNs;
 import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -57,25 +59,54 @@ public class JsonXMLBinder {
 		this.writeDocumentArray = writeDocumentArray;
 	}
 	
-	protected JsonXMLInputFactory createInputFactory(JsonXML config) {
+	protected String getRoot(Class<?> type) {
+		QName name = null;
+		if (type.getAnnotation(XmlRootElement.class) != null) {
+			name = getXmlRootElementName(type);
+		} else if (type.getAnnotation(XmlType.class) != null) {
+			name = getXmlTypeName(type);
+		}
+		if (name != null) {
+			if (XMLConstants.DEFAULT_NS_PREFIX.equals(name.getPrefix())) {
+				return name.getLocalPart();
+			} else {
+				return name.getPrefix() + ":" + name.getLocalPart();
+			}
+		}
+		return null; // TODO
+	}
+
+	protected JsonXMLInputFactory createInputFactory(Class<?> type, JsonXML config) {
 		JsonXMLInputFactory factory = new JsonXMLInputFactory();
 		factory.setProperty(JsonXMLInputFactory.PROP_MULTIPLE_PI, true);
-		factory.setProperty(JsonXMLInputFactory.PROP_VIRTUAL_ROOT, config.virtualRoot().isEmpty() ? null : config.virtualRoot());
 		factory.setProperty(JsonXMLInputFactory.PROP_NAMESPACE_SEPARATOR, config.namespaceSeparator());
+		factory.setProperty(JsonXMLInputFactory.PROP_VIRTUAL_ROOT, config.virtualRoot() ? getRoot(type) : null);
 		return factory;
 	}
 	
-	protected JsonXMLOutputFactory createOutputFactory(JsonXML config) {
+	protected XMLStreamReader createXMLStreamReader(Class<?> type, JsonXML config, Reader stream) throws XMLStreamException, JAXBException {
+		return createInputFactory(type, config).createXMLStreamReader(stream);
+	}
+	
+	protected JsonXMLOutputFactory createOutputFactory(Class<?> type, JsonXML config) {
 		JsonXMLOutputFactory factory = new JsonXMLOutputFactory();
 		factory.setProperty(JsonXMLOutputFactory.PROP_MULTIPLE_PI, true);
 		factory.setProperty(JsonXMLOutputFactory.PROP_AUTO_ARRAY, config.autoArray());
 		factory.setProperty(JsonXMLOutputFactory.PROP_PRETTY_PRINT, config.prettyPrint());
-		factory.setProperty(JsonXMLOutputFactory.PROP_VIRTUAL_ROOT, config.virtualRoot().isEmpty() ? null : config.virtualRoot());
 		factory.setProperty(JsonXMLOutputFactory.PROP_NAMESPACE_SEPARATOR, config.namespaceSeparator());
 		factory.setProperty(JsonXMLOutputFactory.PROP_NAMESPACE_DECLARATIONS, config.namespaceDeclarations());
+		factory.setProperty(JsonXMLOutputFactory.PROP_VIRTUAL_ROOT, config.virtualRoot() ? getRoot(type) : null);
 		return factory;
 	}
-	
+
+	protected XMLStreamWriter createXMLStreamWriter(Class<?> type, JsonXML config, Writer stream) throws XMLStreamException, JAXBException {
+		XMLStreamWriter writer = createOutputFactory(type, config).createXMLStreamWriter(stream);
+		if (config.multiplePaths().length > 0) {
+			writer = new XMLMultipleStreamWriter(writer, false, config.multiplePaths());
+		}
+		return writer;
+	}
+
 	public boolean isBindable(Class<?> type) {
 		return type.isAnnotationPresent(XmlRootElement.class) || type.isAnnotationPresent(XmlType.class);
 	}
@@ -104,6 +135,14 @@ public class JsonXMLBinder {
 		}
 	}
 
+	protected String getNamespaceURI(XmlRootElement xmlRootElement, XmlSchema xmlSchema) {
+		if ("##default".equals(xmlRootElement.namespace())) {
+			return xmlSchema == null ? XMLConstants.NULL_NS_URI : xmlSchema.namespace();
+		} else {
+			return xmlRootElement.namespace();
+		}
+	}
+
 	protected String getNamespaceURI(XmlElementDecl xmlElementDecl, XmlSchema xmlSchema) {
 		if ("##default".equals(xmlElementDecl.namespace())) {
 			return xmlSchema == null ? XMLConstants.NULL_NS_URI : xmlSchema.namespace();
@@ -112,7 +151,63 @@ public class JsonXMLBinder {
 		}
 	}
 
-	protected JAXBElement<?> createJAXBElement(Class<?> type, String localName, Object value) throws JAXBException {
+	protected String getPrefix(String namespaceURI, XmlSchema xmlSchema) {
+		if (xmlSchema != null) {
+			for (XmlNs xmlns : xmlSchema.xmlns()) {
+				if (xmlns.namespaceURI().equals(namespaceURI)) {
+					return xmlns.prefix();
+				}
+			}
+		}
+		return XMLConstants.DEFAULT_NS_PREFIX;
+	}
+
+	/**
+	 * Calculate root element name for an <code>@XmlRootElement</code>-annotated type.
+	 * @param type
+	 * @return element name
+	 */
+	protected QName getXmlRootElementName(Class<?> type) {
+		XmlRootElement xmlRootElement = type.getAnnotation(XmlRootElement.class);
+		if (xmlRootElement == null) {
+			return null;
+		}
+		String localName;
+		if ("##default".equals(xmlRootElement.name())) {
+			localName = Character.toLowerCase(type.getSimpleName().charAt(0)) + type.getSimpleName().substring(1);
+		} else {
+			localName = xmlRootElement.name();
+		}
+		XmlSchema xmlSchema = type.getPackage().getAnnotation(XmlSchema.class);
+		String namespaceURI = getNamespaceURI(xmlRootElement, xmlSchema);
+		return new QName(namespaceURI, localName, getPrefix(namespaceURI, xmlSchema));
+	}
+
+	/**
+	 * Calculate root element name for an <code>@XmlType</code>-annotated type.
+	 * @param type
+	 * @return element name
+	 */
+	protected QName getXmlTypeName(Class<?> type) {
+		Method method = getXmlElementDeclMethod(type);
+		if (method == null) {
+			return null;
+		}
+		XmlElementDecl xmlElementDecl = method.getAnnotation(XmlElementDecl.class);
+		if (xmlElementDecl == null) {
+			return null;
+		}
+		XmlSchema xmlSchema = type.getPackage().getAnnotation(XmlSchema.class);
+		return new QName(getNamespaceURI(xmlElementDecl, xmlSchema), xmlElementDecl.name());
+	}
+
+	/**
+	 * Determine <code>@XmlElementDecl</code>-annotated factory method to create {@link JAXBElement}
+	 * for an <code>@XmlType</code>-annotated type
+	 * @param type
+	 * @return element
+	 */
+	protected Method getXmlElementDeclMethod(Class<?> type) {
 		XmlType xmlType = type.getAnnotation(XmlType.class);
 		if (xmlType == null) {
 			return null;
@@ -134,16 +229,10 @@ public class JsonXMLBinder {
 		for (Method method : factoryClass.getDeclaredMethods()) {
 			XmlElementDecl xmlElementDecl = method.getAnnotation(XmlElementDecl.class);
 			if (xmlElementDecl != null && namespaceURI.equals(getNamespaceURI(xmlElementDecl, xmlSchema))) {
-				if (localName == null || localName.equals(xmlElementDecl.name())) {
-					if (method.getReturnType() == JAXBElement.class) {
-						Class<?>[] parameterTypes = method.getParameterTypes();
-						if (parameterTypes.length == 1 && parameterTypes[0] == type) {
-							try {
-								return (JAXBElement<?>)method.invoke(factoryClass.newInstance(), value);
-							} catch (Exception e) {
-								throw new JAXBException("Cannot create JAXBElement", e);
-							}
-						}
+				if (method.getReturnType() == JAXBElement.class) {
+					Class<?>[] parameterTypes = method.getParameterTypes();
+					if (parameterTypes.length == 1 && parameterTypes[0] == type) {
+						return method;
 					}
 				}
 			}
@@ -151,28 +240,23 @@ public class JsonXMLBinder {
 		return null;
 	}
 	
-	protected void marshal(Class<?> type, Marshaller marshaller, XMLStreamWriter writer, String virtualRoot, Object value)
+	protected void marshal(Class<?> type, Marshaller marshaller, XMLStreamWriter writer, Object value)
 			throws JAXBException, XMLStreamException {
 		Object element = null;
 		if (type.isAnnotationPresent(XmlRootElement.class)) {
 			element = value;
 		} else if (type.isAnnotationPresent(XmlType.class)) {
 			/*
-			 * determine expected localName
-			 */
-			String localPart = null;
-			if (virtualRoot != null) {
-				int colon = virtualRoot.indexOf(':');
-				if (colon > 0) {
-					localPart = virtualRoot.substring(colon + 1);
-				} else {
-					localPart = virtualRoot;
-				}
-			}
-			/*
 			 * create JAXBElement
 			 */
-			element = createJAXBElement(type, localPart, value);
+			Method method = getXmlElementDeclMethod(type);
+			if (method != null) {
+				try {
+					element = method.invoke(method.getDeclaringClass().newInstance(), value);
+				} catch (Exception e) {
+					throw new JAXBException("Cannot create JAXBElement", e);
+				}
+			}
 			if (element == null) {
 				throw new JAXBException("Cannot create JAXBElement");
 			}
@@ -181,11 +265,11 @@ public class JsonXMLBinder {
 		}
 		marshaller.marshal(element, writer);
 	}
-
+	
 	public <T> T readObject(Class<? extends T> type, JsonXML config, JAXBContext context, Reader stream)
 			throws XMLStreamException, JAXBException {
 		checkBindable(type);
-		XMLStreamReader reader = createInputFactory(config).createXMLStreamReader(stream);
+		XMLStreamReader reader = createXMLStreamReader(type, config, stream);
 		T result;
 		if (reader.isCharacters() && reader.getText() == null) { // hack: read null
 			result = null;
@@ -202,15 +286,12 @@ public class JsonXMLBinder {
 	public void writeObject(Class<?> type, JsonXML config, JAXBContext context, Writer stream, Object value)
 			throws XMLStreamException, JAXBException {
 		checkBindable(type);
-		XMLStreamWriter writer = createOutputFactory(config).createXMLStreamWriter(stream);
+		XMLStreamWriter writer = createXMLStreamWriter(type, config, stream);
 		if (value == null) { // hack: write null
 			writer.writeCharacters(null);
 		} else {
-			if (config.multiplePaths().length > 0) {
-				writer = new XMLMultipleStreamWriter(writer, config.multiplePaths());
-			}
 			Marshaller marshaller = context.createMarshaller();
-			marshal(type, marshaller, writer, config.virtualRoot().length() > 0 ? config.virtualRoot() : null, value);
+			marshal(type, marshaller, writer, value);
 		}
 		writer.close();
 	}
@@ -218,7 +299,7 @@ public class JsonXMLBinder {
 	public <T> List<T> readArray(Class<? extends T> type, JsonXML config, JAXBContext context, Reader stream)
 			throws XMLStreamException, JAXBException {
 		checkBindable(type);
-		XMLStreamReader reader = createInputFactory(config).createXMLStreamReader(stream);
+		XMLStreamReader reader = createXMLStreamReader(type, config, stream);
 		List<T> result;
 		if (reader.isCharacters() && reader.getText() == null) { // hack: read null
 			result = null;
@@ -252,30 +333,21 @@ public class JsonXMLBinder {
 	public void writeArray(Class<?> type, JsonXML config, JAXBContext context, Writer stream, Collection<?> collection)
 			throws XMLStreamException, JAXBException {
 		checkBindable(type);
-		XMLStreamWriter writer = createOutputFactory(config).createXMLStreamWriter(stream);
+		XMLStreamWriter writer = createXMLStreamWriter(type, config, stream);
 		if (collection == null) { // hack: write null
 			writer.writeCharacters(null);
 		} else {
-			if (config.multiplePaths().length > 0) {
-				writer = new XMLMultipleStreamWriter(writer, config.multiplePaths());
-			}
 			Marshaller marshaller = context.createMarshaller();
-			if (writeDocumentArray) {
-				writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET);
-			} else {
+			if (!writeDocumentArray) {
 				writer.writeStartDocument();
-				if (config.virtualRoot().length() > 0) {
-					writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET, config.virtualRoot());
-				} else {
-					writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET);
-				}
 				marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
 			}
+			writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET);
 			for (Object value : collection) {
 				if (value == null) { // hack: write null
 					writer.writeCharacters(null);
 				} else {							
-					marshal(type, marshaller, writer, config.virtualRoot().length() > 0 ? config.virtualRoot() : null, value);
+					marshal(type, marshaller, writer, value);
 				}
 			}
 			if (!writeDocumentArray) {
