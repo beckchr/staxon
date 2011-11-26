@@ -37,7 +37,7 @@ public class XMLMultipleStreamWriterTest {
 	@Test
 	public void testWriteStartElement_String() throws XMLStreamException {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), "/alice/bob");
+		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), true, "/alice/bob");
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeStartElement("bob");
@@ -55,7 +55,7 @@ public class XMLMultipleStreamWriterTest {
 	@Test
 	public void testWriteStartElement_String_String() throws XMLStreamException {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), "/alice/p:bob");
+		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), true, "/alice/p:bob");
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeNamespace("p", "http://test");
@@ -74,7 +74,7 @@ public class XMLMultipleStreamWriterTest {
 	@Test
 	public void testWriteStartElement_String_String_String() throws XMLStreamException {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), "/alice/p:bob");
+		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), true, "/alice/p:bob");
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeStartElement("p", "bob", "http://test");
@@ -93,7 +93,7 @@ public class XMLMultipleStreamWriterTest {
 	@Test
 	public void testWriteEmptyElement_String() throws XMLStreamException {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), "/alice/bob");
+		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), true, "/alice/bob");
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeEmptyElement("bob");
@@ -109,7 +109,7 @@ public class XMLMultipleStreamWriterTest {
 	@Test
 	public void testWriteEmptyElement_String_String() throws XMLStreamException {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), "/alice/p:bob");
+		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), true, "/alice/p:bob");
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeNamespace("p", "http://test");
@@ -126,7 +126,7 @@ public class XMLMultipleStreamWriterTest {
 	@Test
 	public void testWriteEmptyElement_String_String_String() throws XMLStreamException {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), "/alice/p:bob");
+		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), true, "/alice/p:bob");
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeEmptyElement("p", "bob", "http://test");
@@ -143,7 +143,7 @@ public class XMLMultipleStreamWriterTest {
 	@Test
 	public void testArrayWithTwoElements() throws XMLStreamException {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), "/alice/bob");
+		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), true, "/alice/bob");
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeStartElement("bob");
@@ -164,7 +164,7 @@ public class XMLMultipleStreamWriterTest {
 	@Test
 	public void testArrayWithPreviousSibling() throws XMLStreamException {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), "/alice/bob");
+		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), true, "/alice/bob");
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeEmptyElement("edgar");
@@ -183,7 +183,7 @@ public class XMLMultipleStreamWriterTest {
 	@Test
 	public void testZombieArray() throws XMLStreamException {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), "/alice/edgar/bob");
+		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), true, "/alice/edgar/bob");
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeStartElement("edgar");
@@ -197,4 +197,24 @@ public class XMLMultipleStreamWriterTest {
 		writer.close();
 		Assert.assertEquals("{\"alice\":{\"edgar\":{\"bob\":[null]},\"edgar\":{\"bob\":[null]}}}", result.toString());
 	}
+	
+	/**
+	 * <code>&lt;alice&gt;&lt;bob&gt;charlie&lt;/bob&gt;&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testMatchRootFalse() throws XMLStreamException {
+		StringWriter result = new StringWriter();
+		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), false, "/bob");
+		writer.writeStartDocument();
+		writer.writeStartElement("alice");
+		writer.writeStartElement("bob");
+		writer.writeCharacters("charlie");
+		writer.writeEndElement();
+		writer.writeEndElement();
+		writer.writeEndDocument();
+		writer.close();
+		Assert.assertEquals("{\"alice\":{\"bob\":[\"charlie\"]}}", result.toString());
+	}
+	
+
 }

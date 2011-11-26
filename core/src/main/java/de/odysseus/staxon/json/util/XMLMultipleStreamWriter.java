@@ -40,10 +40,10 @@ public class XMLMultipleStreamWriter extends StreamWriterDelegate {
 	 * @param parent delegate
 	 * @param multiplePaths added via {@link #addMultiplePath(String)}
 	 */
-	public XMLMultipleStreamWriter(XMLStreamWriter parent, String... multiplePaths) {
+	public XMLMultipleStreamWriter(XMLStreamWriter parent, boolean matchRoot, String... multiplePaths) {
 		super(parent);
 		
-		this.handler = new XMLMultipleProcessingInstructionHandler(this);
+		this.handler = new XMLMultipleProcessingInstructionHandler(this, matchRoot);
 		for (String path : multiplePaths) {
 			addMultiplePath(path);
 		}

@@ -32,14 +32,28 @@ import de.odysseus.staxon.json.JsonXMLOutputFactory;
 
 public class XMLMultipleEventWriterTest {
 	@Test
-	public void test() throws XMLStreamException {
+	public void test1() throws XMLStreamException {
 		StringReader input = new StringReader("<alice><bob>charlie</bob></alice>");
 		StringWriter output = new StringWriter();
 		XMLEventReader reader = XMLInputFactory.newFactory().createXMLEventReader(input);
 		XMLOutputFactory factory = new JsonXMLOutputFactory();
 		factory.setProperty(JsonXMLOutputFactory.PROP_MULTIPLE_PI, true);
 		XMLEventWriter writer = factory.createXMLEventWriter(output);
-		writer = new XMLMultipleEventWriter(writer, "/alice/bob");
+		writer = new XMLMultipleEventWriter(writer, true, "/alice/bob");
+		writer.add(reader);
+		writer.close();
+		Assert.assertEquals("{\"alice\":{\"bob\":[\"charlie\"]}}", output.toString());
+	}
+
+	@Test
+	public void test2() throws XMLStreamException {
+		StringReader input = new StringReader("<alice><bob>charlie</bob></alice>");
+		StringWriter output = new StringWriter();
+		XMLEventReader reader = XMLInputFactory.newFactory().createXMLEventReader(input);
+		XMLOutputFactory factory = new JsonXMLOutputFactory();
+		factory.setProperty(JsonXMLOutputFactory.PROP_MULTIPLE_PI, true);
+		XMLEventWriter writer = factory.createXMLEventWriter(output);
+		writer = new XMLMultipleEventWriter(writer, false, "/bob");
 		writer.add(reader);
 		writer.close();
 		Assert.assertEquals("{\"alice\":{\"bob\":[\"charlie\"]}}", output.toString());

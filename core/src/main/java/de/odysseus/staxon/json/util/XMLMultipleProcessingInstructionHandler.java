@@ -130,13 +130,14 @@ class XMLMultipleProcessingInstructionHandler {
 	private final StringBuilder path = new StringBuilder();
 	private final List<String> multiplePaths = new ArrayList<String>();
 	private final String[] names = new String[64];
+	private final boolean matchRoot;
 	
 	private final ProcessingInstructionWriter writer;
 
 	private String previousSiblingName = null;
 	private int depth = 0;
 
-	XMLMultipleProcessingInstructionHandler(final XMLStreamWriter writer) {
+	XMLMultipleProcessingInstructionHandler(final XMLStreamWriter writer, boolean matchRoot) {
 		this.writer = new ProcessingInstructionWriter() {
 			@Override
 			void add(ProcessingInstruction pi) throws XMLStreamException {
@@ -147,19 +148,24 @@ class XMLMultipleProcessingInstructionHandler {
 				}
 			}
 		};
+		this.matchRoot = matchRoot;
 	}
 	
-	XMLMultipleProcessingInstructionHandler(final XMLEventWriter writer) {
+	XMLMultipleProcessingInstructionHandler(final XMLEventWriter writer, boolean matchRoot) {
 		this.writer = new ProcessingInstructionWriter() {
 			@Override
 			void add(ProcessingInstruction pi) throws XMLStreamException {
 				writer.add(pi);
 			}
 		};
+		this.matchRoot = matchRoot;
 	}
 	
 	private void push(String name) throws XMLStreamException {
-		path.append('/').append(name);
+		if (matchRoot || depth > 0) {			
+			path.append('/').append(name);
+		}
+
 		if (multiplePaths.contains(path.toString()) && !name.equals(previousSiblingName)) {
 			writer.add(MULTIPLE_PI);
 		}
@@ -174,7 +180,9 @@ class XMLMultipleProcessingInstructionHandler {
 		previousSiblingName = names[depth];
 		names[depth] = null;
 
-		path.setLength(path.length() - previousSiblingName.length() - 1);
+		if (matchRoot || depth > 0) {			
+			path.setLength(path.length() - previousSiblingName.length() - 1);
+		}
 	}
 
 	/**

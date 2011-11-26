@@ -38,10 +38,10 @@ import de.odysseus.staxon.util.EventWriterDelegate;
 public class XMLMultipleEventWriter extends EventWriterDelegate {
 	private final XMLMultipleProcessingInstructionHandler handler;
 
-	public XMLMultipleEventWriter(XMLEventWriter parent, String... multiplePaths) {
+	public XMLMultipleEventWriter(XMLEventWriter parent, boolean matchRoot, String... multiplePaths) {
 		super(parent);
 		
-		this.handler = new XMLMultipleProcessingInstructionHandler(this);
+		this.handler = new XMLMultipleProcessingInstructionHandler(this, matchRoot);
 		for (String path : multiplePaths) {
 			addMultiplePath(path);
 		}
