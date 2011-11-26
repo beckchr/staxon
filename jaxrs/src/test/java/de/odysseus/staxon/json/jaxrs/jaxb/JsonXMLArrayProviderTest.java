@@ -21,7 +21,7 @@ public class JsonXMLArrayProviderTest {
 	@JsonXML
 	static class JsonXMLDefault {}
 
-	@JsonXML(virtualRoot = "sampleRootElement")
+	@JsonXML(virtualRoot = true, multiplePaths = "/elements")
 	static class JsonXMLVirtualSampleRootElement {}
 
 	static List<SampleRootElement> sampleRootElementList = new ArrayList<SampleRootElement>();

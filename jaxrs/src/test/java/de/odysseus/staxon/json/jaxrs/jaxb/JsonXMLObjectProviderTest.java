@@ -19,7 +19,7 @@ public class JsonXMLObjectProviderTest {
 	@JsonXML
 	static class JsonXMLDefault {}
 
-	@JsonXML(virtualRoot = "sampleRootElement")
+	@JsonXML(virtualRoot = true, multiplePaths = "/elements")
 	static class JsonXMLVirtualSampleRootElement {}
 
 	@Test
@@ -72,7 +72,7 @@ public class JsonXMLObjectProviderTest {
 		provider.write(SampleRootElement.class,
 				null, annotations, MediaType.APPLICATION_JSON_TYPE, null, writer, sampleRootElement);
 
-		String json = "{\"sampleRootElement\":{\"@attribute\":\"hello\",\"elements\":\"world\"}}";
+		String json = "{\"sampleRootElement\":{\"@attribute\":\"hello\",\"elements\":[\"world\"]}}";
 		Assert.assertEquals(json, writer.toString());
 	}
 
