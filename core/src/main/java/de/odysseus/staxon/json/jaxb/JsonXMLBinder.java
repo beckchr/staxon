@@ -59,28 +59,11 @@ public class JsonXMLBinder {
 		this.writeDocumentArray = writeDocumentArray;
 	}
 	
-	protected String getRoot(Class<?> type) {
-		QName name = null;
-		if (type.getAnnotation(XmlRootElement.class) != null) {
-			name = getXmlRootElementName(type);
-		} else if (type.getAnnotation(XmlType.class) != null) {
-			name = getXmlTypeName(type);
-		}
-		if (name != null) {
-			if (XMLConstants.DEFAULT_NS_PREFIX.equals(name.getPrefix())) {
-				return name.getLocalPart();
-			} else {
-				return name.getPrefix() + ":" + name.getLocalPart();
-			}
-		}
-		return null; // TODO
-	}
-
 	protected JsonXMLInputFactory createInputFactory(Class<?> type, JsonXML config) {
 		JsonXMLInputFactory factory = new JsonXMLInputFactory();
 		factory.setProperty(JsonXMLInputFactory.PROP_MULTIPLE_PI, true);
 		factory.setProperty(JsonXMLInputFactory.PROP_NAMESPACE_SEPARATOR, config.namespaceSeparator());
-		factory.setProperty(JsonXMLInputFactory.PROP_VIRTUAL_ROOT, config.virtualRoot() ? getRoot(type) : null);
+		factory.setProperty(JsonXMLInputFactory.PROP_VIRTUAL_ROOT, config.virtualRoot() ? getName(type) : null);
 		return factory;
 	}
 	
@@ -95,7 +78,7 @@ public class JsonXMLBinder {
 		factory.setProperty(JsonXMLOutputFactory.PROP_PRETTY_PRINT, config.prettyPrint());
 		factory.setProperty(JsonXMLOutputFactory.PROP_NAMESPACE_SEPARATOR, config.namespaceSeparator());
 		factory.setProperty(JsonXMLOutputFactory.PROP_NAMESPACE_DECLARATIONS, config.namespaceDeclarations());
-		factory.setProperty(JsonXMLOutputFactory.PROP_VIRTUAL_ROOT, config.virtualRoot() ? getRoot(type) : null);
+		factory.setProperty(JsonXMLOutputFactory.PROP_VIRTUAL_ROOT, config.virtualRoot() ? getName(type) : null);
 		return factory;
 	}
 
@@ -200,6 +183,22 @@ public class JsonXMLBinder {
 		XmlSchema xmlSchema = type.getPackage().getAnnotation(XmlSchema.class);
 		String namespaceURI = getNamespaceURI(xmlElementDecl, xmlSchema);
 		return new QName(namespaceURI, xmlElementDecl.name(), getPrefix(namespaceURI, xmlSchema));
+	}
+
+	/**
+	 * Calculate root element name for an
+	 * <code>@XmlRootElement</code> or <code>@XmlType</code>-annotaed type.
+	 * @param type
+	 * @return name or <code>null</code>
+	 */
+	protected QName getName(Class<?> type) {
+		if (type.getAnnotation(XmlRootElement.class) != null) {
+			return getXmlRootElementName(type);
+		} else if (type.getAnnotation(XmlType.class) != null) {
+			return getXmlTypeName(type);
+		} else {
+			return null;
+		}
 	}
 
 	/**

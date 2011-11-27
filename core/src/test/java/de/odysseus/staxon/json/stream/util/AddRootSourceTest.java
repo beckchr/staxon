@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.StringReader;
 
 import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
 
@@ -31,8 +32,8 @@ import de.odysseus.staxon.json.stream.impl.JsonStreamFactoryImpl;
 import de.odysseus.staxon.json.stream.util.AddRootSource;
 
 public class AddRootSourceTest {
-	private AddRootSource createSource(StringReader reader, String root) throws IOException {
-		return new AddRootSource(new JsonStreamFactoryImpl().createJsonStreamSource(reader), root);
+	private AddRootSource createSource(StringReader reader, QName root) throws IOException {
+		return new AddRootSource(new JsonStreamFactoryImpl().createJsonStreamSource(reader), root, ':');
 	}
 
 	void verify(XMLStreamReader reader, int expectedEventType, String expectedLocalName, String expectedText) {
@@ -47,7 +48,7 @@ public class AddRootSourceTest {
 	@Test
 	public void testTextContent() throws Exception {
 		String input = "\"bob\"";
-		XMLStreamReader reader = new JsonXMLStreamReader(createSource(new StringReader(input), "alice"), true, ':');
+		XMLStreamReader reader = new JsonXMLStreamReader(createSource(new StringReader(input), new QName("alice")), true, ':');
 		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
 		reader.next();
 		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
@@ -66,7 +67,7 @@ public class AddRootSourceTest {
 	@Test
 	public void testNested() throws Exception {
 		String input = "{\"bob\":\"charlie\",\"david\":\"edgar\"}";
-		XMLStreamReader reader = new JsonXMLStreamReader(createSource(new StringReader(input), "alice"), true, ':');
+		XMLStreamReader reader = new JsonXMLStreamReader(createSource(new StringReader(input), new QName("alice")), true, ':');
 		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
 		reader.next();
 		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
@@ -95,7 +96,7 @@ public class AddRootSourceTest {
 	@Test
 	public void testArray() throws Exception {
 		String input = "{\"bob\":[\"charlie\",\"david\"]}";
-		XMLStreamReader reader = new JsonXMLStreamReader(createSource(new StringReader(input), "alice"), true, ':');
+		XMLStreamReader reader = new JsonXMLStreamReader(createSource(new StringReader(input), new QName("alice")), true, ':');
 		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
 		reader.next();
 		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
@@ -125,7 +126,7 @@ public class AddRootSourceTest {
 	@Test
 	public void testRootArray() throws Exception {
 		String input = "[\"charlie\",\"david\"]";
-		XMLStreamReader reader = new JsonXMLStreamReader(createSource(new StringReader(input), "bob"), true, ':');
+		XMLStreamReader reader = new JsonXMLStreamReader(createSource(new StringReader(input), new QName("bob")), true, ':');
 		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
 		reader.next();
 		verify(reader, XMLStreamConstants.PROCESSING_INSTRUCTION, null, null);
@@ -151,7 +152,7 @@ public class AddRootSourceTest {
 	@Test
 	public void testEmptyArray() throws Exception {
 		String input = "[]";
-		XMLStreamReader reader = new JsonXMLStreamReader(createSource(new StringReader(input), "bob"), true, ':');
+		XMLStreamReader reader = new JsonXMLStreamReader(createSource(new StringReader(input), new QName("bob")), true, ':');
 		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
 		reader.next();
 		verify(reader, XMLStreamConstants.PROCESSING_INSTRUCTION, null, null);
@@ -169,7 +170,7 @@ public class AddRootSourceTest {
 	@Test
 	public void testAttributes() throws Exception {
 		String input = "{\"@charlie\":\"david\",\"$\":\"bob\"}";
-		XMLStreamReader reader = new JsonXMLStreamReader(createSource(new StringReader(input), "alice"), true, ':');
+		XMLStreamReader reader = new JsonXMLStreamReader(createSource(new StringReader(input), new QName("alice")), true, ':');
 		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
 		reader.next();
 		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
@@ -191,7 +192,29 @@ public class AddRootSourceTest {
 	@Test
 	public void testNamespaces() throws Exception {
 		String input = "{\"@xmlns\":\"http://some-namespace\",\"$\":\"bob\"}";
-		XMLStreamReader reader = new JsonXMLStreamReader(createSource(new StringReader(input), "alice"), true, ':');
+		XMLStreamReader reader = new JsonXMLStreamReader(createSource(new StringReader(input), new QName("alice")), true, ':');
+		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
+		Assert.assertEquals("http://some-namespace", reader.getNamespaceURI());
+		Assert.assertEquals(0, reader.getAttributeCount());
+		reader.next();
+		verify(reader, XMLStreamConstants.CHARACTERS, null, "bob");
+		reader.next();
+		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
+		Assert.assertEquals("http://some-namespace", reader.getNamespaceURI());
+		reader.next();
+		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
+		reader.close();
+	}
+
+	/**
+	 * <code>&lt;alice xmlns="http://some-namespace"&gt;bob&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testNamespaces2() throws Exception {
+		String input = "{\"$\":\"bob\"}";
+		XMLStreamReader reader = new JsonXMLStreamReader(createSource(new StringReader(input), new QName("http://some-namespace", "alice")), true, ':');
 		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
 		reader.next();
 		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);

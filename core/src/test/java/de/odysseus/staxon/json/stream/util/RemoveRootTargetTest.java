@@ -18,6 +18,7 @@ package de.odysseus.staxon.json.stream.util;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.junit.Assert;
@@ -28,8 +29,8 @@ import de.odysseus.staxon.json.JsonXMLStreamWriter;
 import de.odysseus.staxon.json.stream.impl.JsonStreamFactoryImpl;
 
 public class RemoveRootTargetTest {
-	private RemoveRootTarget createTarget(StringWriter result, String root) throws IOException {
-		return new RemoveRootTarget(new JsonStreamFactoryImpl().createJsonStreamTarget(result, false), root);
+	private RemoveRootTarget createTarget(StringWriter result, QName root) throws IOException {
+		return new RemoveRootTarget(new JsonStreamFactoryImpl().createJsonStreamTarget(result, false), root, ':');
 	}
 	
 	/**
@@ -38,7 +39,7 @@ public class RemoveRootTargetTest {
 	@Test
 	public void testTextContent() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result, "alice"), true, ':', true);
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result, new QName("alice")), true, ':', true);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeCharacters("bob");
@@ -54,7 +55,7 @@ public class RemoveRootTargetTest {
 	@Test
 	public void testArray() throws Exception {
 		StringWriter result = new StringWriter();
-		JsonXMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result, "alice"), true, ':', true);
+		JsonXMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result, new QName("alice")), true, ':', true);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeStartArray("bob");
@@ -78,7 +79,7 @@ public class RemoveRootTargetTest {
 	@Test
 	public void testNested() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result, "alice"), true, ':', true);
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result, new QName("alice")), true, ':', true);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeStartElement("bob");
@@ -99,7 +100,7 @@ public class RemoveRootTargetTest {
 	@Test
 	public void testAttributes() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result, "alice"), true, ':', true);
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result, new QName("alice")), true, ':', true);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeAttribute("charlie", "david");
@@ -116,7 +117,25 @@ public class RemoveRootTargetTest {
 	@Test
 	public void testNamespaces() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result, "alice"), true, ':', true);
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result, new QName("alice")), true, ':', true);
+		writer.setDefaultNamespace("http://some-namespace");
+		writer.writeStartDocument();
+		writer.writeStartElement("alice");
+		writer.writeDefaultNamespace("http://some-namespace");
+		writer.writeCharacters("bob");
+		writer.writeEndElement();
+		writer.writeEndDocument();
+		writer.close();
+		Assert.assertEquals("{\"@xmlns\":\"http://some-namespace\",\"$\":\"bob\"}", result.toString());
+	}
+
+	/**
+	 * <code>&lt;alice xmlns="http://some-namespace"&gt;bob&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testNamespaces2() throws Exception {
+		StringWriter result = new StringWriter();
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result, new QName("http://some-namespace", "alice", "p")), true, ':', true);
 		writer.setDefaultNamespace("http://some-namespace");
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
@@ -134,7 +153,7 @@ public class RemoveRootTargetTest {
 	@Test
 	public void testEmpty() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result, "alice"), true, ':', true);
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result, new QName("alice")), true, ':', true);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeEndElement();
@@ -146,7 +165,7 @@ public class RemoveRootTargetTest {
 	@Test
 	public void testRootArray() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result, "alice"), true, ':', true);
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result, new QName("alice")), true, ':', true);
 		writer.writeStartDocument();
 		writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET);
 		writer.writeStartElement("alice");
@@ -163,7 +182,7 @@ public class RemoveRootTargetTest {
 	@Test
 	public void testDocumentArray() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result, "alice"), true, ':', true);
+		XMLStreamWriter writer = new JsonXMLStreamWriter(createTarget(result, new QName("alice")), true, ':', true);
 		writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");

@@ -76,7 +76,7 @@ public class JsonXMLBinderTest {
 		factory = new JsonXMLBinder().createInputFactory(SampleRootElement.class, JsonXMLCustom.class.getAnnotation(JsonXML.class));
 		Assert.assertEquals(Boolean.TRUE, factory.getProperty(JsonXMLInputFactory.PROP_MULTIPLE_PI));
 		Assert.assertEquals(Character.valueOf('_'), factory.getProperty(JsonXMLInputFactory.PROP_NAMESPACE_SEPARATOR));
-		Assert.assertEquals("sampleRootElement", factory.getProperty(JsonXMLInputFactory.PROP_VIRTUAL_ROOT));
+		Assert.assertEquals(new QName("sampleRootElement"), factory.getProperty(JsonXMLInputFactory.PROP_VIRTUAL_ROOT));
 	}
 
 	@Test
@@ -92,7 +92,7 @@ public class JsonXMLBinderTest {
 		factory = new JsonXMLBinder().createOutputFactory(SampleRootElement.class, JsonXMLCustom.class.getAnnotation(JsonXML.class));
 		Assert.assertEquals(Boolean.TRUE, factory.getProperty(JsonXMLOutputFactory.PROP_MULTIPLE_PI));
 		Assert.assertEquals(Character.valueOf('_'), factory.getProperty(JsonXMLOutputFactory.PROP_NAMESPACE_SEPARATOR));
-		Assert.assertEquals("sampleRootElement", factory.getProperty(JsonXMLOutputFactory.PROP_VIRTUAL_ROOT));
+		Assert.assertEquals(new QName("sampleRootElement"), factory.getProperty(JsonXMLOutputFactory.PROP_VIRTUAL_ROOT));
 		Assert.assertEquals(Boolean.FALSE, factory.getProperty(JsonXMLOutputFactory.PROP_NAMESPACE_DECLARATIONS));
 		Assert.assertEquals(Boolean.TRUE, factory.getProperty(JsonXMLOutputFactory.PROP_PRETTY_PRINT));
 		Assert.assertEquals(Boolean.TRUE, factory.getProperty(JsonXMLOutputFactory.PROP_AUTO_ARRAY));
@@ -128,6 +128,15 @@ public class JsonXMLBinderTest {
 	public void testGetNamespaceURI_XmlRootElement() {
 		Assert.assertEquals(XMLConstants.NULL_NS_URI,
 				new JsonXMLBinder().getNamespaceURI(SampleRootElement.class.getAnnotation(XmlRootElement.class), null));
+	}
+
+	@Test
+	public void testGetName() {
+		JsonXMLBinder provider = new JsonXMLBinder();
+		Assert.assertEquals(new QName("sampleRootElement"), provider.getName(SampleRootElement.class));
+		Assert.assertEquals(new QName("sampleType"), provider.getXmlTypeName(SampleType.class));
+		Assert.assertEquals(new QName("urn:staxon:jaxb:test", "sampleTypeWithNamespace"), provider.getXmlTypeName(SampleTypeWithNamespace.class));
+		Assert.assertNull(provider.getName(EmptyType.class));
 	}
 
 	@Test

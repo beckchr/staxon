@@ -17,25 +17,32 @@ package de.odysseus.staxon.json.stream.util;
 
 import java.io.IOException;
 
+import javax.xml.namespace.QName;
+
 import de.odysseus.staxon.json.stream.JsonStreamTarget;
 
 public class RemoveRootTarget implements JsonStreamTarget {
 	private final JsonStreamTarget delegate;
-	private final String root;
+	private final QName root;
+	private final char namespaceSeparator;
 	
 	private int depth;
 
-	public RemoveRootTarget(JsonStreamTarget delegate, String root) {
+	public RemoveRootTarget(JsonStreamTarget delegate, QName root, char namespaceSeparator) {
 		this.delegate = delegate;
 		this.root = root;
+		this.namespaceSeparator = namespaceSeparator;
 	}
 
 	@Override
 	public void name(String name) throws IOException {
 		if (depth > 1) {
 			delegate.name(name);
-		} else if (!name.equals(root)) {
-			throw new IOException("Unexpected root: " + name);
+		} else {
+			String localPart = name.substring(name.indexOf(namespaceSeparator) + 1);
+			if (!localPart.equals(root.getLocalPart())) {
+				throw new IOException("Unexpected root: " + name);
+			}
 		}
 	}
 

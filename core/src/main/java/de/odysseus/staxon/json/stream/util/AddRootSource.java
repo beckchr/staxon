@@ -17,6 +17,9 @@ package de.odysseus.staxon.json.stream.util;
 
 import java.io.IOException;
 
+import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
+
 import de.odysseus.staxon.json.stream.JsonStreamSource;
 import de.odysseus.staxon.json.stream.JsonStreamToken;
 
@@ -24,31 +27,55 @@ public class AddRootSource implements JsonStreamSource {
 	private enum State {
 		START_DOC,
 		ROOT_NAME,
+		ROOT_XMLNS_START,
+		ROOT_XMLNS_NAME,
+		ROOT_XMLNS_VALUE,
 		DELEGATE,
 		END_DOC
 	}
 	private final JsonStreamSource delegate;
-	private final String root;
+	private final QName root;
+	private final char namespaceSeparator;
 	
 	private State state = State.START_DOC;
 	private int depth = 0;
 
-	public AddRootSource(JsonStreamSource delegate, String root) {
+	public AddRootSource(JsonStreamSource delegate, QName root, char namespaceSeparator) {
 		this.delegate = delegate;
 		this.root = root;
+		this.namespaceSeparator = namespaceSeparator;
 	}
 
 	@Override
 	public String name() throws IOException {
 		if (state == State.ROOT_NAME) {
-			state = State.DELEGATE;
-			return root;
+			if (XMLConstants.NULL_NS_URI.equals(root.getNamespaceURI())) {
+				state = State.DELEGATE;
+			} else { // declare namespace
+				state = State.ROOT_XMLNS_START;
+			}
+			if (XMLConstants.DEFAULT_NS_PREFIX.equals(root.getPrefix())) {
+				return root.getLocalPart();
+			} else {
+				return root.getPrefix() + namespaceSeparator + root.getLocalPart();
+			}
+		} else if (state == State.ROOT_XMLNS_NAME) {
+			state = State.ROOT_XMLNS_VALUE;
+			if (XMLConstants.DEFAULT_NS_PREFIX.equals(root.getPrefix())) {
+				return '@' + XMLConstants.XMLNS_ATTRIBUTE;
+			} else {
+				return '@' + XMLConstants.XMLNS_ATTRIBUTE + namespaceSeparator + root.getLocalPart();
+			}
 		}
 		return delegate.name();
 	}
 
 	@Override
 	public String value() throws IOException {
+		if (state == State.ROOT_XMLNS_VALUE) {
+			state = State.DELEGATE;
+			return root.getNamespaceURI();
+		}
 		return delegate.value();
 	}
 
@@ -57,6 +84,9 @@ public class AddRootSource implements JsonStreamSource {
 		if (state == State.START_DOC) {
 			state = State.ROOT_NAME;
 		} else {
+			if (state == State.ROOT_XMLNS_START) {
+				state = State.ROOT_XMLNS_NAME;
+			}
 			delegate.startObject();
 		}
 		depth++;
@@ -95,6 +125,9 @@ public class AddRootSource implements JsonStreamSource {
 		switch (state) {
 		case START_DOC: return JsonStreamToken.START_OBJECT;
 		case ROOT_NAME: return JsonStreamToken.NAME;
+		case ROOT_XMLNS_START: return JsonStreamToken.START_OBJECT;
+		case ROOT_XMLNS_NAME: return JsonStreamToken.NAME;
+		case ROOT_XMLNS_VALUE: return JsonStreamToken.VALUE;
 		case END_DOC: return JsonStreamToken.END_OBJECT;
 		}
 		JsonStreamToken result = delegate.peek();

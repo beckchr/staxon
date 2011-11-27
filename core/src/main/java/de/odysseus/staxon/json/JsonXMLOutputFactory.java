@@ -20,6 +20,7 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.util.Arrays;
 
+import javax.xml.namespace.QName;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
@@ -88,7 +89,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 
 	private JsonStreamFactory streamFactory = null;
 	private boolean multiplePI = true;
-	private String virtualRoot = null;
+	private QName virtualRoot = null;
 	private boolean autoArray = false;
 	private boolean prettyPrint = false;
 	private char namespaceSeparator = ':';
@@ -109,7 +110,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 		
 	private JsonStreamTarget decorate(JsonStreamTarget target) {
 		if (virtualRoot != null) {
-			target = new RemoveRootTarget(target, virtualRoot);
+			target = new RemoveRootTarget(target, virtualRoot, namespaceSeparator);
 		}
 		if (autoArray) {
 			target = new AutoArrayTarget(target);
@@ -183,7 +184,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 			} else if (PROP_MULTIPLE_PI.equals(name)) {
 				multiplePI = ((Boolean)value).booleanValue();
 			} else if (PROP_VIRTUAL_ROOT.equals(name)) {
-				virtualRoot = (String)value;
+				virtualRoot = value instanceof String ? QName.valueOf((String)value) : (QName)value;
 			} else if (PROP_PRETTY_PRINT.equals(name)) {
 				prettyPrint = ((Boolean)value).booleanValue();
 			} else if (PROP_NAMESPACE_SEPARATOR.equals(name)) {

@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.util.Arrays;
 
+import javax.xml.namespace.QName;
 import javax.xml.stream.EventFilter;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLEventReader;
@@ -69,7 +70,7 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	private final JsonStreamFactory streamFactory;
 
 	private boolean multiplePI = true;
-	private String virtualRoot = null;
+	private QName virtualRoot = null;
 	private char namespaceSeparator = ':';
 	
 	public JsonXMLInputFactory() throws FactoryConfigurationError {
@@ -92,7 +93,7 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	
 	private JsonStreamSource decorate(JsonStreamSource source) {
 		if (virtualRoot != null) {
-			source = new AddRootSource(source, virtualRoot);
+			source = new AddRootSource(source, virtualRoot, namespaceSeparator);
 		}
 		return source;
 	}
@@ -190,7 +191,7 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 			if (PROP_MULTIPLE_PI.equals(name)) {
 				multiplePI = ((Boolean)value).booleanValue();
 			} else if (PROP_VIRTUAL_ROOT.equals(name)) {
-				virtualRoot = (String)value;
+				virtualRoot = value instanceof String ? QName.valueOf((String)value) : (QName)value;
 			} else if (PROP_NAMESPACE_SEPARATOR.equals(name)) {
 				namespaceSeparator = (Character)value;
 			} else {

@@ -17,6 +17,7 @@ package de.odysseus.staxon.json;
 
 import java.io.StringWriter;
 
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
@@ -173,9 +174,31 @@ public class JsonXMLStreamWriterTest {
 		writer.writeStartElement("alice");
 		writer.writeCharacters("bob");
 		writer.writeEndElement();
-		writer.writeEndDocument(); // flush?
+		writer.writeEndDocument();
 		writer.close();
 		Assert.assertEquals("{\"alice\":[\"bob\",\"bob\"]}", result.toString());
+	}
+
+	/**
+	 * <code>&lt;alice&gt;bob&lt;/alice&gt;&lt;alice&gt;bob&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testRootArrayWithVirtualRoot() throws Exception {
+		StringWriter result = new StringWriter();
+		JsonXMLOutputFactory factory = new JsonXMLOutputFactory();
+		factory.setProperty(JsonXMLOutputFactory.PROP_VIRTUAL_ROOT, new QName("alice"));
+		XMLStreamWriter writer = factory.createXMLStreamWriter(result);
+		writer.writeStartDocument();
+		writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET, "alice");
+		writer.writeStartElement("alice");
+		writer.writeCharacters("bob");
+		writer.writeEndElement();
+		writer.writeStartElement("alice");
+		writer.writeCharacters("bob");
+		writer.writeEndElement();
+		writer.writeEndDocument();
+		writer.close();
+		Assert.assertEquals("[\"bob\",\"bob\"]", result.toString());
 	}
 
 	/**
@@ -190,12 +213,12 @@ public class JsonXMLStreamWriterTest {
 		writer.writeStartElement("alice");
 		writer.writeCharacters("bob");
 		writer.writeEndElement();
-		writer.writeEndDocument(); // flush?
+		writer.writeEndDocument();
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeCharacters("bob");
 		writer.writeEndElement();
-		writer.writeEndDocument(); // flush?
+		writer.writeEndDocument();
 		writer.close();
 		Assert.assertEquals("[{\"alice\":\"bob\"},{\"alice\":\"bob\"}]", result.toString());
 	}

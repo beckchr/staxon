@@ -18,6 +18,7 @@ package de.odysseus.staxon.json;
 import java.io.StringReader;
 
 import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
 
@@ -209,6 +210,38 @@ public class JsonXMLStreamReaderTest {
 		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
 		reader.close();
 	}
+
+	/**
+	 * <code>&lt;alice&gt;bob&lt;/alice&gt;&lt;alice&gt;bob&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testRootArrayWithVirtualRoot() throws Exception {
+		String input = "[\"bob\",\"bob\"]";
+		JsonXMLInputFactory factory = new JsonXMLInputFactory();
+		factory.setProperty(JsonXMLInputFactory.PROP_VIRTUAL_ROOT, new QName("alice"));
+		XMLStreamReader reader = factory.createXMLStreamReader(new StringReader(input));
+		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
+		reader.next();
+		verify(reader, XMLStreamConstants.PROCESSING_INSTRUCTION, null, null);
+		Assert.assertEquals(JsonXMLStreamConstants.MULTIPLE_PI_TARGET, reader.getPITarget());
+		Assert.assertEquals("alice", reader.getPIData());
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.CHARACTERS, null, "bob");
+		reader.next();
+		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.CHARACTERS, null, "bob");
+		reader.next();
+		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
+		reader.close();
+	}
+
 
 	@Test
 	public void testSimpleValueArray() throws Exception {
