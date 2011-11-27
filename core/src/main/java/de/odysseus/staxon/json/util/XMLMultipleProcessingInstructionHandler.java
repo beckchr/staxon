@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
@@ -119,7 +120,7 @@ class XMLMultipleProcessingInstructionHandler {
 			return null;
 		}
 	};
-
+	
 	/**
 	 * Processing instruction writer
 	 */
@@ -131,14 +132,16 @@ class XMLMultipleProcessingInstructionHandler {
 	private final List<String> multiplePaths = new ArrayList<String>();
 	private final String[] names = new String[64];
 	private final boolean matchRoot;
-	
+	private final boolean matchPrefixes;
+
+	private final Pattern pathPattern;
 	private final ProcessingInstructionWriter writer;
 
 	private String previousSiblingName = null;
 	private int depth = 0;
 
-	XMLMultipleProcessingInstructionHandler(final XMLStreamWriter writer, boolean matchRoot) {
-		this.writer = new ProcessingInstructionWriter() {
+	XMLMultipleProcessingInstructionHandler(final XMLStreamWriter writer, boolean matchRoot, boolean matchPrefixes) {
+		this(new ProcessingInstructionWriter() {
 			@Override
 			void add(ProcessingInstruction pi) throws XMLStreamException {
 				if (pi.getData() == null) {
@@ -147,20 +150,35 @@ class XMLMultipleProcessingInstructionHandler {
 					writer.writeProcessingInstruction(pi.getTarget(), pi.getData());
 				}
 			}
-		};
-		this.matchRoot = matchRoot;
+		}, matchRoot, matchPrefixes);
 	}
 	
-	XMLMultipleProcessingInstructionHandler(final XMLEventWriter writer, boolean matchRoot) {
-		this.writer = new ProcessingInstructionWriter() {
+	XMLMultipleProcessingInstructionHandler(final XMLEventWriter writer, boolean matchRoot, boolean matchPrefixes) {
+		this(new ProcessingInstructionWriter() {
 			@Override
 			void add(ProcessingInstruction pi) throws XMLStreamException {
 				writer.add(pi);
 			}
-		};
-		this.matchRoot = matchRoot;
+		}, matchRoot, matchPrefixes);
 	}
-	
+
+	private XMLMultipleProcessingInstructionHandler(ProcessingInstructionWriter writer, boolean matchRoot, boolean matchPrefixes) {
+		this.matchRoot = matchRoot;
+		this.matchPrefixes = matchPrefixes;
+		this.writer = writer;
+
+		/*
+		 * determine path pattern
+		 */
+		String prefix = "\\w(-?\\w)*";
+		String localPart = "\\w(-?\\w)*";
+		if (matchPrefixes) {
+			pathPattern = Pattern.compile("(/(" + prefix + ":)?" + localPart + ");");
+		} else {
+			pathPattern = Pattern.compile("(/" + localPart + ")+");
+		}
+	}
+
 	private void push(String name) throws XMLStreamException {
 		if (matchRoot || depth > 0) {			
 			path.append('/').append(name);
@@ -192,12 +210,19 @@ class XMLMultipleProcessingInstructionHandler {
 	 * <code>"/foo/bar"</code> or <code>"/foo/bar:baz"</code>.
 	 * @param path
 	 */
-	void addMultiplePath(String path) {
+	void addMultiplePath(String path) throws XMLStreamException {
+		if (!pathPattern.matcher(path).matches()) {
+			throw new XMLStreamException("multiple path does not match " + pathPattern.pattern());			
+		}
 		multiplePaths.add(path);
 	}
 	
 	void preStartElement(String prefix, String localPart) throws XMLStreamException {
-		push(XMLConstants.DEFAULT_NS_PREFIX.equals(prefix) ? localPart : prefix + ':' + localPart);
+		if (matchPrefixes) {
+			push(XMLConstants.DEFAULT_NS_PREFIX.equals(prefix) ? localPart : prefix + ':' + localPart);
+		} else {
+			push(localPart);
+		}
 	}
 	
 	void postStartElement() throws XMLStreamException {

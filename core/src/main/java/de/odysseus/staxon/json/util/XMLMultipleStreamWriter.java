@@ -29,7 +29,7 @@ import de.odysseus.staxon.util.StreamWriterDelegate;
  * XMLOutputFactory factory = new JsonXMLOutputFactory();
  * factory.setProperty(JsonXMLOutputFactory.PROP_MULTIPLE_PI, true);
  * XMLEventWriter writer = factory.createXMLStreamWriter(...);
- * writer = new XMLMultipleEventWriter(writer, "/alice/bob", ...);
+ * writer = new XMLMultipleEventWriter(writer, false, "/bob", ...);
  * </pre>
  */
 public class XMLMultipleStreamWriter extends StreamWriterDelegate {
@@ -38,12 +38,13 @@ public class XMLMultipleStreamWriter extends StreamWriterDelegate {
 	/**
 	 * Create instance.
 	 * @param parent delegate
+	 * @param matchRoot whether the root element is included in paths
 	 * @param multiplePaths added via {@link #addMultiplePath(String)}
 	 */
-	public XMLMultipleStreamWriter(XMLStreamWriter parent, boolean matchRoot, String... multiplePaths) {
+	public XMLMultipleStreamWriter(XMLStreamWriter parent, boolean matchRoot, String... multiplePaths) throws XMLStreamException {
 		super(parent);
 		
-		this.handler = new XMLMultipleProcessingInstructionHandler(this, matchRoot);
+		this.handler = new XMLMultipleProcessingInstructionHandler(this, matchRoot, false);
 		for (String path : multiplePaths) {
 			addMultiplePath(path);
 		}
@@ -56,12 +57,13 @@ public class XMLMultipleStreamWriter extends StreamWriterDelegate {
 	
 	/**
 	 * Add path to trigger <code>&lt;?xml-multiple?></code> PI.
-	 * The path must start with <code>'/'</code> and contain element
-	 * names from the root, separated by <code>'/'</code>, e.g
-	 * <code>"/foo/bar"</code> or <code>"/foo/bar:baz"</code>.
-	 * @param path
+	 * The path must start with <code>'/'</code> and contain
+	 * local element names, separated by <code>'/'</code>, e.g.
+	 * <code>"/foo/bar"</code> or <code>"/foo/bar/baz"</code>.
+	 * @param path multiple path
+	 * @throws XMLStreamException if the path is invalid
 	 */
-	public void addMultiplePath(String path) {
+	public void addMultiplePath(String path) throws XMLStreamException {
 		handler.addMultiplePath(path);
 	}
 	

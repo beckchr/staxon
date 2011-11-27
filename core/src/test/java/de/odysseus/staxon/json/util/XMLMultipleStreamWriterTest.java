@@ -55,7 +55,7 @@ public class XMLMultipleStreamWriterTest {
 	@Test
 	public void testWriteStartElement_String_String() throws XMLStreamException {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), true, "/alice/p:bob");
+		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), true, "/alice/bob");
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeNamespace("p", "http://test");
@@ -74,7 +74,7 @@ public class XMLMultipleStreamWriterTest {
 	@Test
 	public void testWriteStartElement_String_String_String() throws XMLStreamException {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), true, "/alice/p:bob");
+		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), true, "/alice/bob");
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeStartElement("p", "bob", "http://test");
@@ -109,7 +109,7 @@ public class XMLMultipleStreamWriterTest {
 	@Test
 	public void testWriteEmptyElement_String_String() throws XMLStreamException {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), true, "/alice/p:bob");
+		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), true, "/alice/bob");
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeNamespace("p", "http://test");
@@ -126,7 +126,7 @@ public class XMLMultipleStreamWriterTest {
 	@Test
 	public void testWriteEmptyElement_String_String_String() throws XMLStreamException {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), true, "/alice/p:bob");
+		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), true, "/alice/bob");
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeEmptyElement("p", "bob", "http://test");
