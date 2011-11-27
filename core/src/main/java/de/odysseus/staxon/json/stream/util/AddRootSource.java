@@ -125,7 +125,6 @@ public class AddRootSource implements JsonStreamSource {
 		switch (state) {
 		case START_DOC: return JsonStreamToken.START_OBJECT;
 		case ROOT_NAME: return JsonStreamToken.NAME;
-		case ROOT_XMLNS_START: return JsonStreamToken.START_OBJECT;
 		case ROOT_XMLNS_NAME: return JsonStreamToken.NAME;
 		case ROOT_XMLNS_VALUE: return JsonStreamToken.VALUE;
 		case END_DOC: return JsonStreamToken.END_OBJECT;
