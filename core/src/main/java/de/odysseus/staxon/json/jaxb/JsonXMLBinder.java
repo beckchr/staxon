@@ -198,7 +198,8 @@ public class JsonXMLBinder {
 			return null;
 		}
 		XmlSchema xmlSchema = type.getPackage().getAnnotation(XmlSchema.class);
-		return new QName(getNamespaceURI(xmlElementDecl, xmlSchema), xmlElementDecl.name());
+		String namespaceURI = getNamespaceURI(xmlElementDecl, xmlSchema);
+		return new QName(namespaceURI, xmlElementDecl.name(), getPrefix(namespaceURI, xmlSchema));
 	}
 
 	/**
