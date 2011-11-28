@@ -29,6 +29,65 @@ import java.util.Properties;
 import javax.xml.stream.FactoryConfigurationError;
 
 public abstract class JsonStreamFactory {
+	private static String getMetaInfServicesClassName(Class<?> serviceInterface, ClassLoader classLoader) {
+		String serviceId = "META-INF/services/" + serviceInterface.getName();
+		InputStream input = classLoader.getResourceAsStream(serviceId);
+		if (input != null) {
+			BufferedReader reader = null;
+			try {
+				reader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
+				try {
+					return reader.readLine();
+				} catch (IOException e) {
+					// do nothing
+				} finally {
+					try {
+						reader.close();
+					} catch (Exception io) {
+						// do nothing
+					}
+				}
+			} catch (IOException e) {
+				try {
+					input.close();
+				} catch (Exception io) {
+					// do nothing
+				}
+			}
+		}
+		return null;
+	}
+
+	private static String getJavaHomeLibClassName(Class<?> serviceInterface, String bundleName) {
+		String home = System.getProperty("java.home");
+		if (home != null) {
+			InputStream input = null;
+			String path = home + File.separator + "lib" + File.separator + bundleName + ".properties";
+			File file = new File(path);
+			try {
+				if (file.exists()) {
+					input = new FileInputStream(file);
+					Properties props = new Properties();
+					props.load(input);
+					return props.getProperty(serviceInterface.getName());
+				}
+			} catch (IOException e) {
+				// do nothing
+			} catch (SecurityException e) {
+				// do nothing
+			} finally {
+				if (input != null) {
+					try {
+						input.close();
+					} catch (IOException io) {
+						// do nothing
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * <p>Create a new instance of a JsonStreamFactory.</p>
 	 * <p>Determines the class to instantiate as follows:
@@ -57,64 +116,10 @@ public abstract class JsonStreamFactory {
 			classLoader = JsonStreamFactory.class.getClassLoader();
 		}
 
-		String className = null;
-
-		String serviceId = "META-INF/services/" + JsonStreamFactory.class.getName();
-		InputStream input = classLoader.getResourceAsStream(serviceId);
-		if (input != null) {
-			BufferedReader reader = null;
-			try {
-				reader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
-				try {
-					className = reader.readLine();
-				} catch (IOException e) {
-					// do nothing
-				} finally {
-					try {
-						reader.close();
-					} catch (Exception io) {
-						// do nothing
-					}
-				}
-			} catch (IOException e) {
-				try {
-					input.close();
-				} catch (Exception io) {
-					// do nothing
-				}
-			} finally {
-				input = null;				
-			}
-		}
+		String className = getMetaInfServicesClassName(JsonStreamFactory.class, classLoader);
 
 		if (className == null || className.trim().length() == 0) {
-			try {
-				String home = System.getProperty("java.home");
-				if (home != null) {
-					String path = home + File.separator + "lib" + File.separator + "staxon.properties";
-					File file = new File(path);
-					if (file.exists()) {
-						input = new FileInputStream(file);
-						Properties props = new Properties();
-						props.load(input);
-						className = props.getProperty(JsonStreamFactory.class.getName());
-					}
-				}
-			} catch (IOException e) {
-				// do nothing
-			} catch (SecurityException e) {
-				// do nothing
-			} finally {
-				if (input != null) {
-					try {
-						input.close();
-					} catch (IOException io) {
-						// do nothing
-					} finally {
-						input = null;
-					}
-				}
-			}
+			className = getJavaHomeLibClassName(JsonStreamFactory.class, "staxon");
 		}
 
 		if (className == null || className.trim().length() == 0) {
