@@ -61,21 +61,29 @@ public abstract class JsonStreamFactory {
 
 		String serviceId = "META-INF/services/" + JsonStreamFactory.class.getName();
 		InputStream input = classLoader.getResourceAsStream(serviceId);
-		try {
-			if (input != null) {
-				className = new BufferedReader(new InputStreamReader(input, "UTF-8")).readLine();
-			}
-		} catch (IOException e) {
-			// do nothing
-		} finally {
-			if (input != null) {
+		if (input != null) {
+			BufferedReader reader = null;
+			try {
+				reader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
+				try {
+					className = reader.readLine();
+				} catch (IOException e) {
+					// do nothing
+				} finally {
+					try {
+						reader.close();
+					} catch (Exception io) {
+						// do nothing
+					}
+				}
+			} catch (IOException e) {
 				try {
 					input.close();
 				} catch (Exception io) {
 					// do nothing
-				} finally {
-					input = null;
 				}
+			} finally {
+				input = null;				
 			}
 		}
 

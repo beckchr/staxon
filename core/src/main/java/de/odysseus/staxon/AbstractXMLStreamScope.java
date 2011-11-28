@@ -330,14 +330,13 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 				Iterator<?> above;
 
 				private String next0() {
-					switch (state) {
-					case 0: // check default
+					if (state == 0) { // check default
+						state = 1;
 						if (namespaceURI.equals(defaultNamespace)) {
-							state = 1;
 							return XMLConstants.DEFAULT_NS_PREFIX;
 						}
-					case 1: // check pairs
-						state = 1;
+					}
+					if (state == 1) { // check pairs
 						if (prefixes != null) {
 							if (pairs == null) {
 								pairs = prefixes.iterator();
@@ -349,8 +348,9 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 								}
 							}
 						}
-					case 2: // check above
 						state = 2;
+					}
+					if (state == 2) { // check above
 						if (parent != null) {
 							if (above == null) {
 								above = parent.getPrefixes(namespaceURI);
@@ -362,10 +362,12 @@ public abstract class AbstractXMLStreamScope implements NamespaceContext {
 								}
 							}
 						}
-					default:
-						state = -1;
+						state = 3;
+					}
+					if (state == 3) { // check out...
 						return null;
 					}
+					throw new IllegalStateException(); // should not happen
 				}
 
 				@Override
