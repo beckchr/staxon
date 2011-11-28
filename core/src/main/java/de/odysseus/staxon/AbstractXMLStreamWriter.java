@@ -285,8 +285,8 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 
 	@Override
 	public void writeEndDocument() throws XMLStreamException {
-		if (!startDocumentWritten || !scope.isRoot()) {
-			throw new XMLStreamException("Cannot start document");
+		if (!startDocumentWritten) {
+			throw new XMLStreamException("Cannot end document");
 		}
 		if (!scope.isRoot()) {
 			ensureStartTagClosed();
