@@ -1,0 +1,18 @@
+<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee">
+   <display-name>StAXON JAX-RS Jersey Sample</display-name>
+
+	<servlet>
+		<servlet-name>jersey-serlvet</servlet-name>
+		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+		<init-param>
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>de.odysseus.staxon.sample.service.CustomerApplication</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>jersey-serlvet</servlet-name>
+		<url-pattern>/restful/*</url-pattern>
+	</servlet-mapping>
+</web-app>
