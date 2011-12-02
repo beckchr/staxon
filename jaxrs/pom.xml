@@ -3,7 +3,7 @@
 
 	<groupId>de.odysseus.staxon</groupId>
 	<artifactId>staxon-jaxrs</artifactId>
-	<version>0.9.3-SNAPSHOT</version>
+	<version>0.9.3</version>
 	<packaging>jar</packaging>
 
 	<name>StAXON JAX-RS</name>
@@ -12,14 +12,14 @@
 	<parent>
 		<groupId>de.odysseus.staxon</groupId>
 		<artifactId>staxon-parent</artifactId>
-		<version>0.9.3-SNAPSHOT</version>
+		<version>0.9.3</version>
 	</parent>
 
 	<dependencies>
 		<dependency>
 			<groupId>de.odysseus.staxon</groupId>
 			<artifactId>staxon</artifactId>
-			<version>0.9.3-SNAPSHOT</version>
+			<version>0.9.3</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.ws.rs</groupId>
