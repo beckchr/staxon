@@ -216,5 +216,21 @@ public class XMLMultipleStreamWriterTest {
 		Assert.assertEquals("{\"alice\":{\"bob\":[\"charlie\"]}}", result.toString());
 	}
 	
-
+	/**
+	 * <code>&lt;alice&gt;&lt;bob&gt;charlie&lt;/bob&gt;&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testMatchRelative() throws XMLStreamException {
+		StringWriter result = new StringWriter();
+		XMLStreamWriter writer = new XMLMultipleStreamWriter(createStreamWriter(result), true, "bob");
+		writer.writeStartDocument();
+		writer.writeStartElement("alice");
+		writer.writeStartElement("bob");
+		writer.writeCharacters("charlie");
+		writer.writeEndElement();
+		writer.writeEndElement();
+		writer.writeEndDocument();
+		writer.close();
+		Assert.assertEquals("{\"alice\":{\"bob\":[\"charlie\"]}}", result.toString());
+	}
 }

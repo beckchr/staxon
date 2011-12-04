@@ -18,7 +18,9 @@ package de.odysseus.staxon.json.util;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.xml.XMLConstants;
@@ -129,7 +131,8 @@ class XMLMultipleProcessingInstructionHandler {
 	}
 	
 	private final StringBuilder path = new StringBuilder();
-	private final List<String> multiplePaths = new ArrayList<String>();
+	private final Set<String> absoluteMultiplePaths = new HashSet<String>();
+	private final List<String> relativeMultiplePaths = new ArrayList<String>();
 	private final String[] names = new String[64];
 	private final boolean matchRoot;
 	private final boolean matchPrefixes;
@@ -170,13 +173,23 @@ class XMLMultipleProcessingInstructionHandler {
 		/*
 		 * determine path pattern
 		 */
-		String prefix = "\\w(-?\\w)*";
-		String localPart = "\\w(-?\\w)*";
-		if (matchPrefixes) {
-			pathPattern = Pattern.compile("(/(" + prefix + ":)?" + localPart + ");");
-		} else {
-			pathPattern = Pattern.compile("(/" + localPart + ")+");
+		String identifier = "\\w(-?\\w)*";
+		String name = matchPrefixes ? "(" + identifier + ":)?" + identifier : identifier;
+		pathPattern = Pattern.compile("/?" + name + "(/" + name + ")*");
+	}
+	
+	private boolean matches() {
+		if (absoluteMultiplePaths.contains(path.toString())) {
+			return true;
 		}
+		if (!relativeMultiplePaths.isEmpty()) {
+			for (String suffix : relativeMultiplePaths) {
+				if (path.toString().endsWith(suffix) && path.charAt(path.length() - suffix.length() - 1) == '/') {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private void push(String name) throws XMLStreamException {
@@ -184,7 +197,7 @@ class XMLMultipleProcessingInstructionHandler {
 			path.append('/').append(name);
 		}
 
-		if (multiplePaths.contains(path.toString()) && !name.equals(previousSiblingName)) {
+		if (!name.equals(previousSiblingName) && matches()) {
 			writer.add(MULTIPLE_PI);
 		}
 
@@ -214,7 +227,11 @@ class XMLMultipleProcessingInstructionHandler {
 		if (!pathPattern.matcher(path).matches()) {
 			throw new XMLStreamException("multiple path does not match " + pathPattern.pattern());			
 		}
-		multiplePaths.add(path);
+		if (path.charAt(0) == '/') {
+			absoluteMultiplePaths.add(path);
+		} else {
+			relativeMultiplePaths.add(path);
+		}
 	}
 	
 	void preStartElement(String prefix, String localPart) throws XMLStreamException {
