@@ -26,6 +26,11 @@ import java.util.Map;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.ext.ContextResolver;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.MessageBodyReader;
+import javax.ws.rs.ext.MessageBodyWriter;
+import javax.ws.rs.ext.Providers;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -33,13 +38,19 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import de.odysseus.staxon.json.jaxb.DefaultJsonXMLConfig;
 import de.odysseus.staxon.json.jaxb.JsonXML;
+import de.odysseus.staxon.json.jaxb.JsonXMLConfig;
+import de.odysseus.staxon.json.jaxrs.jaxb.model.SampleRootElement;
 import de.odysseus.staxon.json.jaxrs.jaxb.model.SampleType;
 
 public class AbstractJsonXMLProviderTest {
 	static class TestProvider extends AbstractJsonXMLProvider {
 		public TestProvider() {
 			super(null);
+		}
+		public TestProvider(Providers providers) {
+			super(providers);
 		}
 		@Override
 		protected boolean isReadWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
@@ -89,13 +100,50 @@ public class AbstractJsonXMLProviderTest {
 	
 	@Test
 	public void testGetJsonXML() {
-		JsonXML typeAnnotation = SampleType.class.getAnnotation(JsonXML.class);
-		Assert.assertEquals(typeAnnotation, new TestProvider().getJsonXML(SampleType.class, new Annotation[0]));
+		JsonXML typeAnnotation = SampleRootElement.class.getAnnotation(JsonXML.class);
+		Assert.assertEquals(typeAnnotation, new TestProvider().getJsonXML(SampleRootElement.class, new Annotation[0]));
 
-		Annotation[] resourceAnnotations = new Annotation[]{JsonXMLCustom.class.getAnnotation(JsonXML.class)};
+		Annotation[] resourceAnnotations = new Annotation[]{JsonXMLDefault.class.getAnnotation(JsonXML.class)};
 		Assert.assertEquals(resourceAnnotations[0], new TestProvider().getJsonXML(SampleType.class, resourceAnnotations));
+
+		Assert.assertNull(new TestProvider().getJsonXML(SampleType.class, new Annotation[0]));
+	}
+
+	@Test
+	public void testGetConfig() {
+		Assert.assertNotNull(new TestProvider().getJsonXMLConfig(SampleRootElement.class, new Annotation[0], null));
+		Annotation[] resourceAnnotations = new Annotation[]{JsonXMLDefault.class.getAnnotation(JsonXML.class)};
+		Assert.assertNotNull(new TestProvider().getJsonXMLConfig(SampleType.class, resourceAnnotations, null));
+		Assert.assertNull(new TestProvider().getJsonXMLConfig(SampleType.class, new Annotation[0], null));
+		final ContextResolver<JsonXMLConfig> resolver = new ContextResolver<JsonXMLConfig>() {
+			@Override
+			public JsonXMLConfig getContext(Class<?> type) {
+				return new DefaultJsonXMLConfig();
+			}
+		};
+		Providers providers = new Providers() {
+			@Override
+			public <T> MessageBodyWriter<T> getMessageBodyWriter(Class<T> arg0, Type arg1, Annotation[] arg2, MediaType arg3) {
+				return null;
+			}
+			@Override
+			public <T> MessageBodyReader<T> getMessageBodyReader(Class<T> arg0, Type arg1, Annotation[] arg2, MediaType arg3) {
+				return null;
+			}
+			@Override
+			public <T extends Throwable> ExceptionMapper<T> getExceptionMapper(Class<T> arg0) {
+				return null;
+			}
+			@Override
+			@SuppressWarnings("unchecked")
+			public <T> ContextResolver<T> getContextResolver(Class<T> type, MediaType mediaType) {
+				return type == JsonXMLConfig.class ? (ContextResolver<T>)resolver : null;
+			}
+		};
+		Assert.assertNotNull(new TestProvider(providers).getJsonXMLConfig(SampleType.class, new Annotation[0], null));
 	}
 	
+
 	@Test
 	public void testGetSize() {
 		Assert.assertEquals(-1, new TestProvider().getSize(null, null, null, null, null));

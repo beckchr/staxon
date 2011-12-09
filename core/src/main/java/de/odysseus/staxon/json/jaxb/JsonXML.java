@@ -49,9 +49,10 @@ public @interface JsonXML {
 	boolean virtualRoot() default false;
 	
 	/**
-	 * <p>Specify array paths. paths are absolute with at least two names,
-	 * where names are separated by `'/'` and may be prefixed. The root
-	 * element is <em>not</em> included in a multiple path.</p>
+	 * <p>Specify array paths. Paths may be absolute or relative (without
+	 * leading <code>'/'</code>), where names are separated by <code>'/'</code>
+	 * and may be prefixed. The root element is <em>not</em> included in a
+	 * multiple path.</p>
 	 * <p>E.g. for</p>
 	 * <pre>
 	 * {
@@ -61,7 +62,8 @@ public @interface JsonXML {
 	 *   }
 	 * }
 	 * </pre>
-	 * <p>we would specify <code>"/bob"</code> as multiple path.</p>
+	 * <p>we would specify <code>"/bob"</code> or <code>"bob"</code> as
+	 * multiple path.</p>
 	 */
 	String[] multiplePaths() default {};
 
@@ -70,7 +72,7 @@ public @interface JsonXML {
 	 * 
 	 * <p>The default value is <code>false</code>.</p>
 	 */
-	boolean prettyPrint()  default false;
+	boolean prettyPrint() default false;
 
 	/**
 	 * <p>Trigger arrays automatically?</p>

@@ -47,11 +47,12 @@ import de.odysseus.staxon.json.jaxb.sample.SampleType;
 import de.odysseus.staxon.json.jaxb.sample.SampleTypeWithNamespace;
 
 public class JsonXMLBinderTest {
-	@JsonXML
-	static class JsonXMLDefault {}
-
 	@JsonXML(autoArray = true, namespaceDeclarations = false, namespaceSeparator = '_', prettyPrint = true, virtualRoot = true)
-	static class JsonXMLCustom {}
+	static class JsonXMLCustom {
+		static JsonXMLConfig getConfig() {
+			return new DefaultJsonXMLConfig(JsonXMLCustom.class.getAnnotation(JsonXML.class));
+		}
+	}
 
 	@JsonXML(virtualRoot = true, multiplePaths = "/elements")
 	static class JsonXMLVirtualSampleRootElement {}
@@ -68,12 +69,12 @@ public class JsonXMLBinderTest {
 	
 	@Test
 	public void testCreateInputFactory() {
-		JsonXMLInputFactory factory = new JsonXMLBinder().createInputFactory(SampleRootElement.class, JsonXMLDefault.class.getAnnotation(JsonXML.class));
+		JsonXMLInputFactory factory = new JsonXMLBinder().createInputFactory(SampleRootElement.class, new DefaultJsonXMLConfig());
 		Assert.assertEquals(Boolean.TRUE, factory.getProperty(JsonXMLInputFactory.PROP_MULTIPLE_PI));
 		Assert.assertEquals(Character.valueOf(':'), factory.getProperty(JsonXMLInputFactory.PROP_NAMESPACE_SEPARATOR));
 		Assert.assertNull(factory.getProperty(JsonXMLInputFactory.PROP_VIRTUAL_ROOT));
 
-		factory = new JsonXMLBinder().createInputFactory(SampleRootElement.class, JsonXMLCustom.class.getAnnotation(JsonXML.class));
+		factory = new JsonXMLBinder().createInputFactory(SampleRootElement.class, JsonXMLCustom.getConfig());
 		Assert.assertEquals(Boolean.TRUE, factory.getProperty(JsonXMLInputFactory.PROP_MULTIPLE_PI));
 		Assert.assertEquals(Character.valueOf('_'), factory.getProperty(JsonXMLInputFactory.PROP_NAMESPACE_SEPARATOR));
 		Assert.assertEquals(new QName("sampleRootElement"), factory.getProperty(JsonXMLInputFactory.PROP_VIRTUAL_ROOT));
@@ -81,7 +82,7 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testCreateOutputFactory() {
-		JsonXMLOutputFactory factory = new JsonXMLBinder().createOutputFactory(SampleRootElement.class, JsonXMLDefault.class.getAnnotation(JsonXML.class));
+		JsonXMLOutputFactory factory = new JsonXMLBinder().createOutputFactory(SampleRootElement.class, new DefaultJsonXMLConfig());
 		Assert.assertEquals(Boolean.TRUE, factory.getProperty(JsonXMLOutputFactory.PROP_MULTIPLE_PI));
 		Assert.assertEquals(Character.valueOf(':'), factory.getProperty(JsonXMLOutputFactory.PROP_NAMESPACE_SEPARATOR));
 		Assert.assertNull(factory.getProperty(JsonXMLOutputFactory.PROP_VIRTUAL_ROOT));
@@ -89,7 +90,7 @@ public class JsonXMLBinderTest {
 		Assert.assertEquals(Boolean.FALSE, factory.getProperty(JsonXMLOutputFactory.PROP_PRETTY_PRINT));
 		Assert.assertEquals(Boolean.FALSE, factory.getProperty(JsonXMLOutputFactory.PROP_AUTO_ARRAY));
 
-		factory = new JsonXMLBinder().createOutputFactory(SampleRootElement.class, JsonXMLCustom.class.getAnnotation(JsonXML.class));
+		factory = new JsonXMLBinder().createOutputFactory(SampleRootElement.class, JsonXMLCustom.getConfig());
 		Assert.assertEquals(Boolean.TRUE, factory.getProperty(JsonXMLOutputFactory.PROP_MULTIPLE_PI));
 		Assert.assertEquals(Character.valueOf('_'), factory.getProperty(JsonXMLOutputFactory.PROP_NAMESPACE_SEPARATOR));
 		Assert.assertEquals(new QName("sampleRootElement"), factory.getProperty(JsonXMLOutputFactory.PROP_VIRTUAL_ROOT));
@@ -161,7 +162,7 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testMarshallSampleRootElement() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		StringWriter result = new StringWriter();
 		Class<?> type = SampleRootElement.class;
 		SampleRootElement sampleRootElement = new SampleRootElement();
@@ -179,7 +180,7 @@ public class JsonXMLBinderTest {
 	
 	@Test
 	public void testMarshallSampleRootElementWithVirtualRoot() throws Exception {
-		JsonXML config = JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig(JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class));
 		StringWriter result = new StringWriter();
 		Class<?> type = SampleRootElement.class;
 		SampleRootElement sampleRootElement = new SampleRootElement();
@@ -197,7 +198,7 @@ public class JsonXMLBinderTest {
 	
 	@Test
 	public void testMarshallSampleType() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		StringWriter result = new StringWriter();
 		Class<?> type = SampleType.class;
 		SampleType sampleType = new SampleType();
@@ -214,7 +215,7 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testMarshallSampleTypeWithNamespace() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		StringWriter result = new StringWriter();
 		Class<?> type = SampleTypeWithNamespace.class;
 		SampleTypeWithNamespace sampleTypeWithNamespace = new SampleTypeWithNamespace();
@@ -233,7 +234,7 @@ public class JsonXMLBinderTest {
 	
 	@Test
 	public void testUnmarshallSampleRootElement() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		String json = "{\"sampleRootElement\":{\"@attribute\":\"hello\",\"elements\":[\"world\"]}}";
 		Class<SampleRootElement> type = SampleRootElement.class;
 
@@ -247,7 +248,7 @@ public class JsonXMLBinderTest {
 	
 	@Test
 	public void testUnmarshallSampleRootElementWithVirtualRoot() throws Exception {
-		JsonXML config = JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig(JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class));
 		String json = "{\"@attribute\":\"hello\",\"elements\":[\"world\"]}";
 		Class<SampleRootElement> type = SampleRootElement.class;
 
@@ -261,7 +262,7 @@ public class JsonXMLBinderTest {
 	
 	@Test
 	public void testUnmarshallSampleType() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		String json = "{\"sampleType\":{\"element\":\"hi!\"}}";
 		Class<SampleType> type = SampleType.class;
 
@@ -274,7 +275,7 @@ public class JsonXMLBinderTest {
 	
 	@Test
 	public void testUnmarshallSampleTypeWithNamespace() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		String json = "{\"sampleTypeWithNamespace\":{\"@xmlns\":\"urn:staxon-jaxrs:test\"}}";
 		Class<SampleTypeWithNamespace> type = SampleTypeWithNamespace.class;
 
@@ -286,7 +287,7 @@ public class JsonXMLBinderTest {
 	
 	@Test
 	public void testWriteObjectSampleRootElement() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		SampleRootElement sampleRootElement = new SampleRootElement();
 		sampleRootElement.attribute = "hello";
 		sampleRootElement.elements = Arrays.asList("world");
@@ -301,7 +302,7 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testWriteObjectSampleType() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		SampleType sampleType = new SampleType();
 		sampleType.element = "hi!";
 
@@ -315,7 +316,7 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testWriteObjectNull() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		StringWriter writer = new StringWriter();
 		JAXBContext context = JAXBContext.newInstance(SampleType.class);
 		new JsonXMLBinder().writeObject(SampleType.class, config, context, writer, null);
@@ -324,7 +325,7 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testWriteObjectNullWithVirtualRoot() throws Exception {
-		JsonXML config = JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig(JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class));
 		StringWriter writer = new StringWriter();
 		JAXBContext context = JAXBContext.newInstance(SampleType.class);
 		new JsonXMLBinder().writeObject(SampleType.class, config, context, writer, null);
@@ -333,7 +334,7 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testReadObjectSampleRootElement() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		String json = "{\"sampleRootElement\":{\"@attribute\":\"hello\",\"elements\":[\"world\"]}}";
 
 		JAXBContext context = JAXBContext.newInstance(SampleRootElement.class);
@@ -346,7 +347,7 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testReadObjectSampleType() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		String json = "{\"sampleType\":{\"element\":\"hi!\"}}";
 
 		JAXBContext context = JAXBContext.newInstance(SampleType.class);
@@ -358,21 +359,21 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testReadObjectNull() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		JAXBContext context = JAXBContext.newInstance(SampleRootElement.class);
 		Assert.assertNull(new JsonXMLBinder().readObject(SampleRootElement.class, config, context, new StringReader("null")));
 	}
 
 	@Test
 	public void testReadObjectNullWithVirtualRoot() throws Exception {
-		JsonXML config = JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig(JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class));
 		JAXBContext context = JAXBContext.newInstance(SampleRootElement.class);
 		Assert.assertNotNull(new JsonXMLBinder().readObject(SampleRootElement.class, config, context, new StringReader("null")));
 	}
 
 	@Test
 	public void testWriteArraySampleRootElement() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		List<SampleRootElement> list = new ArrayList<SampleRootElement>();
 		list.add(new SampleRootElement());
 		list.get(0).attribute = "hello";
@@ -389,7 +390,7 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testWriteArraySampleRootElement_Document() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		List<SampleRootElement> list = new ArrayList<SampleRootElement>();
 		list.add(new SampleRootElement());
 		list.get(0).attribute = "hello";
@@ -407,7 +408,7 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testWriteArraySampleType() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		List<SampleType> list = new ArrayList<SampleType>();
 		list.add(new SampleType());
 		list.get(0).element = "hello";
@@ -424,7 +425,7 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testWriteArraySampleRootElementWithNull1() throws Exception {
-		JsonXML config = JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig(JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class));
 		List<SampleRootElement> list = new ArrayList<SampleRootElement>();
 		list.add(new SampleRootElement());
 		list.get(0).attribute = "hello";
@@ -440,7 +441,7 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testWriteArraySampleRootElementWithNull2() throws Exception {
-		JsonXML config = JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig(JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class));
 		List<SampleRootElement> list = new ArrayList<SampleRootElement>();
 		list.add(null);
 		list.add(new SampleRootElement());
@@ -456,7 +457,7 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testWriteArraySampleRootElementWithNull3() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		List<SampleRootElement> list = new ArrayList<SampleRootElement>();
 		list.add(null);
 
@@ -470,7 +471,7 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testWriteArrayEmpty1() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		StringWriter writer = new StringWriter();
 		JAXBContext context = JAXBContext.newInstance(SampleRootElement.class);
 		new JsonXMLBinder().writeArray(SampleRootElement.class, config, context, writer, new ArrayList<SampleRootElement>());
@@ -479,7 +480,7 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testWriteArrayEmpty2() throws Exception {
-		JsonXML config = JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig(JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class));
 		StringWriter writer = new StringWriter();
 		JAXBContext context = JAXBContext.newInstance(SampleRootElement.class);
 		new JsonXMLBinder().writeArray(SampleRootElement.class, config, context, writer, new ArrayList<SampleRootElement>());
@@ -488,7 +489,7 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testWriteArrayNull() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		StringWriter writer = new StringWriter();
 		JAXBContext context = JAXBContext.newInstance(SampleType.class);
 		new JsonXMLBinder().writeArray(SampleType.class, config, context, writer, null);
@@ -497,7 +498,7 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testWriteArrayNullWithVirtualRoot() throws Exception {
-		JsonXML config = JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig(JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class));
 		StringWriter writer = new StringWriter();
 		JAXBContext context = JAXBContext.newInstance(SampleType.class);
 		new JsonXMLBinder().writeArray(SampleType.class, config, context, writer, null);
@@ -506,7 +507,7 @@ public class JsonXMLBinderTest {
 	
 	@Test
 	public void testReadArraySampleRootElement() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		String json = "{\"sampleRootElement\":[{\"@attribute\":\"hello\"},{\"@attribute\":\"world\"}]}";
 
 		JAXBContext context = JAXBContext.newInstance(SampleRootElement.class);
@@ -520,7 +521,7 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testReadArraySampleRootElement_DocumentArray() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		String json = "[{\"sampleRootElement\":{\"@attribute\":\"hello\"}},{\"sampleRootElement\":{\"@attribute\":\"world\"}}]";
 
 		JAXBContext context = JAXBContext.newInstance(SampleRootElement.class);
@@ -534,7 +535,7 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testReadArraySampleTypeWithNull1() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		String json = "{\"sampleType\":[{\"element\":\"hi!\"},null]}";
 
 		JAXBContext context = JAXBContext.newInstance(SampleType.class);
@@ -547,7 +548,7 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testReadArraySampleTypeWithNull2() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		String json = "{\"sampleType\":[null,{\"element\":\"hi!\"}]}";
 
 		JAXBContext context = JAXBContext.newInstance(SampleType.class);
@@ -560,7 +561,7 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testReadArraySampleTypeWithNull_DocumentArray1() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		String json = "[{\"sampleType\":{\"element\":\"hi!\"}},null]";
 
 		JAXBContext context = JAXBContext.newInstance(SampleType.class);
@@ -573,7 +574,7 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testReadArraySampleTypeWithNull_DocumentArray2() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		String json = "[null,{\"sampleType\":{\"element\":\"hi!\"}}]";
 
 		JAXBContext context = JAXBContext.newInstance(SampleType.class);
@@ -586,14 +587,14 @@ public class JsonXMLBinderTest {
 
 	@Test
 	public void testReadArrayNull() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		JAXBContext context = JAXBContext.newInstance(SampleType.class);
 		Assert.assertNull(new JsonXMLBinder().readArray(SampleType.class, config, context, new StringReader("null")));
 	}
 
 	@Test
 	public void testReadArrayNullWithVirtualRoot() throws Exception {
-		JsonXML config = JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig(JsonXMLVirtualSampleRootElement.class.getAnnotation(JsonXML.class));
 		JAXBContext context = JAXBContext.newInstance(SampleType.class);
 		Assert.assertNotNull(new JsonXMLBinder().readArray(SampleType.class, config, context, new StringReader("null")));
 	}

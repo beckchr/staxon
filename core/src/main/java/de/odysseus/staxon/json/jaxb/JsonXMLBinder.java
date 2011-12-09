@@ -59,33 +59,34 @@ public class JsonXMLBinder {
 		this.writeDocumentArray = writeDocumentArray;
 	}
 	
-	protected JsonXMLInputFactory createInputFactory(Class<?> type, JsonXML config) {
+	protected JsonXMLInputFactory createInputFactory(Class<?> type, JsonXMLConfig config) {
 		JsonXMLInputFactory factory = new JsonXMLInputFactory();
 		factory.setProperty(JsonXMLInputFactory.PROP_MULTIPLE_PI, true);
-		factory.setProperty(JsonXMLInputFactory.PROP_NAMESPACE_SEPARATOR, config.namespaceSeparator());
-		factory.setProperty(JsonXMLInputFactory.PROP_VIRTUAL_ROOT, config.virtualRoot() ? getName(type) : null);
+		factory.setProperty(JsonXMLInputFactory.PROP_NAMESPACE_SEPARATOR, config.getNamespaceSeparator());
+		factory.setProperty(JsonXMLInputFactory.PROP_VIRTUAL_ROOT, config.isVirtualRoot() ? getName(type) : null);
 		return factory;
 	}
 	
-	protected XMLStreamReader createXMLStreamReader(Class<?> type, JsonXML config, Reader stream) throws XMLStreamException, JAXBException {
+	protected XMLStreamReader createXMLStreamReader(Class<?> type, JsonXMLConfig config, Reader stream) throws XMLStreamException, JAXBException {
 		return createInputFactory(type, config).createXMLStreamReader(stream);
 	}
 	
-	protected JsonXMLOutputFactory createOutputFactory(Class<?> type, JsonXML config) {
+	protected JsonXMLOutputFactory createOutputFactory(Class<?> type, JsonXMLConfig config) {
 		JsonXMLOutputFactory factory = new JsonXMLOutputFactory();
 		factory.setProperty(JsonXMLOutputFactory.PROP_MULTIPLE_PI, true);
-		factory.setProperty(JsonXMLOutputFactory.PROP_AUTO_ARRAY, config.autoArray());
-		factory.setProperty(JsonXMLOutputFactory.PROP_PRETTY_PRINT, config.prettyPrint());
-		factory.setProperty(JsonXMLOutputFactory.PROP_NAMESPACE_SEPARATOR, config.namespaceSeparator());
-		factory.setProperty(JsonXMLOutputFactory.PROP_NAMESPACE_DECLARATIONS, config.namespaceDeclarations());
-		factory.setProperty(JsonXMLOutputFactory.PROP_VIRTUAL_ROOT, config.virtualRoot() ? getName(type) : null);
+		factory.setProperty(JsonXMLOutputFactory.PROP_AUTO_ARRAY, config.isAutoArray());
+		factory.setProperty(JsonXMLOutputFactory.PROP_PRETTY_PRINT, config.isPrettyPrint());
+		factory.setProperty(JsonXMLOutputFactory.PROP_NAMESPACE_SEPARATOR, config.getNamespaceSeparator());
+		factory.setProperty(JsonXMLOutputFactory.PROP_NAMESPACE_DECLARATIONS, config.isNamespaceDeclarations());
+		factory.setProperty(JsonXMLOutputFactory.PROP_VIRTUAL_ROOT, config.isVirtualRoot() ? getName(type) : null);
 		return factory;
 	}
 
-	protected XMLStreamWriter createXMLStreamWriter(Class<?> type, JsonXML config, Writer stream) throws XMLStreamException, JAXBException {
+	protected XMLStreamWriter createXMLStreamWriter(Class<?> type, JsonXMLConfig config, Writer stream) throws XMLStreamException, JAXBException {
 		XMLStreamWriter writer = createOutputFactory(type, config).createXMLStreamWriter(stream);
-		if (config.multiplePaths().length > 0) {
-			writer = new XMLMultipleStreamWriter(writer, false, config.multiplePaths());
+		String[] multiplePaths = config.getMultiplePaths();
+		if (multiplePaths != null && multiplePaths.length > 0) {
+			writer = new XMLMultipleStreamWriter(writer, false, multiplePaths);
 		}
 		return writer;
 	}
@@ -266,7 +267,7 @@ public class JsonXMLBinder {
 		marshaller.marshal(element, writer);
 	}
 	
-	public <T> T readObject(Class<? extends T> type, JsonXML config, JAXBContext context, Reader stream)
+	public <T> T readObject(Class<? extends T> type, JsonXMLConfig config, JAXBContext context, Reader stream)
 			throws XMLStreamException, JAXBException {
 		checkBindable(type);
 		XMLStreamReader reader = createXMLStreamReader(type, config, stream);
@@ -283,7 +284,7 @@ public class JsonXMLBinder {
 		return result;
 	}
 
-	public void writeObject(Class<?> type, JsonXML config, JAXBContext context, Writer stream, Object value)
+	public void writeObject(Class<?> type, JsonXMLConfig config, JAXBContext context, Writer stream, Object value)
 			throws XMLStreamException, JAXBException {
 		checkBindable(type);
 		XMLStreamWriter writer = createXMLStreamWriter(type, config, stream);
@@ -296,7 +297,7 @@ public class JsonXMLBinder {
 		writer.close();
 	}
 	
-	public <T> List<T> readArray(Class<? extends T> type, JsonXML config, JAXBContext context, Reader stream)
+	public <T> List<T> readArray(Class<? extends T> type, JsonXMLConfig config, JAXBContext context, Reader stream)
 			throws XMLStreamException, JAXBException {
 		checkBindable(type);
 		XMLStreamReader reader = createXMLStreamReader(type, config, stream);
@@ -330,7 +331,7 @@ public class JsonXMLBinder {
 		return result;
 	}
 
-	public void writeArray(Class<?> type, JsonXML config, JAXBContext context, Writer stream, Collection<?> collection)
+	public void writeArray(Class<?> type, JsonXMLConfig config, JAXBContext context, Writer stream, Collection<?> collection)
 			throws XMLStreamException, JAXBException {
 		checkBindable(type);
 		XMLStreamWriter writer = createXMLStreamWriter(type, config, stream);

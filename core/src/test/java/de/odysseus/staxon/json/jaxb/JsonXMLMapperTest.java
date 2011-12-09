@@ -17,8 +17,6 @@ package de.odysseus.staxon.json.jaxb;
 
 import java.io.StringWriter;
 
-import javax.xml.bind.annotation.XmlType;
-
 import junit.framework.Assert;
 
 import org.junit.Test;
@@ -28,15 +26,6 @@ import de.odysseus.staxon.json.jaxb.sample.SampleType;
 import de.odysseus.staxon.json.jaxb.sample.SampleTypeWithNamespace;
 
 public class JsonXMLMapperTest {
-	@JsonXML
-	static class JsonXMLDefault {}
-
-	@JsonXML(autoArray = true, namespaceDeclarations = false, namespaceSeparator = '_', prettyPrint = true, virtualRoot = true)
-	static class JsonXMLCustom {}
-
-	@XmlType
-	static class EmptyType {}
-
 	@Test
 	public void testWriteXmlRootElement() throws Exception {
 		JsonXMLMapper<SampleRootElement> mapper = new JsonXMLMapper<SampleRootElement>(SampleRootElement.class);
@@ -49,7 +38,7 @@ public class JsonXMLMapperTest {
 	
 	@Test
 	public void testWriteXmlType() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		JsonXMLMapper<SampleType> mapper = new JsonXMLMapper<SampleType>(SampleType.class, config);
 		StringWriter writer = new StringWriter();
 		SampleType value = new SampleType();
@@ -60,7 +49,7 @@ public class JsonXMLMapperTest {
 
 	@Test
 	public void testWriteXmlTypeWithNamespace() throws Exception {
-		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
+		JsonXMLConfig config = new DefaultJsonXMLConfig();
 		JsonXMLMapper<SampleTypeWithNamespace> mapper =
 				new JsonXMLMapper<SampleTypeWithNamespace>(SampleTypeWithNamespace.class, config);
 		StringWriter writer = new StringWriter();
