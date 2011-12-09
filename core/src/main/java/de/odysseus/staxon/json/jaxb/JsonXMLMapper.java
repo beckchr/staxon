@@ -34,10 +34,9 @@ public class JsonXMLMapper<T> {
 	private final JAXBContext context;
 	
 	public JsonXMLMapper(Class<T> type) throws JAXBException {
-		this(type, new DefaultJsonXMLConfig(type.getAnnotation(JsonXML.class)));
+		this(type, type.getAnnotation(JsonXML.class));
 	}
 
-	@Deprecated
 	public JsonXMLMapper(Class<T> type, JsonXML annotation) throws JAXBException {
 		this(type, new DefaultJsonXMLConfig(annotation));
 	}
