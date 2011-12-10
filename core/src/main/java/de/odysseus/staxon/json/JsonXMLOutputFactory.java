@@ -87,23 +87,37 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	 */
 	public static final String PROP_PRETTY_PRINT = "JsonXMLOutputFactory.prettyPrint";
 
-	private JsonStreamFactory streamFactory = null;
-	private boolean multiplePI = true;
-	private QName virtualRoot = null;
-	private boolean autoArray = false;
-	private boolean prettyPrint = false;
-	private char namespaceSeparator = ':';
-	private boolean namespaceDeclarations = true;
+	private JsonStreamFactory streamFactory;
+	private boolean multiplePI;
+	private QName virtualRoot;
+	private boolean autoArray;
+	private boolean prettyPrint;
+	private char namespaceSeparator;
+	private boolean namespaceDeclarations;
 
 	public JsonXMLOutputFactory() throws FactoryConfigurationError {
-		this(JsonStreamFactory.newFactory());
+		this(JsonXMLConfig.DEFAULT);
 	}
 
 	public JsonXMLOutputFactory(JsonStreamFactory streamFactory) {
+		this(JsonXMLConfig.DEFAULT, streamFactory);
+	}
+
+	public JsonXMLOutputFactory(JsonXMLConfig config) throws FactoryConfigurationError {
+		this(config, JsonStreamFactory.newFactory());
+	}
+	
+	public JsonXMLOutputFactory(JsonXMLConfig config, JsonStreamFactory streamFactory) {
+		this.multiplePI = config.isMultiplePI();
+		this.virtualRoot = config.getVirtualRoot();
+		this.autoArray = config.isAutoArray();
+		this.prettyPrint = config.isPrettyPrint();
+		this.namespaceSeparator = config.getNamespaceSeparator();
+		this.namespaceDeclarations = config.isNamespaceDeclarations();
 		this.streamFactory = streamFactory;
 
 		/*
-		 * initialize properties
+		 * initialize standard properties
 		 */
 		super.setProperty(IS_REPAIRING_NAMESPACES, Boolean.FALSE);
 	}

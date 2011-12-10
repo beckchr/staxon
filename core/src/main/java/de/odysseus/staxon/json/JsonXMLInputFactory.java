@@ -40,7 +40,7 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	/**
 	 * <p>Whether to use the {@link JsonXMLStreamConstants#MULTIPLE_PI_TARGET}
 	 * processing instruction to indicate an array start.
-	 * If not <code>true</code>, this reader will insert a PI with the field
+	 * If <code>true</code>, this reader will insert a PI with the field
 	 * name as PI data. 
 	 *  
 	 * <p>Note that the element given in the PI may occur zero times,
@@ -69,19 +69,30 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 
 	private final JsonStreamFactory streamFactory;
 
-	private boolean multiplePI = true;
-	private QName virtualRoot = null;
-	private char namespaceSeparator = ':';
-	
+	private boolean multiplePI;
+	private QName virtualRoot;
+	private char namespaceSeparator;
+
 	public JsonXMLInputFactory() throws FactoryConfigurationError {
-		this(JsonStreamFactory.newFactory());
+		this(JsonXMLConfig.DEFAULT);
 	}
 
 	public JsonXMLInputFactory(JsonStreamFactory streamFactory) {
+		this(JsonXMLConfig.DEFAULT, streamFactory);
+	}
+
+	public JsonXMLInputFactory(JsonXMLConfig config) throws FactoryConfigurationError {
+		this(config, JsonStreamFactory.newFactory());
+	}
+	
+	public JsonXMLInputFactory(JsonXMLConfig config, JsonStreamFactory streamFactory) {
+		this.multiplePI = config.isMultiplePI();
+		this.virtualRoot = config.getVirtualRoot();
+		this.namespaceSeparator = config.getNamespaceSeparator();
 		this.streamFactory = streamFactory;
 		
 		/*
-		 * initialize properties
+		 * initialize standard properties
 		 */
 		super.setProperty(IS_COALESCING, Boolean.TRUE);
 		super.setProperty(IS_NAMESPACE_AWARE, Boolean.TRUE);
