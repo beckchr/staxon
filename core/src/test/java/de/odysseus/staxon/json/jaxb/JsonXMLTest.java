@@ -25,7 +25,7 @@ import de.odysseus.staxon.json.jaxb.JsonXML;
 public class JsonXMLTest {
 	@Test
 	public void testDefaults() {
-		JsonXML config = getClass().getAnnotation(JsonXML.class);
+		JsonXML config = JsonXMLTest.class.getAnnotation(JsonXML.class);
 		Assert.assertFalse(config.autoArray());
 		Assert.assertTrue(config.namespaceDeclarations());
 		Assert.assertEquals(':', config.namespaceSeparator());

@@ -26,6 +26,10 @@ import de.odysseus.staxon.json.jaxb.sample.SampleType;
 import de.odysseus.staxon.json.jaxb.sample.SampleTypeWithNamespace;
 
 public class JsonXMLMapperTest {
+	@JsonXML
+	static class JsonXMLDefault {
+	}
+
 	@Test
 	public void testWriteXmlRootElement() throws Exception {
 		JsonXMLMapper<SampleRootElement> mapper = new JsonXMLMapper<SampleRootElement>(SampleRootElement.class);
@@ -38,7 +42,7 @@ public class JsonXMLMapperTest {
 	
 	@Test
 	public void testWriteXmlType() throws Exception {
-		JsonXMLConfig config = new DefaultJsonXMLConfig();
+		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
 		JsonXMLMapper<SampleType> mapper = new JsonXMLMapper<SampleType>(SampleType.class, config);
 		StringWriter writer = new StringWriter();
 		SampleType value = new SampleType();
@@ -49,14 +53,14 @@ public class JsonXMLMapperTest {
 
 	@Test
 	public void testWriteXmlTypeWithNamespace() throws Exception {
-		JsonXMLConfig config = new DefaultJsonXMLConfig();
+		JsonXML config = JsonXMLDefault.class.getAnnotation(JsonXML.class);
 		JsonXMLMapper<SampleTypeWithNamespace> mapper =
 				new JsonXMLMapper<SampleTypeWithNamespace>(SampleTypeWithNamespace.class, config);
 		StringWriter writer = new StringWriter();
 		SampleTypeWithNamespace value = new SampleTypeWithNamespace();
 		mapper.writeObject(writer, value);
 		writer.close();
-		Assert.assertEquals("{\"ns2:sampleTypeWithNamespace\":{\"@xmlns:ns2\":\"urn:staxon-jaxrs:test\"}}",
+		Assert.assertEquals("{\"ns2:sampleTypeWithNamespace\":{\"@xmlns:ns2\":\"urn:staxon:jaxb:test\"}}",
 				writer.toString()); // TODO don't rely on prefix "ns2"
 	}
 }

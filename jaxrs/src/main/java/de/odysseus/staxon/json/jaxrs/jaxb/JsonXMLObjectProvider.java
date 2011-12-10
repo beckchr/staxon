@@ -33,7 +33,7 @@ import javax.ws.rs.ext.Providers;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 
-import de.odysseus.staxon.json.jaxb.JsonXMLConfig;
+import de.odysseus.staxon.json.jaxb.JsonXML;
 
 @Provider
 @Consumes(MediaType.APPLICATION_JSON)
@@ -45,7 +45,7 @@ public class JsonXMLObjectProvider extends AbstractJsonXMLProvider {
 
 	@Override
 	protected boolean isReadWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-		return isSupported(mediaType) && getJsonXMLConfig(type, annotations, mediaType) != null && isBindable(type);
+		return isSupported(mediaType) && getJsonXML(type, annotations) != null && isBindable(type);
 	}
 
 	@Override
@@ -56,7 +56,7 @@ public class JsonXMLObjectProvider extends AbstractJsonXMLProvider {
 			MediaType mediaType,
 			MultivaluedMap<String, String> httpHeaders,
 			Reader stream) throws IOException, WebApplicationException {
-		JsonXMLConfig config = getJsonXMLConfig(type, annotations, mediaType);
+		JsonXML config = getJsonXML(type, annotations);
 		try {
 			return readObject(type, config, getContext(type, mediaType), stream);
 		} catch (XMLStreamException e) {
@@ -75,7 +75,7 @@ public class JsonXMLObjectProvider extends AbstractJsonXMLProvider {
 			MultivaluedMap<String, Object> httpHeaders,
 			Writer stream,
 			Object value) throws IOException, WebApplicationException {
-		JsonXMLConfig config = getJsonXMLConfig(type, annotations, mediaType);
+		JsonXML config = getJsonXML(type, annotations);
 		try {
 			writeObject(type, config, getContext(type, mediaType), stream, value);
 		} catch (XMLStreamException e) {

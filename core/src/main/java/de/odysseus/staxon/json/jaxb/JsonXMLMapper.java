@@ -29,7 +29,7 @@ import javax.xml.stream.XMLStreamException;
  */
 public class JsonXMLMapper<T> {
 	private final Class<T> type;
-	private final JsonXMLConfig config;
+	private final JsonXML config;
 	private final JsonXMLBinder binder;
 	private final JAXBContext context;
 	
@@ -37,22 +37,18 @@ public class JsonXMLMapper<T> {
 		this(type, type.getAnnotation(JsonXML.class));
 	}
 
-	public JsonXMLMapper(Class<T> type, JsonXML annotation) throws JAXBException {
-		this(type, new DefaultJsonXMLConfig(annotation));
-	}
-
-	public JsonXMLMapper(Class<T> type, JsonXMLConfig config) throws JAXBException {
+	public JsonXMLMapper(Class<T> type, JsonXML config) throws JAXBException {
 		this.type = type;
 		this.config = config;
 		this.binder = createBinder(config);
 		this.context = createContext(config);
 	}
-	
-	protected JsonXMLBinder createBinder(JsonXMLConfig config) {
-		return new JsonXMLBinder();
+
+	protected JsonXMLBinder createBinder(JsonXML config) {
+		return new JsonXMLBinder(new JsonXMLRootProvider(), true);
 	}
 	
-	protected JAXBContext createContext(JsonXMLConfig config) throws JAXBException {
+	protected JAXBContext createContext(JsonXML config) throws JAXBException {
 		return JAXBContext.newInstance(type);
 	}
 	
@@ -63,7 +59,7 @@ public class JsonXMLMapper<T> {
 	public void writeObject(Writer writer, T value) throws JAXBException, XMLStreamException {
 		binder.writeObject(type, config, context, writer, value);
 	}
-	
+
 	public List<T> readArray(Reader reader) throws JAXBException, XMLStreamException {
 		return binder.readArray(type, config, context, reader);
 	}

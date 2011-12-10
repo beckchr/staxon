@@ -33,6 +33,6 @@ public class ObjectFactory {
 	
 	@XmlElementDecl(name = "sampleTypeWithNamespace", namespace = "urn:staxon:jaxb:test")
 	public JAXBElement<SampleTypeWithNamespace> createSampleTypeWithNamespace(SampleTypeWithNamespace value) {
-		return new JAXBElement<SampleTypeWithNamespace>(new QName("urn:staxon-jaxrs:test", "sampleTypeWithNamespace"), SampleTypeWithNamespace.class, null, value);
+		return new JAXBElement<SampleTypeWithNamespace>(new QName("urn:staxon:jaxb:test", "sampleTypeWithNamespace"), SampleTypeWithNamespace.class, null, value);
 	}
 }

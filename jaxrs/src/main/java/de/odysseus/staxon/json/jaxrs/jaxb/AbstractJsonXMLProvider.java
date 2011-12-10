@@ -29,17 +29,14 @@ import java.util.Map;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Providers;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 
-import de.odysseus.staxon.json.jaxb.DefaultJsonXMLConfig;
 import de.odysseus.staxon.json.jaxb.JsonXML;
 import de.odysseus.staxon.json.jaxb.JsonXMLBinder;
-import de.odysseus.staxon.json.jaxb.JsonXMLConfig;
 
 abstract class AbstractJsonXMLProvider extends JsonXMLBinder implements MessageBodyReader<Object>, MessageBodyWriter<Object> {
 	protected static <A extends Annotation> A getAnnotation(Annotation[] annotations, Class<A> annotationType) {
@@ -52,11 +49,9 @@ abstract class AbstractJsonXMLProvider extends JsonXMLBinder implements MessageB
 	}
 	
 	private final JsonXMLContextStore store;
-	private final Providers providers;
 	
 	public AbstractJsonXMLProvider(Providers providers) {
 		super(true);
-		this.providers = providers;
 		this.store = new JsonXMLContextStore(providers);
 	}
 
@@ -66,31 +61,6 @@ abstract class AbstractJsonXMLProvider extends JsonXMLBinder implements MessageB
 			result = type.getAnnotation(JsonXML.class);
 		}
 		return result;
-	}
-
-	protected JsonXMLConfig getJsonXMLConfig(Class<?> type, Annotation[] resourceAnnotations, MediaType mediaType) {
-		/*
-		 * resource/type annotation
-		 */
-		JsonXML annotation = getJsonXML(type, resourceAnnotations);
-		if (annotation != null) {
-			return new DefaultJsonXMLConfig(annotation);
-		}
-		
-		/*
-		 * context resolver
-		 */
-		if (providers != null) {
-			ContextResolver<JsonXMLConfig> resolver = providers.getContextResolver(JsonXMLConfig.class, mediaType);
-			if (resolver != null) {
-				JsonXMLConfig result = resolver.getContext(type);
-				if (result != null) {
-					return result;
-				}
-			}
-		}
-		
-		return null;
 	}
 	
 	protected boolean isSupported(MediaType mediaType) {

@@ -44,7 +44,7 @@ import javax.ws.rs.ext.Providers;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 
-import de.odysseus.staxon.json.jaxb.JsonXMLConfig;
+import de.odysseus.staxon.json.jaxb.JsonXML;
 
 @Provider
 @Consumes(MediaType.APPLICATION_JSON)
@@ -124,7 +124,7 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider {
 			return false;
 		}
 		Class<?> componentType = getComponentType(type, genericType);
-		return componentType != null && getJsonXMLConfig(componentType, annotations, mediaType) != null && isBindable(componentType);
+		return componentType != null && getJsonXML(componentType, annotations) != null && isBindable(componentType);
 	}
 
 	@Override
@@ -136,7 +136,7 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider {
 			MultivaluedMap<String, String> httpHeaders,
 			Reader stream) throws IOException, WebApplicationException {
 		Class<?> componentType = getComponentType(type, genericType);
-		JsonXMLConfig config = getJsonXMLConfig(componentType, annotations, mediaType);	
+		JsonXML config = getJsonXML(componentType, annotations);	
 		List<?> list;
 		try {
 			list = readArray(componentType, config, getContext(componentType, mediaType), stream);
@@ -169,7 +169,7 @@ public class JsonXMLArrayProvider extends AbstractJsonXMLProvider {
 			Writer stream,
 			Object entry) throws IOException, WebApplicationException {
 		Class<?> componentType = getComponentType(type, genericType);
-		JsonXMLConfig config = getJsonXMLConfig(componentType, annotations, mediaType);
+		JsonXML config = getJsonXML(componentType, annotations);
 		Collection<?> collection;
 		if (entry == null) {
 			collection = null;
