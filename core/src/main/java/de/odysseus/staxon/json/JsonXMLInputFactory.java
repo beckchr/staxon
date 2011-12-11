@@ -36,6 +36,9 @@ import de.odysseus.staxon.json.stream.JsonStreamFactory;
 import de.odysseus.staxon.json.stream.JsonStreamSource;
 import de.odysseus.staxon.json.stream.util.AddRootSource;
 
+/**
+ * XML input factory for streaming from JSON.
+ */
 public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	/**
 	 * <p>Whether to use the {@link JsonXMLStreamConstants#MULTIPLE_PI_TARGET}

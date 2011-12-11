@@ -34,6 +34,9 @@ import de.odysseus.staxon.json.stream.JsonStreamTarget;
 import de.odysseus.staxon.json.stream.util.AutoArrayTarget;
 import de.odysseus.staxon.json.stream.util.RemoveRootTarget;
 
+/**
+ * XML output factory for streaming to JSON.
+ */
 public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	/**
 	 * <p>Start/end arrays automatically?</p>
