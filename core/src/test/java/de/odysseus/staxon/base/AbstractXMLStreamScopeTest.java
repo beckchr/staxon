@@ -1,4 +1,4 @@
-package de.odysseus.staxon;
+package de.odysseus.staxon.base;
 
 import java.util.Iterator;
 
@@ -8,6 +8,8 @@ import javax.xml.stream.XMLStreamException;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import de.odysseus.staxon.base.AbstractXMLStreamScope;
 
 public class AbstractXMLStreamScopeTest {
 	static class TestScope extends AbstractXMLStreamScope {

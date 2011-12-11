@@ -23,7 +23,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import de.odysseus.staxon.AbstractXMLOutputFactory;
+import de.odysseus.staxon.base.AbstractXMLOutputFactory;
 import de.odysseus.staxon.event.SimpleXMLEventWriter;
 
 public class SimpleXMLOutputFactory extends AbstractXMLOutputFactory {

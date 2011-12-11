@@ -27,7 +27,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import de.odysseus.staxon.AbstractXMLOutputFactory;
+import de.odysseus.staxon.base.AbstractXMLOutputFactory;
 import de.odysseus.staxon.event.SimpleXMLEventWriter;
 import de.odysseus.staxon.json.stream.JsonStreamFactory;
 import de.odysseus.staxon.json.stream.JsonStreamTarget;

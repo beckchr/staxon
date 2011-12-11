@@ -24,8 +24,8 @@ import javax.xml.XMLConstants;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 
-import de.odysseus.staxon.AbstractXMLStreamReader;
-import de.odysseus.staxon.XMLStreamReaderScope;
+import de.odysseus.staxon.base.AbstractXMLStreamReader;
+import de.odysseus.staxon.base.XMLStreamReaderScope;
 
 /**
  * Simple XML Stream Reader.

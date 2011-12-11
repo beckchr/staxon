@@ -29,7 +29,7 @@ import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import de.odysseus.staxon.AbstractXMLInputFactory;
+import de.odysseus.staxon.base.AbstractXMLInputFactory;
 import de.odysseus.staxon.event.SimpleXMLEventReader;
 import de.odysseus.staxon.event.SimpleXMLFilteredEventReader;
 import de.odysseus.staxon.json.stream.JsonStreamFactory;

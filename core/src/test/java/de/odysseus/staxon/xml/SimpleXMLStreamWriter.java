@@ -22,7 +22,7 @@ import javax.xml.XMLConstants;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 
-import de.odysseus.staxon.AbstractXMLStreamWriter;
+import de.odysseus.staxon.base.AbstractXMLStreamWriter;
 
 /**
  * Simple XML Stream Writer.
