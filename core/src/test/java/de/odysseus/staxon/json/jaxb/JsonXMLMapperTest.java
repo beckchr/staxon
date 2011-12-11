@@ -27,8 +27,7 @@ import de.odysseus.staxon.json.jaxb.sample.SampleTypeWithNamespace;
 
 public class JsonXMLMapperTest {
 	@JsonXML
-	static class JsonXMLDefault {
-	}
+	static class JsonXMLDefault {}
 
 	@Test
 	public void testWriteXmlRootElement() throws Exception {

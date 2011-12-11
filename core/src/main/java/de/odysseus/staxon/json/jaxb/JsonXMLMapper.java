@@ -28,13 +28,23 @@ import javax.xml.stream.XMLStreamException;
  * Read/write instances of JAXB-annotated classes from/to JSON.
  */
 public class JsonXMLMapper<T> {
+	protected static JsonXML getConfig(Class<?> type) throws JAXBException {
+		@JsonXML
+		class Default {}
+		JsonXML config = type.getAnnotation(JsonXML.class);
+		if (config == null) {
+			config = Default.class.getAnnotation(JsonXML.class);
+		}
+		return config;
+	}
+	
 	private final Class<T> type;
 	private final JsonXML config;
 	private final JsonXMLBinder binder;
 	private final JAXBContext context;
 	
 	public JsonXMLMapper(Class<T> type) throws JAXBException {
-		this(type, type.getAnnotation(JsonXML.class));
+		this(type, getConfig(type));
 	}
 
 	public JsonXMLMapper(Class<T> type, JsonXML config) throws JAXBException {

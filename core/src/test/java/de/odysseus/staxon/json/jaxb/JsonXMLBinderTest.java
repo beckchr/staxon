@@ -44,12 +44,10 @@ import de.odysseus.staxon.json.jaxb.sample.SampleTypeWithNamespace;
 
 public class JsonXMLBinderTest {
 	@JsonXML
-	static class JsonXMLDefault {
-	}
+	static class JsonXMLDefault {}
 
 	@JsonXML(autoArray = true, namespaceDeclarations = false, namespaceSeparator = '_', prettyPrint = true, virtualRoot = true)
-	static class JsonXMLCustom {
-	}
+	static class JsonXMLCustom {}
 
 	@JsonXML(virtualRoot = true, multiplePaths = "/elements")
 	static class JsonXMLVirtualSampleRootElement {}
