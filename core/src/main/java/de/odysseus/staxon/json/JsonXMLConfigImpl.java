@@ -20,14 +20,10 @@ import javax.xml.namespace.QName;
 /**
  * <p>Simple JSON XML configuration.</p>
  * 
- * <p>This class provides a simple "fluid" interface, e.g.</p>
- * <pre>
- * JsonXMLConfig config = new JsonXMLConfig().withVirtualRoot("foo").withPrettyPrint(true);
- * </pre>
  * <p>Initially, values are set according to {@link JsonXMLConfig#DEFAULT}.</p>
  * @see JsonXMLConfig
  */
-public class JsonXMLConfigImpl implements JsonXMLConfig {
+public class JsonXMLConfigImpl implements JsonXMLConfig, Cloneable {
 	private QName virtualRoot = JsonXMLConfig.DEFAULT.getVirtualRoot();
 	private boolean multiplePI = JsonXMLConfig.DEFAULT.isMultiplePI();
 	private boolean prettyPrint = JsonXMLConfig.DEFAULT.isPrettyPrint();
@@ -36,22 +32,21 @@ public class JsonXMLConfigImpl implements JsonXMLConfig {
 	private char namespaceSeparator = JsonXMLConfig.DEFAULT.getNamespaceSeparator();
 	
 	@Override
+	protected JsonXMLConfigImpl clone() {
+		try {
+			return (JsonXMLConfigImpl) super.clone();
+		} catch (CloneNotSupportedException e) {
+			throw new RuntimeException(e); // should not happen
+		}
+	}
+	
+	@Override
 	public boolean isAutoArray() {
 		return autoArray;
 	}
 	
 	public void setAutoArray(boolean autoArray) {
 		this.autoArray = autoArray;
-	}
-	
-	/**
-	 * Set autoArray property and return receiver.
-	 * @param autoArray
-	 * @return this
-	 */
-	public JsonXMLConfigImpl withAutoArray(boolean autoArray) {
-		setAutoArray(autoArray);
-		return this;
 	}
 
 	@Override
@@ -62,16 +57,6 @@ public class JsonXMLConfigImpl implements JsonXMLConfig {
 	public void setMultiplePI(boolean multiplePI) {
 		this.multiplePI = multiplePI;
 	}
-	
-	/**
-	 * Set multiplePI property and return receiver.
-	 * @param multiplePI
-	 * @return this
-	 */
-	public JsonXMLConfigImpl withMultiplePI(boolean multiplePI) {
-		setMultiplePI(multiplePI);
-		return this;
-	}
 
 	@Override
 	public boolean isNamespaceDeclarations() {
@@ -80,16 +65,6 @@ public class JsonXMLConfigImpl implements JsonXMLConfig {
 	
 	public void setNamespaceDeclarations(boolean namespaceDeclarations) {
 		this.namespaceDeclarations = namespaceDeclarations;
-	}
-	
-	/**
-	 * Set namespaceDeclarations property and return receiver.
-	 * @param namespaceDeclarations
-	 * @return this
-	 */
-	public JsonXMLConfigImpl withNamespaceDeclarations(boolean namespaceDeclarations) {
-		setNamespaceDeclarations(namespaceDeclarations);
-		return this;
 	}
 
 	@Override
@@ -100,16 +75,6 @@ public class JsonXMLConfigImpl implements JsonXMLConfig {
 	public void setNamespaceSeparator(char namespaceSeparator) {
 		this.namespaceSeparator = namespaceSeparator;
 	}
-	
-	/**
-	 * Set namespaceSeparator property and return receiver.
-	 * @param namespaceSeparator
-	 * @return this
-	 */
-	public JsonXMLConfigImpl withNamespaceSeparator(char namespaceSeparator) {
-		setNamespaceSeparator(namespaceSeparator);
-		return this;
-	}
 
 	@Override
 	public boolean isPrettyPrint() {
@@ -119,16 +84,6 @@ public class JsonXMLConfigImpl implements JsonXMLConfig {
 	public void setPrettyPrint(boolean prettyPrint) {
 		this.prettyPrint = prettyPrint;
 	}
-	
-	/**
-	 * Set prettyPrint property and return receiver.
-	 * @param prettyPrint
-	 * @return this
-	 */
-	public JsonXMLConfigImpl withPrettyPrint(boolean prettyPrint) {
-		setPrettyPrint(prettyPrint);
-		return this;
-	}
 
 	@Override
 	public QName getVirtualRoot() {
@@ -137,25 +92,5 @@ public class JsonXMLConfigImpl implements JsonXMLConfig {
 	
 	public void setVirtualRoot(QName virtualRoot) {
 		this.virtualRoot = virtualRoot;
-	}
-	
-	/**
-	 * Set virtualRoot property and return receiver.
-	 * @param virtualRoot
-	 * @return this
-	 */
-	public JsonXMLConfigImpl withVirtualRoot(QName virtualRoot) {
-		setVirtualRoot(virtualRoot);
-		return this;
-	}
-	
-	/**
-	 * Set virtualRoot property and return receiver.
-	 * @param virtualRoot (parsed with {@link QName#valueOf(String)})
-	 * @return this
-	 */
-	public JsonXMLConfigImpl withVirtualRoot(String virtualRoot) {
-		setVirtualRoot(QName.valueOf(virtualRoot));
-		return this;
 	}
 }

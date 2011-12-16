@@ -33,7 +33,7 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
 import de.odysseus.staxon.json.JsonXMLConfig;
-import de.odysseus.staxon.json.JsonXMLConfigImpl;
+import de.odysseus.staxon.json.JsonXMLConfigBuilder;
 import de.odysseus.staxon.json.JsonXMLInputFactory;
 import de.odysseus.staxon.json.JsonXMLOutputFactory;
 import de.odysseus.staxon.json.JsonXMLStreamConstants;
@@ -60,14 +60,14 @@ public class JsonXMLBinder {
 	}
 	
 	private JsonXMLConfig toJsonXMLConfig(Class<?> type, JsonXML config) throws JAXBException {
-		JsonXMLConfigImpl result = new JsonXMLConfigImpl();
-		result.setAutoArray(config.autoArray());
-		result.setMultiplePI(true);
-		result.setNamespaceDeclarations(config.namespaceDeclarations());
-		result.setNamespaceSeparator(config.namespaceSeparator());
-		result.setPrettyPrint(config.prettyPrint());
-		result.setVirtualRoot(config.virtualRoot() ? rootProvider.getName(type) : null);
-		return result;
+		return new JsonXMLConfigBuilder().
+				autoArray(config.autoArray()).
+				multiplePI(true).
+				namespaceDeclarations(config.namespaceDeclarations()).
+				namespaceSeparator(config.namespaceSeparator()).
+				prettyPrint(config.prettyPrint()).
+				virtualRoot(config.virtualRoot() ? rootProvider.getName(type) : null).
+				build();
 	}
 	
 	protected JsonXMLInputFactory createInputFactory(Class<?> type, JsonXML config) throws JAXBException {
