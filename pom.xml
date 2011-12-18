@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.odysseus.staxon</groupId>
 	<artifactId>staxon-parent</artifactId>
-	<version>0.9.4-SNAPSHOT</version>
+	<version>0.9.4</version>
 	<packaging>pom</packaging>
 	<name>StAXON Parent</name>
 	<description>JSON via StAX - Parent</description>
