@@ -29,7 +29,7 @@ import de.odysseus.staxon.util.StreamWriterDelegate;
  * XMLOutputFactory factory = new JsonXMLOutputFactory();
  * factory.setProperty(JsonXMLOutputFactory.PROP_MULTIPLE_PI, true);
  * XMLEventWriter writer = factory.createXMLStreamWriter(...);
- * writer = new XMLMultipleEventWriter(writer, false, "/bob", ...);
+ * writer = new XMLMultipleStreamWriter(writer, false, "/bob", ...);
  * </pre>
  */
 public class XMLMultipleStreamWriter extends StreamWriterDelegate {

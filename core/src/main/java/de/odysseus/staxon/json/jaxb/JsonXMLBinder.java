@@ -85,7 +85,7 @@ public class JsonXMLBinder {
 	protected XMLStreamWriter createXMLStreamWriter(Class<?> type, JsonXML config, Writer stream) throws XMLStreamException, JAXBException {
 		XMLStreamWriter writer = createOutputFactory(type, config).createXMLStreamWriter(stream);
 		if (config.multiplePaths().length > 0) {
-			writer = new XMLMultipleStreamWriter(writer, false, config.multiplePaths());
+			writer = new XMLMultipleStreamWriter(writer, !config.virtualRoot(), config.multiplePaths());
 		}
 		return writer;
 	}

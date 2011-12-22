@@ -38,7 +38,7 @@ import java.lang.annotation.Target;
 public @interface JsonXML {
 	/**
 	 * <p>JSON documents may have have multiple root properties. However,
-	 * XML requires a single root element. This property whether to treat
+	 * XML requires a single root element. This property states whether to treat
 	 * the root as a "virtual" element, which will be removed from the stream
 	 * when writing and added to the stream when reading. The root element
 	 * name will be determined from an <code>@XmlRootElement</code> or
@@ -51,8 +51,9 @@ public @interface JsonXML {
 	/**
 	 * <p>Specify array paths. Paths may be absolute or relative (without
 	 * leading <code>'/'</code>), where names are separated by <code>'/'</code>
-	 * and may be prefixed. The root element is <em>not</em> included in a
-	 * multiple path.</p>
+	 * and may be prefixed. The root element is included in a multiple path
+	 * if and only if <code>virtualRoot</code> is set to <code>false</code>
+	 * (i.e. the root <em>does</em> appear in the JSON representation).</p>
 	 * <p>E.g. for</p>
 	 * <pre>
 	 * {
@@ -62,8 +63,20 @@ public @interface JsonXML {
 	 *   }
 	 * }
 	 * </pre>
-	 * <p>we would specify <code>"/bob"</code> or <code>"bob"</code> as
-	 * multiple path.</p>
+	 * <p>with <code>virtualRoot == false</code> we would specify
+	 * <code>"/alice/bob"</code>, <code>"alice/bob"</code> or <code>"bob"</code>
+	 * as multiple path.</p>
+	 * 
+	 * <p>On the other hand, when setting <code>virtualRoot == true</code>, our JSON
+	 * representation will change to<p>
+	 * <pre>
+	 * {
+	 *   "bob" : [ "edgar", "charlie" ],
+	 *   "peter" : null
+	 * }
+	 * </pre>
+	 * and we would specify <code>"/bob"</code> or <code>"bob"</code> as multiple path.</p>
+	 * 
 	 */
 	String[] multiplePaths() default {};
 
