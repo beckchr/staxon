@@ -76,7 +76,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 	 * The returned scope info is stored in the new scope and will be available via
 	 * <code>getScope().getInfo()</code>.
 	 * @param prefix element prefix (may be <code>XMLConstants.DEFAULT_NS_PREFIX</code>)
-	 * @param localName local name
+	 * @param localPart local name
 	 * @param namespaceURI namespace URI
 	 * @return new scope info
 	 * @throws XMLStreamException
