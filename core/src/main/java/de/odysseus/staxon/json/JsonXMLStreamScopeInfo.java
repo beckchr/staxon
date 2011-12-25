@@ -38,11 +38,7 @@ class JsonXMLStreamScopeInfo {
 		return arrayName;
 	}
 
-	int getArraySize() {
-		return arraySize;
-	}
-	
-	boolean isArray() {
+    boolean isArray() {
 		return arraySize >= 0;
 	}
 
