@@ -110,8 +110,8 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	 * @param namespaceSeparator namespace prefix separator
 	 * @param namespaceDeclarations whether to write namespace declarations
 	 */
-	public JsonXMLStreamWriter(JsonStreamTarget target, boolean multiplePI, char namespaceSeparator, boolean namespaceDeclarations) {
-		super(new ScopeInfo());
+	public JsonXMLStreamWriter(JsonStreamTarget target, boolean repairNamespaces, boolean multiplePI, char namespaceSeparator, boolean namespaceDeclarations) {
+		super(new ScopeInfo(), repairNamespaces);
 		this.target = target;
 		this.multiplePI = multiplePI;
 		this.namespaceSeparator = namespaceSeparator;
@@ -243,7 +243,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 				}
 				if (getScope().getLastChild() != null) {
 					if (!skipSpace || !isWhitespace(data)) {
-						throw new XMLStreamException("Mixed content is not supported: '" + getScope().getInfo().getText() + "'");
+						throw new XMLStreamException("Mixed content is not supported: '" + data + "'");
 					}
 				} else {
 					getScope().getInfo().addText(data);

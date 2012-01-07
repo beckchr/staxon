@@ -36,7 +36,7 @@ public class SimpleXMLOutputFactory extends AbstractXMLOutputFactory {
 
 	@Override
 	public XMLStreamWriter createXMLStreamWriter(Writer stream) throws XMLStreamException {
-		return new SimpleXMLStreamWriter(stream);
+		return new SimpleXMLStreamWriter(stream, Boolean.TRUE.equals(getProperty(IS_REPAIRING_NAMESPACES)));
 	}
 
 	@Override

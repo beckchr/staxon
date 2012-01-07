@@ -32,17 +32,19 @@ import de.odysseus.staxon.xml.SimpleXMLStreamWriter;
 public class AbstractXMLStreamWriterTest {
 	boolean jdkStreamWriter = false;
 	
-	XMLStreamWriter createXMLStreamWriter() throws XMLStreamException {
+	XMLStreamWriter createXMLStreamWriter(boolean repairNamespaces) throws XMLStreamException {
 		final StringWriter writer = new StringWriter();
 		if (jdkStreamWriter) {
-			return new StreamWriterDelegate(XMLOutputFactory.newFactory().createXMLStreamWriter(writer)) {
+			XMLOutputFactory factory = XMLOutputFactory.newFactory();
+			factory.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES, repairNamespaces);
+			return new StreamWriterDelegate(factory.createXMLStreamWriter(writer)) {
 				@Override
 				public String toString() {
 					return writer.toString();
 				}
 			};
 		} else {
-			return new SimpleXMLStreamWriter(writer) {
+			return new SimpleXMLStreamWriter(writer, repairNamespaces) {
 				@Override
 				public String toString() {
 					return writer.toString();
@@ -53,7 +55,7 @@ public class AbstractXMLStreamWriterTest {
 	
 	@Test
 	public void testWriteAttribute0() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.writeStartElement("foo");
 		writer.writeAttribute("bar", "foobar");
 		writer.flush();
@@ -63,7 +65,7 @@ public class AbstractXMLStreamWriterTest {
 	@Test
 	@Ignore
 	public void testWriteAttribute0a() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.writeStartElement("foo");
 		writer.writeAttribute("bar", "<>'\"&");
 		writer.flush();
@@ -72,7 +74,7 @@ public class AbstractXMLStreamWriterTest {
 
 	@Test
 	public void testWriteAttribute1a() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.setPrefix("p", "http://p");
 		writer.writeStartElement("foo");
 		writer.writeAttribute("http://p", "bar", "foobar");
@@ -82,14 +84,14 @@ public class AbstractXMLStreamWriterTest {
 
 	@Test(expected = XMLStreamException.class)
 	public void testWriteAttribute1b() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.writeStartElement("foo");
 		writer.writeAttribute("http://p", "bar", "foobar");
 	}
 
 	@Test
 	public void testWriteAttribute2a() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.setPrefix("p", "http://p");
 		writer.writeStartElement("foo");
 		writer.writeAttribute("p", "http://p", "bar", "foobar");
@@ -99,7 +101,7 @@ public class AbstractXMLStreamWriterTest {
 
 	@Test(expected = XMLStreamException.class)
 	public void testWriteAttribute2b() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.writeStartElement("foo");
 		writer.writeAttribute("p", "http://p", "bar", "foobar");
 		writer.writeEndElement();
@@ -107,7 +109,7 @@ public class AbstractXMLStreamWriterTest {
 
 	@Test
 	public void testWriteAttribute2c() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.writeStartElement("foo");
 		writer.writeAttribute("p", "http://p", "bar", "foobar");
 		writer.writeNamespace("p", "http://p");
@@ -118,7 +120,7 @@ public class AbstractXMLStreamWriterTest {
 
 	@Test(expected = XMLStreamException.class)
 	public void testWriteAttribute2d() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.setPrefix("p", "http://p");
 		writer.writeStartElement("foo");
 		writer.writeAttribute("pp", "http://p", "bar", "foobar");
@@ -127,7 +129,7 @@ public class AbstractXMLStreamWriterTest {
 
 	@Test(expected = XMLStreamException.class)
 	public void testWriteAttribute2e() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.setPrefix("p", "http://p");
 		writer.writeStartElement("foo");
 		writer.writeAttribute("p", "http://pp", "bar", "foobar");
@@ -136,7 +138,7 @@ public class AbstractXMLStreamWriterTest {
 
 	@Test
 	public void testWriteElement0() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.writeStartElement("foo");
 		writer.writeEndElement();
 		writer.flush();
@@ -145,7 +147,7 @@ public class AbstractXMLStreamWriterTest {
 
 	@Test
 	public void testWriteElement1a() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.setPrefix("p", "http://p");
 		writer.writeStartElement("http://p", "foo");
 		writer.writeEndElement();
@@ -155,13 +157,22 @@ public class AbstractXMLStreamWriterTest {
 
 	@Test(expected = XMLStreamException.class)
 	public void testWriteElement1b() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.writeStartElement("http://p", "foo");
 	}
 
 	@Test
+	public void testWriteElement1bRepaired() throws XMLStreamException {
+		XMLStreamWriter writer = createXMLStreamWriter(true);
+		writer.writeStartElement("http://p", "foo");
+		writer.writeEndElement();
+		writer.flush();
+		Assert.assertEquals("<foo xmlns=\"http://p\"></foo>", writer.toString());
+	}
+
+	@Test
 	public void testWriteElement2a() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.setPrefix("p", "http://p");
 		writer.writeStartElement("p", "foo", "http://p");
 		writer.writeEndElement();
@@ -171,33 +182,61 @@ public class AbstractXMLStreamWriterTest {
 
 	@Test(expected = XMLStreamException.class)
 	public void testWriteElement2b() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.setPrefix("p", "http://p");
 		writer.writeStartElement("pp", "foo", "http://p");
 		writer.writeEndElement();
 		writer.flush();
+		Assert.assertEquals("<foo xmlns=\"http://p\"></foo>", writer.toString());
+	}
+
+	@Test
+	public void testWriteElement2bRepaired() throws XMLStreamException {
+		XMLStreamWriter writer = createXMLStreamWriter(true);
+		writer.setPrefix("p", "http://p");
+		writer.writeStartElement("pp", "foo", "http://p");
+		writer.writeEndElement();
+		writer.flush();
+		Assert.assertEquals("<pp:foo xmlns:pp=\"http://p\"></pp:foo>", writer.toString());
 	}
 
 	@Test(expected = XMLStreamException.class)
 	public void testWriteElement2c() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.writeStartElement("p", "foo", "http://p");
 		writer.writeEndElement();
 	}
 	
+	@Test
+	public void testWriteElement2cRepaired() throws XMLStreamException {
+		XMLStreamWriter writer = createXMLStreamWriter(true);
+		writer.writeStartElement("p", "foo", "http://p");
+		writer.writeEndElement();
+		writer.flush();
+		Assert.assertEquals("<p:foo xmlns:p=\"http://p\"></p:foo>", writer.toString());
+	}
+	
 	@Test(expected = XMLStreamException.class)
 	public void testWriteElement2d() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.setPrefix("p", "http://p");
 		writer.writeStartElement("p", "foo", "http://pp");
 		writer.writeEndElement();
 		writer.flush();
 	}
 
+	@Test
+	public void testWriteElement2dRepaired() throws XMLStreamException {
+		XMLStreamWriter writer = createXMLStreamWriter(true);
+		writer.setPrefix("p", "http://p");
+		writer.writeStartElement("p", "foo", "http://pp");
+		writer.writeEndElement();
+		writer.flush();
+	}
 
 	@Test
 	public void testWriteNamespaceAddsPrefixBinding() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.writeStartElement("p", "foo", "http://p");
 		writer.writeNamespace("p", "http://p");
 		Assert.assertEquals("p", writer.getPrefix("http://p"));
@@ -207,7 +246,7 @@ public class AbstractXMLStreamWriterTest {
 
 	@Test
 	public void testWriteEmptyElement0() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.writeEmptyElement("foo");
 		writer.flush();
 		Assert.assertEquals("<foo", writer.toString());
@@ -215,7 +254,7 @@ public class AbstractXMLStreamWriterTest {
 
 	@Test
 	public void testWriteEmptyElement1a() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.setPrefix("p", "http://p");
 		writer.writeEmptyElement("http://p", "foo");
 		writer.flush();
@@ -224,13 +263,21 @@ public class AbstractXMLStreamWriterTest {
 
 	@Test(expected = XMLStreamException.class)
 	public void testWriteEmptyElement1b() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
-		writer.writeStartElement("http://p", "foo");
+		XMLStreamWriter writer = createXMLStreamWriter(false);
+		writer.writeEmptyElement("http://p", "foo");
+	}
+
+	@Test
+	public void testWriteEmptyElement1bRepaired() throws XMLStreamException {
+		XMLStreamWriter writer = createXMLStreamWriter(true);
+		writer.writeEmptyElement("http://p", "foo");
+		writer.flush();
+		Assert.assertEquals("<foo xmlns=\"http://p\"", writer.toString());
 	}
 
 	@Test
 	public void testWriteEmptyElement2a() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.setPrefix("p", "http://p");
 		writer.writeEmptyElement("p", "foo", "http://p");
 		writer.flush();
@@ -239,7 +286,7 @@ public class AbstractXMLStreamWriterTest {
 
 	@Test
 	public void testWriteEmptyElement2b() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.setPrefix("p", "http://p");
 		writer.writeEmptyElement("pp", "foo", "http://p");
 //		Assert.fail("expected exception: bound to another prefix"); // according to XMLStreamWriter javadoc
@@ -249,7 +296,7 @@ public class AbstractXMLStreamWriterTest {
 
 	@Test
 	public void testWriteEmptyElement2c() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.writeEmptyElement("p", "foo", "http://p");
 		writer.flush();
 		Assert.assertEquals("<p:foo", writer.toString());
@@ -257,7 +304,7 @@ public class AbstractXMLStreamWriterTest {
 
 	@Test(expected = XMLStreamException.class)
 	public void testWriteElementMultipleRoots() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.writeStartElement("foo");
 		writer.writeEndElement();
 		writer.writeStartElement("foo");
@@ -265,7 +312,7 @@ public class AbstractXMLStreamWriterTest {
 
 	@Test
 	public void testWriterCharacters() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.writeStartElement("foo");
 		writer.writeCharacters("bar");
 		writer.writeEndElement();
@@ -276,7 +323,7 @@ public class AbstractXMLStreamWriterTest {
 	@Test
 	@Ignore
 	public void testWriterCharacters2() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.writeStartElement("foo");
 		writer.writeCharacters("<>'\"&");
 		writer.writeEndElement();
@@ -286,7 +333,7 @@ public class AbstractXMLStreamWriterTest {
 
 	@Test
 	public void testWriteCDtata() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.writeStartElement("foo");
 		writer.writeCData("bar");
 		writer.writeEndElement();
@@ -296,7 +343,7 @@ public class AbstractXMLStreamWriterTest {
 
 	@Test
 	public void testWriteCDtata2() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.writeStartElement("foo");
 		writer.writeCData("<>'\"&");
 		writer.writeEndElement();
@@ -306,7 +353,7 @@ public class AbstractXMLStreamWriterTest {
 
 	@Test
 	public void testWriteComment() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.writeStartElement("foo");
 		writer.writeComment("bar");
 		writer.writeEndElement();
@@ -317,7 +364,7 @@ public class AbstractXMLStreamWriterTest {
 
 	@Test
 	public void testWriteEntityRef() throws XMLStreamException {
-		XMLStreamWriter writer = createXMLStreamWriter();
+		XMLStreamWriter writer = createXMLStreamWriter(false);
 		writer.writeStartElement("foo");
 		writer.writeEntityRef("bar");
 		writer.writeEndElement();

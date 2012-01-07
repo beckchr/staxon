@@ -23,7 +23,6 @@ import java.util.Arrays;
 import javax.xml.namespace.QName;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
@@ -137,8 +136,9 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 
 	@Override
 	public XMLStreamWriter createXMLStreamWriter(Writer stream) throws XMLStreamException {
+		boolean repairNamespaces = Boolean.TRUE.equals(getProperty(IS_REPAIRING_NAMESPACES));
 		try {
-			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), multiplePI, namespaceSeparator, namespaceDeclarations);
+			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), repairNamespaces, multiplePI, namespaceSeparator, namespaceDeclarations);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -146,8 +146,9 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 
 	@Override
 	public XMLStreamWriter createXMLStreamWriter(OutputStream stream) throws XMLStreamException {
+		boolean repairNamespaces = Boolean.TRUE.equals(getProperty(IS_REPAIRING_NAMESPACES));
 		try {
-			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), multiplePI, namespaceSeparator, namespaceDeclarations);
+			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), repairNamespaces, multiplePI, namespaceSeparator, namespaceDeclarations);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -189,11 +190,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 
 	@Override
 	public void setProperty(String name, Object value) throws IllegalArgumentException {
-		if (XMLOutputFactory.IS_REPAIRING_NAMESPACES.equals(name)) {
-			if (!getProperty(name).equals(value)) {
-				throw new IllegalArgumentException("Cannot change property: " + name);
-			}
-		} else if (super.isPropertySupported(name)) {
+		if (super.isPropertySupported(name)) {
 			super.setProperty(name, value);
 		} else { // proprietary properties
 			if (PROP_AUTO_ARRAY.equals(name)) {

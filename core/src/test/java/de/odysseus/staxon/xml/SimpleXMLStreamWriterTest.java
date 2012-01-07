@@ -33,7 +33,7 @@ public class SimpleXMLStreamWriterTest {
 	@Test
 	public void testTextContent() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new SimpleXMLStreamWriter(result);
+		XMLStreamWriter writer = new SimpleXMLStreamWriter(result, false);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeCharacters("bob");
@@ -49,7 +49,7 @@ public class SimpleXMLStreamWriterTest {
 	@Test
 	public void testCooment() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new SimpleXMLStreamWriter(result);
+		XMLStreamWriter writer = new SimpleXMLStreamWriter(result, false);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeComment("bob");
@@ -66,7 +66,7 @@ public class SimpleXMLStreamWriterTest {
 	@Test
 	public void testEscapeCharacters() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new SimpleXMLStreamWriter(result);
+		XMLStreamWriter writer = new SimpleXMLStreamWriter(result, false);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeCharacters("<>&\"'");
@@ -82,7 +82,7 @@ public class SimpleXMLStreamWriterTest {
 	@Test
 	public void testEscapeCData() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new SimpleXMLStreamWriter(result);
+		XMLStreamWriter writer = new SimpleXMLStreamWriter(result, false);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeCData("<>&\"'");
@@ -98,7 +98,7 @@ public class SimpleXMLStreamWriterTest {
 	@Test
 	public void testEscapeAttribute() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new SimpleXMLStreamWriter(result);
+		XMLStreamWriter writer = new SimpleXMLStreamWriter(result, false);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeAttribute("escape", "<>&\"'");
@@ -114,7 +114,7 @@ public class SimpleXMLStreamWriterTest {
 	@Test
 	public void testNested() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new SimpleXMLStreamWriter(result);
+		XMLStreamWriter writer = new SimpleXMLStreamWriter(result, false);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeStartElement("bob");
@@ -135,7 +135,7 @@ public class SimpleXMLStreamWriterTest {
 	@Test
 	public void testArray() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new SimpleXMLStreamWriter(result);
+		XMLStreamWriter writer = new SimpleXMLStreamWriter(result, false);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeStartElement("bob");
@@ -156,7 +156,7 @@ public class SimpleXMLStreamWriterTest {
 	@Test
 	public void testAttributes() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new SimpleXMLStreamWriter(result);
+		XMLStreamWriter writer = new SimpleXMLStreamWriter(result, false);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeAttribute("charlie", "david");
@@ -173,7 +173,7 @@ public class SimpleXMLStreamWriterTest {
 	@Test
 	public void testNamespaces() throws Exception {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new SimpleXMLStreamWriter(result);
+		XMLStreamWriter writer = new SimpleXMLStreamWriter(result, false);
 		writer.setDefaultNamespace("http://some-namespace");
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
@@ -185,9 +185,25 @@ public class SimpleXMLStreamWriterTest {
 		Assert.assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><alice xmlns=\"http://some-namespace\">bob</alice>", result.toString());
 	}
 
+	/**
+	 * <code>&lt;alice xmlns="http://some-namespace"&gt;bob&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testRepairNamespaces() throws Exception {
+		StringWriter result = new StringWriter();
+		XMLStreamWriter writer = new SimpleXMLStreamWriter(result, true);
+		writer.writeStartDocument();
+		writer.writeStartElement("http://some-namespace", "alice");
+		writer.writeCharacters("bob");
+		writer.writeEndElement();
+		writer.writeEndDocument();
+		writer.close();
+		Assert.assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><alice xmlns=\"http://some-namespace\">bob</alice>", result.toString());
+	}
+
 	@Test(expected = XMLStreamException.class)
 	public void testWriteElementMultipleRoots() throws XMLStreamException {
-		XMLStreamWriter writer = new SimpleXMLStreamWriter(new StringWriter());
+		XMLStreamWriter writer = new SimpleXMLStreamWriter(new StringWriter(), false);
 		writer.writeStartElement("foo");
 		writer.writeEndElement();
 		writer.writeStartElement("foo");
@@ -199,7 +215,7 @@ public class SimpleXMLStreamWriterTest {
 	@Test
 	public void testOther() throws XMLStreamException {
 		StringWriter result = new StringWriter();
-		XMLStreamWriter writer = new SimpleXMLStreamWriter(result);
+		XMLStreamWriter writer = new SimpleXMLStreamWriter(result, false);
 		writer.setDefaultNamespace("http://foo");
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");

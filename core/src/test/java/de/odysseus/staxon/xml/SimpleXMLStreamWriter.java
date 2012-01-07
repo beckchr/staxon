@@ -32,8 +32,8 @@ import de.odysseus.staxon.base.AbstractXMLStreamWriter;
 public class SimpleXMLStreamWriter extends AbstractXMLStreamWriter<String> {
 	private final Writer writer;
 	
-	public SimpleXMLStreamWriter(Writer writer) {
-		super(null);
+	public SimpleXMLStreamWriter(Writer writer, boolean repairNamespaces) {
+		super(null, repairNamespaces);
 		this.writer = writer;
 	}
 	
