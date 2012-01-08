@@ -15,130 +15,32 @@
  */
 package de.odysseus.staxon.xml.util;
 
-import java.io.Writer;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.Location;
+import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.events.Characters;
-import javax.xml.stream.events.EndElement;
-import javax.xml.stream.events.StartElement;
+
+import de.odysseus.staxon.event.SimpleXMLEventFactory;
 
 /**
  * Package-private helper used by {@link PrettyXMLStreamWriter} and {@link PrettyXMLEventWriter}
  * to handle pretty printing state and insert indentation and newline characters events.
  */
 class PrettyXMLWhitespaceHandler {
-	/**
-	 * Whitespace (indentation/newline) event
-	 */
-	static class WhitespaceEvent implements Characters {
-		final String whitespace;
-		final String description;
-		WhitespaceEvent(String whitespace, String description) {
-			this.whitespace = whitespace;
-			this.description = description;
-		}
-		@Override
-		public Characters asCharacters() {
-			return this;
-		}
-		@Override
-		public StartElement asStartElement() {
-			return null;
-		}
-		@Override
-		public EndElement asEndElement() {
-			return null;
-		}
-		@Override
-		public int getEventType() {
-			return XMLStreamConstants.CHARACTERS;
-		}
-		@Override
-		public Location getLocation() {
-			return null;
-		}
-		@Override
-		public QName getSchemaType() {
-			return null;
-		}
-		@Override
-		public boolean isAttribute() {
-			return false;
-		}
-		@Override
-		public boolean isCharacters() {
-			return true;
-		}
-		@Override
-		public boolean isEndDocument() {
-			return false;
-		}
-		@Override
-		public boolean isEndElement() {
-			return false;
-		}
-		@Override
-		public boolean isEntityReference() {
-			return false;
-		}
-		@Override
-		public boolean isNamespace() {
-			return false;
-		}
-		@Override
-		public boolean isProcessingInstruction() {
-			return false;
-		}
-		@Override
-		public boolean isStartDocument() {
-			return false;
-		}
-		@Override
-		public boolean isStartElement() {
-			return false;
-		}
-		@Override
-		public String toString() {
-			return description;
-		}
-		@Override
-		public void writeAsEncodedUnicode(Writer writer) throws XMLStreamException {
-			// API doc: No indentation or whitespace should be "outputted".
-		}
-		@Override
-		public String getData() {
-			return whitespace;
-		}
-		@Override
-		public boolean isCData() {
-			return false;
-		}
-		@Override
-		public boolean isIgnorableWhiteSpace() {
-			return false;
-		}
-		@Override
-		public boolean isWhiteSpace() {
-			return true;
-		}
-	}
+	static final XMLEventFactory EVENT_FACTORY = new SimpleXMLEventFactory();
 
 	/**
 	 * Whitespace writer.
 	 */
 	private static abstract class WhitespaceWriter {
-		abstract void add(WhitespaceEvent event) throws XMLStreamException;
+		abstract void add(Characters event) throws XMLStreamException;
 	}
 	
 	private static final int MAX_DEPTH = 64;
 	
-	private final WhitespaceEvent newline;
-	private final WhitespaceEvent[] indent;
+	private final Characters newline;
+	private final Characters[] indent;
 	private final WhitespaceWriter writer;
 
 	private int depth = 0;
@@ -158,7 +60,7 @@ class PrettyXMLWhitespaceHandler {
 	PrettyXMLWhitespaceHandler(final XMLStreamWriter writer, String indentation, String newline) {
 		this(indentation, newline, new WhitespaceWriter() {
 			@Override
-			public void add(WhitespaceEvent event) throws XMLStreamException {
+			public void add(Characters event) throws XMLStreamException {
 				writer.writeCharacters(event.getData());
 			}
 		});
@@ -177,15 +79,15 @@ class PrettyXMLWhitespaceHandler {
 	PrettyXMLWhitespaceHandler(final XMLEventWriter writer, String indentation, String newline) {
 		this(indentation, newline, new WhitespaceWriter() {
 			@Override
-			public void add(WhitespaceEvent event) throws XMLStreamException {
+			public void add(Characters event) throws XMLStreamException {
 				writer.add(event);
 			}
 		});
 	}
 
 	private PrettyXMLWhitespaceHandler(String indentation, String newline, WhitespaceWriter writer) {
-		this.newline = new WhitespaceEvent(newline, "<<newline>>");
-		this.indent = new WhitespaceEvent[MAX_DEPTH];
+		this.newline = EVENT_FACTORY.createSpace(newline);
+		this.indent = new Characters[MAX_DEPTH];
 		this.writer = writer;
 
 		/*
@@ -193,7 +95,7 @@ class PrettyXMLWhitespaceHandler {
 		 */
 		StringBuilder builder = new StringBuilder();
 		for (int i = 0; i < indent.length; i++) {
-			indent[i] = new WhitespaceEvent(builder.toString(), "<<indentation>>");
+			indent[i] = EVENT_FACTORY.createSpace(builder.toString());
 			builder.append(indentation);
 		}
 	}

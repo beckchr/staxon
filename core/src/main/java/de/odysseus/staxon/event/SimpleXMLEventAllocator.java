@@ -50,6 +50,18 @@ import javax.xml.stream.util.XMLEventConsumer;
  */
 public class SimpleXMLEventAllocator implements XMLEventAllocator {
 	static abstract class AbstractXMLEvent implements XMLEvent {
+		static <E> List<E> toList(Iterator<E> iterator) {
+			if (iterator == null || !iterator.hasNext()) {
+				return Collections.emptyList();
+			} else {
+				List<E> list = new ArrayList<E>();
+				while (iterator.hasNext()) {
+					list.add(iterator.next());
+				}
+				return list;
+			}
+		}
+		
 		final int eventType;
 		final Location location;
 		AbstractXMLEvent(int eventType, Location location) {
@@ -207,12 +219,15 @@ public class SimpleXMLEventAllocator implements XMLEventAllocator {
 		final String data;
 		final boolean whitespace;
 		CharactersEvent(XMLStreamReader reader) {
-			super(reader.getEventType(), reader.getLocation());
+			this(reader.getEventType(), reader.getLocation(), reader.getText(), reader.isWhiteSpace());
+		}
+		CharactersEvent(int eventType, Location location, String data, boolean whitespace) {
+			super(eventType, location);
 			assert eventType == XMLStreamConstants.CHARACTERS
-				|| eventType == XMLStreamConstants.CDATA
-				|| eventType == XMLStreamConstants.SPACE;
-			data = reader.getText();
-			whitespace = reader.isWhiteSpace();
+					|| eventType == XMLStreamConstants.CDATA
+					|| eventType == XMLStreamConstants.SPACE;
+			this.data = data;
+			this.whitespace = whitespace;
 		}
 		@Override
 		public String getData() {
@@ -236,7 +251,7 @@ public class SimpleXMLEventAllocator implements XMLEventAllocator {
 				writer.write("<![CDATA[");
 				writer.write(data);
 				writer.write("]]>");
-			} else {
+			} else if (!isIgnorableWhiteSpace()) { // API doc: No indentation or whitespace should be "outputted".
 				for (int i = 0; i < data.length(); i++) {
 					char c = data.charAt(i);
 					switch (c) {
@@ -264,6 +279,10 @@ public class SimpleXMLEventAllocator implements XMLEventAllocator {
 			assert eventType == XMLStreamConstants.COMMENT;
 			text = reader.getText();
 		}
+		CommentEvent(Location location, String text) {
+			super(XMLStreamConstants.COMMENT, location);
+			this.text = text;
+		}
 		@Override
 		public String getText() {
 			return text;
@@ -280,6 +299,9 @@ public class SimpleXMLEventAllocator implements XMLEventAllocator {
 		EndDocumentEvent(XMLStreamReader reader) {
 			super(reader.getEventType(), reader.getLocation());
 			assert eventType == XMLStreamConstants.END_DOCUMENT;
+		}
+		EndDocumentEvent(Location location) {
+			super(XMLStreamConstants.END_DOCUMENT, location);
 		}
 		@Override
 		void writeAsEncodedUnicodeInternal(Writer writer) {
@@ -303,6 +325,11 @@ public class SimpleXMLEventAllocator implements XMLEventAllocator {
 				}
 			}
 		}
+		EndElementEvent(Location location, QName name, Iterator<NamespaceEvent> namespaces) {
+			super(XMLStreamConstants.END_ELEMENT, location);
+			this.name = name;
+			this.namespaces = toList(namespaces);
+		}
 		@Override
 		public QName getName() {
 			return name;
@@ -325,14 +352,21 @@ public class SimpleXMLEventAllocator implements XMLEventAllocator {
 	
 	static class EntityReferenceEvent extends AbstractXMLEvent implements EntityReference {
 		final String name;
+		final EntityDeclaration declaration;
 		EntityReferenceEvent(XMLStreamReader reader) {
 			super(reader.getEventType(), reader.getLocation());
 			assert eventType == XMLStreamConstants.ENTITY_REFERENCE;
 			name = reader.getText();
+			declaration = null; // TODO
+		}
+		EntityReferenceEvent(Location location, String name, EntityDeclaration declaration) {
+			super(XMLStreamConstants.ENTITY_REFERENCE, location);
+			this.name = name;
+			this.declaration = declaration;
 		}
 		@Override
 		public EntityDeclaration getDeclaration() {
-			return null; // TODO ?
+			return declaration;
 		}
 		@Override
 		public String getName() {
@@ -380,6 +414,11 @@ public class SimpleXMLEventAllocator implements XMLEventAllocator {
 			target = reader.getPITarget();
 			data = reader.getPIData();
 		}
+		ProcessingInstructionEvent(Location location, String target, String data) {
+			super(XMLStreamConstants.PROCESSING_INSTRUCTION, location);
+			this.target = target;
+			this.data = data;
+		}
 		@Override
 		public String getTarget() {
 			return target;
@@ -410,6 +449,12 @@ public class SimpleXMLEventAllocator implements XMLEventAllocator {
 			encodingScheme = reader.getCharacterEncodingScheme();
 			version = reader.getVersion() == null ? "1.0" : reader.getVersion();
 			standalone = reader.standaloneSet() ? Boolean.valueOf(reader.isStandalone()) : null;
+		}
+		StartDocumentEvent(Location location, String encoding, String version, Boolean standalone) {
+			super(XMLStreamConstants.START_DOCUMENT, location);
+			this.encodingScheme = encoding;
+			this.version = version == null ? "1.0" : version;
+			this.standalone = standalone;
 		}
 		@Override
 		public String getCharacterEncodingScheme() {
@@ -480,6 +525,13 @@ public class SimpleXMLEventAllocator implements XMLEventAllocator {
 					namespaces.add(new NamespaceEvent(location, reader.getNamespaceURI(i), reader.getNamespacePrefix(i)));
 				}
 			}
+		}
+		StartElementEvent(Location location, QName name, Iterator<AttributeEvent> attributes, Iterator<NamespaceEvent> namespaces, NamespaceContext context) {
+			super(XMLStreamConstants.START_ELEMENT, location);
+			this.name = name;
+			this.context = context;
+			this.attributes = toList(attributes);
+			this.namespaces = toList(namespaces);
 		}
 		@Override
 		public Attribute getAttributeByName(QName name) {

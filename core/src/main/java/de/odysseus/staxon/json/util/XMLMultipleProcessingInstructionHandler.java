@@ -15,8 +15,6 @@
  */
 package de.odysseus.staxon.json.util;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -24,17 +22,12 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.xml.XMLConstants;
-import javax.xml.namespace.QName;
-import javax.xml.stream.Location;
 import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.events.Characters;
-import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.ProcessingInstruction;
-import javax.xml.stream.events.StartElement;
 
+import de.odysseus.staxon.event.SimpleXMLEventFactory;
 import de.odysseus.staxon.json.JsonXMLStreamConstants;
 
 /**
@@ -42,86 +35,8 @@ import de.odysseus.staxon.json.JsonXMLStreamConstants;
  * to handle path matching and insert <code>&lt;xml-multiple&gt;</code> processing instruction events.
  */
 class XMLMultipleProcessingInstructionHandler {
-	private static final ProcessingInstruction MULTIPLE_PI = new ProcessingInstruction() {	
-		@Override
-		public void writeAsEncodedUnicode(Writer writer) throws XMLStreamException {
-			try {
-				writer.write("<?");
-				writer.write(getTarget());
-				writer.write("?>");
-			} catch (IOException e) {
-				throw new XMLStreamException(e);
-			}
-		}		
-		@Override
-		public boolean isStartElement() {
-			return false;
-		}
-		@Override
-		public boolean isStartDocument() {
-			return false;
-		}		
-		@Override
-		public boolean isProcessingInstruction() {
-			return true;
-		}
-		@Override
-		public boolean isNamespace() {
-			return false;
-		}
-		@Override
-		public boolean isEntityReference() {
-			return false;
-		}
-		@Override
-		public boolean isEndElement() {
-			return false;
-		}
-		@Override
-		public boolean isEndDocument() {
-			return false;
-		}
-		@Override
-		public boolean isCharacters() {
-			return false;
-		}
-		@Override
-		public boolean isAttribute() {
-			return false;
-		}
-		@Override
-		public QName getSchemaType() {
-			return null;
-		}
-		@Override
-		public Location getLocation() {
-			return null;
-		}
-		@Override
-		public int getEventType() {
-			return XMLStreamConstants.PROCESSING_INSTRUCTION;
-		}		
-		@Override
-		public StartElement asStartElement() {
-			return null;
-		}
-		@Override
-		public EndElement asEndElement() {
-			return null;
-		}		
-		@Override
-		public Characters asCharacters() {
-			return null;
-		}
-		@Override
-		public String getTarget() {
-			return JsonXMLStreamConstants.MULTIPLE_PI_TARGET;
-		}		
-		@Override
-		public String getData() {
-			return null;
-		}
-	};
+	private static final ProcessingInstruction MULTIPLE_PI =
+			new SimpleXMLEventFactory().createProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET, null);
 	
 	/**
 	 * Processing instruction writer
