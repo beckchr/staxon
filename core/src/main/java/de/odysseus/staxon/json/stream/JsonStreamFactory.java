@@ -28,6 +28,12 @@ import java.util.Properties;
 
 import javax.xml.stream.FactoryConfigurationError;
 
+/**
+ * Abstract JSON stream ({@link JsonStreamSource} and {@link JsonStreamTarget}) factory.
+ * 
+ * <p>This class provides the static {@link #newFactory()} method to lookup and instantiate a default
+ * implementation using the Services API (as detailed in the JAR specification).</p>
+ */
 public abstract class JsonStreamFactory {
 	private static String getMetaInfServicesClassName(Class<?> serviceInterface, ClassLoader classLoader) {
 		String serviceId = "META-INF/services/" + serviceInterface.getName();
@@ -141,9 +147,37 @@ public abstract class JsonStreamFactory {
 		}
 	}
 
+	/**
+	 * Create stream source.
+	 * @param input
+	 * @return stream source
+	 * @throws IOException
+	 */
 	public abstract JsonStreamSource createJsonStreamSource(InputStream input) throws IOException;
+	
+	/**
+	 * Create stream source.
+	 * @param reader
+	 * @return stream source
+	 * @throws IOException
+	 */
 	public abstract JsonStreamSource createJsonStreamSource(Reader reader) throws IOException;
-		
+
+	/**
+	 * Create stream target.
+	 * @param output
+	 * @param pretty
+	 * @return stream target
+	 * @throws IOException
+	 */
 	public abstract JsonStreamTarget createJsonStreamTarget(OutputStream output, boolean pretty) throws IOException;
+	
+	/**
+	 * Create stream target.
+	 * @param writer
+	 * @param pretty
+	 * @return stream target
+	 * @throws IOException
+	 */
 	public abstract JsonStreamTarget createJsonStreamTarget(Writer writer, boolean pretty) throws IOException;
 }

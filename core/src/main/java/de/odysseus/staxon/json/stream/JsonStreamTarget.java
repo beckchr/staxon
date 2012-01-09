@@ -19,11 +19,45 @@ import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
 
+/**
+ * JSON stream target.
+ */
 public interface JsonStreamTarget extends Closeable, Flushable {
+	/**
+	 * Write name.
+	 * @param name
+	 * @throws IOException
+	 */
 	public void name(String name) throws IOException;
+	
+	/**
+	 * Write value.
+	 * @param value
+	 * @throws IOException
+	 */
 	public void value(String value) throws IOException;
+	
+	/**
+	 * Start object
+	 * @throws IOException
+	 */
 	public void startObject() throws IOException;
+	
+	/**
+	 * End object.
+	 * @throws IOException
+	 */
 	public void endObject() throws IOException;
+	
+	/**
+	 * Start array.
+	 * @throws IOException
+	 */
 	public void startArray() throws IOException;
+	
+	/**
+	 * End array.
+	 * @throws IOException
+	 */
 	public void endArray() throws IOException;
 }

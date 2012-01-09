@@ -15,12 +15,42 @@
  */
 package de.odysseus.staxon.json.stream;
 
+/**
+ * JSON stream token.
+ */
 public enum JsonStreamToken {
+	/**
+	 * Start object
+	 */
 	START_OBJECT,
+
+	/**
+	 * End object
+	 */
 	END_OBJECT,
+	
+	/**
+	 * Start array
+	 */
 	START_ARRAY,
+	
+	/**
+	 * End array
+	 */
 	END_ARRAY,
+	
+	/**
+	 * Field name
+	 */
 	NAME,
+	
+	/**
+	 * Simple value
+	 */
 	VALUE,
+	
+	/**
+	 * End of input
+	 */
 	NONE;
 }

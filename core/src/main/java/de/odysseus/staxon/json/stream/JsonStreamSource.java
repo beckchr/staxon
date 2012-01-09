@@ -18,13 +18,53 @@ package de.odysseus.staxon.json.stream;
 import java.io.Closeable;
 import java.io.IOException;
 
+/**
+ * JSON stream source.
+ */
 public interface JsonStreamSource extends Closeable {
+	/**
+	 * Consume {@link JsonStreamToken#NAME} token.
+	 * @return name
+	 * @throws IOException
+	 */
 	public String name() throws IOException;
+	
+	/**
+	 * Consume {@link JsonStreamToken#VALUE} token.
+	 * Numbers and booleans are reported as strings, <code>null</code> values are reported as <code>null</code>.
+	 * @return value
+	 * @throws IOException
+	 */
 	public String value() throws IOException;
+	
+	/**
+	 * Consume {@link JsonStreamToken#START_OBJECT} token.
+	 * @throws IOException
+	 */
 	public void startObject() throws IOException;
+
+	/**
+	 * Consume {@link JsonStreamToken#END_OBJECT} token.
+	 * @throws IOException
+	 */
 	public void endObject() throws IOException;
+
+	/**
+	 * Consume {@link JsonStreamToken#START_ARRAY} token.
+	 * @throws IOException
+	 */
 	public void startArray() throws IOException;
+	
+	/**
+	 * Consume {@link JsonStreamToken#END_ARRAY} token.
+	 * @throws IOException
+	 */
 	public void endArray() throws IOException;
 
+	/**
+	 * Peek next token.
+	 * @return token
+	 * @throws IOException
+	 */
 	public JsonStreamToken peek() throws IOException;
 }
