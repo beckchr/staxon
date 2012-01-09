@@ -23,6 +23,9 @@ import javax.xml.stream.events.EntityReference;
 import javax.xml.stream.events.XMLEvent;
 import javax.xml.stream.util.EventReaderDelegate;
 
+/**
+ * Simple implementation of a filtered {@link XMLEventReader}.
+ */
 public class SimpleXMLFilteredEventReader extends EventReaderDelegate {
 	private final EventFilter filter;
 	
