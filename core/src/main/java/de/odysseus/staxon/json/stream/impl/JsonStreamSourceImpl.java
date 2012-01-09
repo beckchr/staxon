@@ -22,7 +22,7 @@ import de.odysseus.staxon.json.stream.JsonStreamSource;
 import de.odysseus.staxon.json.stream.JsonStreamToken;
 
 /**
- * Simple <code>JsonStreamSource</code> implementation.
+ * Default <code>JsonStreamSource</code> implementation.
  */
 class JsonStreamSourceImpl implements JsonStreamSource {
 	/**

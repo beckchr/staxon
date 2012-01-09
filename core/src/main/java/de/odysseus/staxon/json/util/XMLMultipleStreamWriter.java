@@ -27,9 +27,8 @@ import de.odysseus.staxon.util.StreamWriterDelegate;
  * element path. Use this class to trigger JSON array start events like this:
  * <pre>
  * XMLOutputFactory factory = new JsonXMLOutputFactory();
- * factory.setProperty(JsonXMLOutputFactory.PROP_MULTIPLE_PI, true);
  * XMLEventWriter writer = factory.createXMLStreamWriter(...);
- * writer = new XMLMultipleStreamWriter(writer, false, "/bob", ...);
+ * writer = new XMLMultipleStreamWriter(writer, false, "/alice/bob", ...);
  * </pre>
  */
 public class XMLMultipleStreamWriter extends StreamWriterDelegate {
@@ -57,9 +56,9 @@ public class XMLMultipleStreamWriter extends StreamWriterDelegate {
 	
 	/**
 	 * Add path to trigger <code>&lt;?xml-multiple?></code> PI.
-	 * The path must start with <code>'/'</code> and contain
-	 * local element names, separated by <code>'/'</code>, e.g.
-	 * <code>"/foo/bar"</code> or <code>"/foo/bar/baz"</code>.
+	 * The path may start with <code>'/'</code> and contain local element
+	 * names, separated by <code>'/'</code>, e.g
+	 * <code>"/foo/bar"</code>, <code>"foo/bar"</code> or <code>"bar"</code>.
 	 * @param path multiple path
 	 * @throws XMLStreamException if the path is invalid
 	 */

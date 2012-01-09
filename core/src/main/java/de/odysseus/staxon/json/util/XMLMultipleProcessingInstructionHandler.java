@@ -133,9 +133,11 @@ class XMLMultipleProcessingInstructionHandler {
 
 	/**
 	 * Add path to trigger <code>&lt;?xml-multiple?></code> PI.
-	 * The path must start with <code>'/'</code> and contain element
-	 * names from the root, separated by <code>'/'</code>, e.g
-	 * <code>"/foo/bar"</code> or <code>"/foo/bar:baz"</code>.
+	 * The path may start with <code>'/'</code> and contain element
+	 * names, separated by <code>'/'</code>, e.g
+	 * <code>"/foo/bar"</code>, <code>"foo/bar"</code> or <code>"bar"</code>.
+	 * If <code>matchPrefixes</code> isv set to <code>true</code>, element
+	 * names may be prefixed, e.g. <code>"p:foo/bar"</code>.
 	 * @param path
 	 */
 	void addMultiplePath(String path) throws XMLStreamException {

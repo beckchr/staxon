@@ -28,6 +28,9 @@ import de.odysseus.staxon.json.stream.JsonStreamSource;
 import de.odysseus.staxon.json.stream.JsonStreamTarget;
 import de.odysseus.staxon.json.stream.impl.Yylex;
 
+/**
+ * Default <code>JsonStreamFactory</code> implementation.
+ */
 public class JsonStreamFactoryImpl extends JsonStreamFactory {
 	@Override
 	public JsonStreamSource createJsonStreamSource(InputStream input) throws IOException {

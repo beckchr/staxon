@@ -21,7 +21,7 @@ import java.io.Writer;
 import de.odysseus.staxon.json.stream.JsonStreamTarget;
 
 /**
- * Simple <code>JsonStreamTarget</code> implementation.
+ * Default <code>JsonStreamTarget</code> implementation.
  */
 class JsonStreamTargetImpl implements JsonStreamTarget {
 	private final Writer writer;
