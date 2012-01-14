@@ -47,4 +47,4 @@ Visit the [Github project](http://github.com/beckchr/staxon/).
 StAXON is available under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
 
 
-_(c) 2011 Odysseus Software_
+_(c) 2011, 2012 Odysseus Software_
