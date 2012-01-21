@@ -15,11 +15,13 @@
  */
 package de.odysseus.staxon.base;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.xml.stream.StreamFilter;
 import javax.xml.stream.XMLEventReader;
@@ -78,10 +80,26 @@ public abstract class AbstractXMLInputFactory extends XMLInputFactory {
 				}
 			}
 			if (streamSource.getSystemId() != null) {
-				// TODO this stream will never be closed!
 				try {
-					return createXMLStreamReader(streamSource.getSystemId(), new URI(source.getSystemId()).toURL().openStream());
-				} catch (Exception e) {
+					final InputStream stream = new URI(source.getSystemId()).toURL().openStream();
+					return new StreamReaderDelegate(createXMLStreamReader(streamSource.getSystemId(), stream)) {
+						/*
+						 * Close underlying stream, otherwise it could never be done
+						 * @see javax.xml.stream.util.StreamReaderDelegate#close()
+						 */
+						@Override
+						public void close() throws XMLStreamException {
+							super.close();
+							try {
+								stream.close();
+							} catch (IOException e) {
+								// ignore
+							}
+						}
+					};
+				} catch (URISyntaxException e) {
+					throw new XMLStreamException("Cannot parse system id for reading: " + source.getSystemId(), e);
+				} catch (IOException e) {
 					throw new XMLStreamException("Cannot open system id as URL for reading: " + source.getSystemId(), e);
 				}
 			} else {
