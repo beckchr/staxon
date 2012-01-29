@@ -121,7 +121,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 		/*
 		 * initialize standard properties
 		 */
-		super.setProperty(IS_REPAIRING_NAMESPACES, Boolean.FALSE);
+		super.setProperty(IS_REPAIRING_NAMESPACES, config.isRepairingNamespaces());
 	}
 		
 	private JsonStreamTarget decorate(JsonStreamTarget target) {

@@ -116,4 +116,14 @@ public class JsonXMLConfigBuilder {
 		config.setVirtualRoot(QName.valueOf(virtualRoot));
 		return this;
 	}
+
+	/**
+	 * Set repairingNamespaces property and return receiver.
+	 * @param repairingNamespaces
+	 * @return this
+	 */
+	public JsonXMLConfigBuilder repairingNamespaces(boolean repairingNamespaces) {
+		config.setRepairingNamespaces(repairingNamespaces);
+		return this;
+	}
 }

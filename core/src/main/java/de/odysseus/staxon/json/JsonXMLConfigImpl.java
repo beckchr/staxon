@@ -31,6 +31,8 @@ public class JsonXMLConfigImpl implements JsonXMLConfig, Cloneable {
 	private boolean namespaceDeclarations = JsonXMLConfig.DEFAULT.isNamespaceDeclarations();
 	private char namespaceSeparator = JsonXMLConfig.DEFAULT.getNamespaceSeparator();
 	
+	private boolean repairingNamespaces = JsonXMLConfig.DEFAULT.isRepairingNamespaces();
+	
 	@Override
 	protected JsonXMLConfigImpl clone() {
 		try {
@@ -92,5 +94,14 @@ public class JsonXMLConfigImpl implements JsonXMLConfig, Cloneable {
 	
 	public void setVirtualRoot(QName virtualRoot) {
 		this.virtualRoot = virtualRoot;
+	}
+	
+	@Override
+	public boolean isRepairingNamespaces() {
+		return repairingNamespaces;
+	}
+	
+	public void setRepairingNamespaces(boolean repairingNamespaces) {
+		this.repairingNamespaces = repairingNamespaces;
 	}
 }

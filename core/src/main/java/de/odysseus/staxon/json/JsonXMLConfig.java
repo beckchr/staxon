@@ -16,6 +16,7 @@
 package de.odysseus.staxon.json;
 
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLOutputFactory;
 
 /**
  * <p>Json XML factory configuration interface.</p>
@@ -63,8 +64,12 @@ public interface JsonXMLConfig {
 		public QName getVirtualRoot() {
 			return null;
 		}
+		@Override
+		public boolean isRepairingNamespaces() {
+			return false;
+		}
 	};
-
+	
 	/**
 	 * <p>Trigger arrays automatically?</p>
 	 * @see JsonXMLOutputFactory#PROP_AUTO_ARRAY
@@ -121,4 +126,11 @@ public interface JsonXMLConfig {
 	 * @return virtual root
 	 */
 	public QName getVirtualRoot();
+
+	/**
+	 * <p>Repair namespaces when writing</+>
+	 * @see XMLOutputFactory#IS_REPAIRING_NAMESPACES
+	 * @return namespace-repairing flag
+	 */
+	public boolean isRepairingNamespaces();
 }
