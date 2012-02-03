@@ -8,7 +8,7 @@
 	<name>StAXON JAX-RS Sample</name>
 
 	<properties>
-		<staxon.version>0.9.4</staxon.version>
+		<staxon.version>1.0</staxon.version>
 		<jersey.version>1.11</jersey.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>

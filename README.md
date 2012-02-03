@@ -1,33 +1,21 @@
 # StAXON - JSON via StAX
 
-[StAXON](http://beckchr.github.com/staxon/) lets you read and write JSON using the Java Streaming API for XML (`javax.xml.stream`).
-
-More specifically, StAXON provides implementations of the
-
-- StAX Cursor API (`XMLStreamReader` and `XMLStreamWriter`)
-- StAX Event API (`XMLEventReader` and `XMLEventWriter`)
-- StAX Factory API (`XMLInputFactory` and `XMLOutputFactory`)
-
-for JSON.
-
-The availability of a StAX implementation acts as a door opener for JSON to powerful XML related technologies like
+[StAXON](http://beckchr.github.com/staxon/) lets you read and write JSON using the Java Streaming API
+for XML (`javax.xml.stream`). StAXON acts as a door opener for JSON to powerful XML related technologies like
 
 - XSL transformations (XSLT)
 - XML binding API (JAXB)
 - XML Schema Definition (XSD)
+- XPath, XQuery, ...
 
 ## Features
 
-- Supports [Jackson](http://jackson.codehaus.org/) and [Gson](http://code.google.com/p/google-gson/) as JSON streaming backends
-- Full XML namespace support
 - Support for JAXB and JAX-RS
-- Start JSON arrays via XML processing instruction
+- Trigger JSON arrays via XML processing instruction
+- Full XML namespace support
+- Support [Jackson](http://jackson.codehaus.org/) and [Gson](http://code.google.com/p/google-gson/) as JSON streaming backends
 - Memory efficient, even for very large documents
-- It's pretty fast ([benchmark](https://github.com/beckchr/staxon/wiki/Benchmark))…
-
-The XML-to-JSON [Mapping Convention](https://github.com/beckchr/staxon/wiki/Mapping-Convention) used by StAXON is
-similar to the [Badgerfish](http://www.sklar.com/badgerfish/) convention but attempts to avoid needless text-only
-JSON objects to generate a more compact JSON.
+- It's pretty fast ([benchmark](https://github.com/beckchr/staxon/wiki/Benchmark))...
 
 ## Documentation
 
