@@ -1,5 +1,5 @@
 /**
- * <p>This package provides classes to read and write JSON via StAX.</p>
+ * <p>Classes to read and write JSON via StAX.</p>
  * 
  * <p>The writer consumes processing instructions
  * <code>&lt;?xml-multiple element-name?&gt;</code> to properly insert JSON array tokens (<code>'['</code>
