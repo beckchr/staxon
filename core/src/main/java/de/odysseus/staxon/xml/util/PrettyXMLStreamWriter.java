@@ -76,13 +76,6 @@ public class PrettyXMLStreamWriter extends StreamWriterDelegate {
 		super.writeStartDocument(encoding, version);
 		handler.postStartDocument();
 	}
-
-	@Override
-	public void writeEndDocument() throws XMLStreamException {
-		handler.preEndDocument();
-		super.writeEndDocument();
-		handler.postEndDocument();
-	}
 	
 	@Override
 	public void writeStartElement(String localName) throws XMLStreamException {

@@ -163,6 +163,9 @@ class PrettyXMLWhitespaceHandler {
 
 	void postEndElement() throws XMLStreamException {
 		leaf = false;
+		if (depth == 0) {
+			writer.add(newline);
+		}
 	}
 
 	void preEmptyELement() throws XMLStreamException {
@@ -178,12 +181,5 @@ class PrettyXMLWhitespaceHandler {
 	}
 
 	void postCharacters() {
-	}
-
-	void preEndDocument() throws XMLStreamException {
-	}
-
-	void postEndDocument() throws XMLStreamException {
-		writer.add(newline);
 	}
 }
