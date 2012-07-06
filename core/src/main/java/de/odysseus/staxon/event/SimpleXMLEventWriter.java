@@ -115,7 +115,7 @@ public class SimpleXMLEventWriter implements XMLEventWriter {
 
 	@Override
 	public void add(XMLEventReader reader) throws XMLStreamException {
-		while (reader.hasNext()) {
+		while (reader.peek() != null) {
 			add(reader.nextEvent());
 		}
 	}
