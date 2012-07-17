@@ -95,6 +95,9 @@ class JsonStreamSourceImpl implements JsonStreamSource {
 	private JsonStreamToken next() throws IOException {
 		symbol = scanner.nextSymbol();
 		if (symbol == Scanner.Symbol.EOF) {
+			if (depth != 0 || arrays[depth]) {
+				throw new IOException("Premature EOF");
+			}
 			return JsonStreamToken.NONE;
 		}
 		if (token == null) {
@@ -124,6 +127,12 @@ class JsonStreamSourceImpl implements JsonStreamSource {
 				arrays[depth] = false;
 				return JsonStreamToken.END_ARRAY;
 			case END_OBJECT:
+				if (arrays[depth]) {
+					throw new IOException("Unclosed array");
+				}
+				if (depth == 0) {
+					throw new IOException("Not in an object");
+				}
 				depth--;
 				return JsonStreamToken.END_OBJECT;
 			default:

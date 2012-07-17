@@ -20,18 +20,33 @@ import java.io.StringReader;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class JsonXMLStreamReaderTest {
+	@Rule
+	public final ExpectedException expectedException = ExpectedException.none();
+	
+	void readInvalid(String input, Class<? extends Exception> exceptionClass, String exceptiondMessage) throws Exception {
+		expectedException.expect(exceptionClass);
+	    expectedException.expectMessage(exceptiondMessage);
+	    XMLStreamReader reader = new JsonXMLInputFactory().createXMLStreamReader(new StringReader(input));
+	    while (reader.hasNext()) {
+	    	reader.next();
+	    }
+	}
+
 	void verify(XMLStreamReader reader, int expectedEventType, String expectedLocalName, String expectedText) {
 		Assert.assertEquals(expectedEventType, reader.getEventType());
 		Assert.assertEquals(expectedLocalName, reader.getLocalName());
 		Assert.assertEquals(expectedText, reader.getText());
 	}
-
+	
 	/**
 	 * <code>&lt;alice&gt;bob&lt;/alice&gt;</code>
 	 */
@@ -287,5 +302,40 @@ public class JsonXMLStreamReaderTest {
 		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
 		Assert.assertFalse(reader.hasNext());
 		reader.close();
+	}
+
+	@Test
+	public void testInvalid_UnclosedArray() throws Exception {
+		readInvalid("{\"alice\":[\"bob\"}}", XMLStreamException.class, "Unclosed array");
+	}
+
+	@Test
+	public void testInvalid_UnclosedArray2() throws Exception {
+		readInvalid("[\"edgar\",\"david\"}", XMLStreamException.class, "Unclosed array");
+	}
+
+	@Test
+	public void testInvalid_NotInAnArray() throws Exception {
+		readInvalid("{\"alice\":\"bob\"]", XMLStreamException.class, "Not in an array");
+	}
+
+	@Test
+	public void testInvalid_NotInAnArray2() throws Exception {
+		readInvalid("{\"alice\":[\"bob\"]]", XMLStreamException.class, "Not in an array");
+	}
+
+	@Test
+	public void testInvalid_NotInAnObject() throws Exception {
+		readInvalid("{\"alice\":\"bob\"}}", XMLStreamException.class, "Not in an object");
+	}
+
+	@Test
+	public void testInvalid_UnexpectedSymbol() throws Exception {
+		readInvalid("{\"alice\":{\"bob\":\"charlie\"}:}", XMLStreamException.class, "Unexpected symbol: COLON");
+	}
+
+	@Test
+	public void testInvalid_PrematureEOF() throws Exception {
+		readInvalid("[\"edgar\",\"david\"", XMLStreamException.class, "Premature EOF");
 	}
 }
