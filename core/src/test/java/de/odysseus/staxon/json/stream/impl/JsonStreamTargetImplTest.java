@@ -26,7 +26,7 @@ public class JsonStreamTargetImplTest {
 	@Test
 	public void testStringValue() throws IOException {
 		StringWriter writer = new StringWriter();
-		JsonStreamTargetImpl target = new JsonStreamTargetImpl(writer, true, false);
+		JsonStreamTargetImpl target = new JsonStreamTargetImpl(writer, true);
 		
 		target.value("bob");
 
@@ -38,7 +38,7 @@ public class JsonStreamTargetImplTest {
 	@Test
 	public void testObjectValue() throws IOException {
 		StringWriter writer = new StringWriter();
-		JsonStreamTargetImpl target = new JsonStreamTargetImpl(writer, true, false);
+		JsonStreamTargetImpl target = new JsonStreamTargetImpl(writer, true);
 		
 		target.startObject();
 		target.name("alice");
@@ -53,7 +53,7 @@ public class JsonStreamTargetImplTest {
 	@Test
 	public void testArrayValue() throws IOException {
 		StringWriter writer = new StringWriter();
-		JsonStreamTargetImpl target = new JsonStreamTargetImpl(writer, true, false);
+		JsonStreamTargetImpl target = new JsonStreamTargetImpl(writer, true);
 		
 		target.startArray();
 		target.value("bob");
@@ -67,7 +67,7 @@ public class JsonStreamTargetImplTest {
 	@Test
 	public void testArray1() throws IOException {
 		StringWriter writer = new StringWriter();
-		JsonStreamTargetImpl target = new JsonStreamTargetImpl(writer, true, false);
+		JsonStreamTargetImpl target = new JsonStreamTargetImpl(writer, true);
 		
 		target.startObject();
 		target.name("alice");
@@ -84,7 +84,7 @@ public class JsonStreamTargetImplTest {
 	@Test
 	public void testArray2() throws IOException {
 		StringWriter writer = new StringWriter();
-		JsonStreamTargetImpl target = new JsonStreamTargetImpl(writer, true, false);
+		JsonStreamTargetImpl target = new JsonStreamTargetImpl(writer, true);
 		
 		target.startObject();
 		target.name("alice");
@@ -105,7 +105,7 @@ public class JsonStreamTargetImplTest {
 	@Test
 	public void testArray3() throws IOException {
 		StringWriter writer = new StringWriter();
-		JsonStreamTargetImpl target = new JsonStreamTargetImpl(writer, true, false);
+		JsonStreamTargetImpl target = new JsonStreamTargetImpl(writer, true);
 		
 		target.startObject();
 		target.name("alice");
@@ -129,7 +129,7 @@ public class JsonStreamTargetImplTest {
 	@Test
 	public void testString() throws IOException {
 		StringWriter writer = new StringWriter();
-		JsonStreamTargetImpl target = new JsonStreamTargetImpl(writer, true, false);
+		JsonStreamTargetImpl target = new JsonStreamTargetImpl(writer, true);
 		
 		target.startArray();
 		target.value("");

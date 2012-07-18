@@ -26,12 +26,37 @@ import java.io.Writer;
 import de.odysseus.staxon.json.stream.JsonStreamFactory;
 import de.odysseus.staxon.json.stream.JsonStreamSource;
 import de.odysseus.staxon.json.stream.JsonStreamTarget;
-import de.odysseus.staxon.json.stream.impl.Yylex;
 
 /**
  * Default <code>JsonStreamFactory</code> implementation.
  */
 public class JsonStreamFactoryImpl extends JsonStreamFactory {
+	private final String prettyIndent;
+	private final String prettyNewline;
+	private final String prettySpace;
+
+	/**
+	 * Create instance.
+	 * Petty printing will use <code>"\t"</code> for indentation (per level),
+	 * <code>"\n"</code> as line separator and <code>" "</code> to decorate
+	 * colons, commas, etc.
+	 */
+	public JsonStreamFactoryImpl() {
+		this(" ", "\t", "\n");
+	}
+	
+	/**
+	 * Create instance.
+	 * @param prettySpace inserted around colons, commas, etc
+	 * @param prettyIndent indentation per depth level
+	 * @param prettyNewline newline character sequence
+	 */
+	public JsonStreamFactoryImpl(String prettySpace, String prettyIndent, String prettyNewline) {
+		this.prettySpace = prettySpace;
+		this.prettyIndent = prettyIndent;
+		this.prettyNewline = prettyNewline;
+	}
+	
 	@Override
 	public JsonStreamSource createJsonStreamSource(InputStream input) throws IOException {
 		return createJsonStreamSource(new InputStreamReader(input, "UTF-8"));
@@ -49,6 +74,10 @@ public class JsonStreamFactoryImpl extends JsonStreamFactory {
 	
 	@Override
 	public JsonStreamTarget createJsonStreamTarget(Writer writer, boolean pretty) {
-		return new JsonStreamTargetImpl(writer, false, pretty);
+		if (pretty) {
+			return new JsonStreamTargetImpl(writer, false, prettySpace, prettyIndent, prettyNewline);
+		} else {
+			return new JsonStreamTargetImpl(writer, false);
+		}
 	}
 }

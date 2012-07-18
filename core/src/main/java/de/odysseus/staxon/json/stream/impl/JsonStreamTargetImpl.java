@@ -30,27 +30,33 @@ class JsonStreamTargetImpl implements JsonStreamTarget {
 	private final StringBuilder buffer = new StringBuilder();
 	private final boolean closeWriter;
 	
-	private final boolean pretty;
 	private final String[] indent;
-	private final String newline;
+	private final String space;
 
 	private int depth = 0;
-	
-	JsonStreamTargetImpl(Writer writer, boolean closeWriter, boolean pretty) {
+
+	JsonStreamTargetImpl(Writer writer, boolean closeWriter) {
+		this(writer, closeWriter, null, null, null);
+	}
+
+	JsonStreamTargetImpl(Writer writer, boolean closeWriter, String prettySpace, String prettyIndent, String prettyNewline) {
 		this.writer = writer;
 		this.closeWriter = closeWriter;
-		this.pretty = pretty;
+		this.space = prettySpace;
 		
-		if (pretty) {
-			this.newline = "\n";
+		if (prettyIndent != null || prettyNewline != null) {
 			this.indent = new String[64];
 			StringBuilder builder = new StringBuilder();
+			if (prettyNewline != null) {
+				builder.append(prettyNewline);
+			}
 			for (int i = 0; i < 64; i++) {
 				indent[i] = builder.toString();
-				builder.append("\t");
+				if (prettyIndent != null) {
+					builder.append(prettyIndent);
+				}
 			}
 		} else {
-			this.newline = null;
 			this.indent = null;
 		}
 	}
@@ -112,15 +118,16 @@ class JsonStreamTargetImpl implements JsonStreamTarget {
 			writer.write(',');
 		}
 		namePos[depth]++;
-		if (pretty) {
-			writer.write(newline);
+		if (indent != null) {
 			writer.write(indent[depth]);
+		} else if (space != null) {
+			writer.write(space);
 		}
 		writer.write('"');
 		writer.write(name);
 		writer.write('"');
-		if (pretty) {
-			writer.write(' ');
+		if (space != null) {
+			writer.write(space);
 		}
 		writer.write(':');
 	}
@@ -133,8 +140,8 @@ class JsonStreamTargetImpl implements JsonStreamTarget {
 			}
 			arrayPos[depth]++;
 		}
-		if (pretty) {
-			writer.write(' ');
+		if (space != null) {
+			writer.write(space);
 		}
 		if (value == null) {
 			writer.write("null");
@@ -153,8 +160,8 @@ class JsonStreamTargetImpl implements JsonStreamTarget {
 			}
 			arrayPos[depth]++;
 		}
-		if (pretty && (depth > 0 || arrayPos[depth] > 0)) {
-			writer.write(' ');
+		if (space != null && (depth > 0 || arrayPos[depth] > 0)) {
+			writer.write(space);
 		}
 		writer.write('{');
 		depth++;
@@ -165,9 +172,10 @@ class JsonStreamTargetImpl implements JsonStreamTarget {
 	public void endObject() throws IOException {
 		namePos[depth] = 0;
 		depth--;
-		if (pretty) {
-			writer.write(newline);
+		if (indent != null) {
 			writer.write(indent[depth]);
+		} else if (space != null) {
+			writer.write(space);
 		}
 		writer.write('}');
 		if (depth == 0) {
@@ -180,8 +188,8 @@ class JsonStreamTargetImpl implements JsonStreamTarget {
 		if (arrayPos[depth] > 0) {
 			throw new IOException("Nested arrays are not supported!");
 		}
-		if (pretty && depth > 0) {
-			writer.write(' ');
+		if (space != null && depth > 0) {
+			writer.write(space);
 		}
 		writer.write('[');
 		arrayPos[depth] = 1;
@@ -190,8 +198,8 @@ class JsonStreamTargetImpl implements JsonStreamTarget {
 	@Override
 	public void endArray() throws IOException {
 		arrayPos[depth] = 0;
-		if (pretty) {
-			writer.write(' ');
+		if (space != null) {
+			writer.write(space);
 		}
 		writer.write(']');
 	}
