@@ -21,15 +21,14 @@ import javax.xml.namespace.QName;
 
 import de.odysseus.staxon.json.stream.JsonStreamTarget;
 
-public class RemoveRootTarget implements JsonStreamTarget {
-	private final JsonStreamTarget delegate;
+public class RemoveRootTarget extends StreamTargetDelegate {
 	private final QName root;
 	private final char namespaceSeparator;
 	
 	private int depth;
 
 	public RemoveRootTarget(JsonStreamTarget delegate, QName root, char namespaceSeparator) {
-		this.delegate = delegate;
+		super(delegate);
 		this.root = root;
 		this.namespaceSeparator = namespaceSeparator;
 	}
@@ -37,7 +36,7 @@ public class RemoveRootTarget implements JsonStreamTarget {
 	@Override
 	public void name(String name) throws IOException {
 		if (depth > 1) {
-			delegate.name(name);
+			super.name(name);
 		} else {
 			String localPart = name.substring(name.indexOf(namespaceSeparator) + 1);
 			if (!localPart.equals(root.getLocalPart())) {
@@ -47,41 +46,16 @@ public class RemoveRootTarget implements JsonStreamTarget {
 	}
 
 	@Override
-	public void value(String value) throws IOException {
-		delegate.value(value);
-	}
-
-	@Override
 	public void startObject() throws IOException {
 		if (depth++ > 0) {
-			delegate.startObject();
+			super.startObject();
 		}
 	}
 
 	@Override
 	public void endObject() throws IOException {
 		if (--depth > 0) {
-			delegate.endObject();
+			super.endObject();
 		}
-	}
-
-	@Override
-	public void startArray() throws IOException {
-		delegate.startArray();
-	}
-
-	@Override
-	public void endArray() throws IOException {
-		delegate.endArray();
-	}
-
-	@Override
-	public void flush() throws IOException {
-		delegate.flush();
-	}
-
-	@Override
-	public void close() throws IOException {
-		delegate.close();
 	}
 }

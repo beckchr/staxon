@@ -23,7 +23,7 @@ import javax.xml.namespace.QName;
 import de.odysseus.staxon.json.stream.JsonStreamSource;
 import de.odysseus.staxon.json.stream.JsonStreamToken;
 
-public class AddRootSource implements JsonStreamSource {
+public class AddRootSource extends StreamSourceDelegate {
 	private enum State {
 		START_DOC,
 		ROOT_NAME,
@@ -33,7 +33,6 @@ public class AddRootSource implements JsonStreamSource {
 		DELEGATE,
 		END_DOC
 	}
-	private final JsonStreamSource delegate;
 	private final QName root;
 	private final char namespaceSeparator;
 	
@@ -41,7 +40,7 @@ public class AddRootSource implements JsonStreamSource {
 	private int depth = 0;
 
 	public AddRootSource(JsonStreamSource delegate, QName root, char namespaceSeparator) {
-		this.delegate = delegate;
+		super(delegate);
 		this.root = root;
 		this.namespaceSeparator = namespaceSeparator;
 	}
@@ -67,7 +66,7 @@ public class AddRootSource implements JsonStreamSource {
 				return '@' + XMLConstants.XMLNS_ATTRIBUTE + namespaceSeparator + root.getLocalPart();
 			}
 		}
-		return delegate.name();
+		return super.name();
 	}
 
 	@Override
@@ -76,7 +75,7 @@ public class AddRootSource implements JsonStreamSource {
 			state = State.DELEGATE;
 			return root.getNamespaceURI();
 		}
-		return delegate.value();
+		return super.value();
 	}
 
 	@Override
@@ -87,7 +86,7 @@ public class AddRootSource implements JsonStreamSource {
 			if (state == State.ROOT_XMLNS_START) {
 				state = State.ROOT_XMLNS_NAME;
 			}
-			delegate.startObject();
+			super.startObject();
 		}
 		depth++;
 	}
@@ -98,23 +97,13 @@ public class AddRootSource implements JsonStreamSource {
 			state = null;
 			return;
 		}
-		if (depth == 1 && state == State.DELEGATE && delegate.peek() == JsonStreamToken.NONE) {
+		if (depth == 1 && state == State.DELEGATE && super.peek() == JsonStreamToken.NONE) {
 			state = State.END_DOC;
 		}
 		if (state != State.END_DOC) {
-			delegate.endObject();
+			super.endObject();
 		}
 		depth--;
-	}
-
-	@Override
-	public void startArray() throws IOException {
-		delegate.startArray();
-	}
-
-	@Override
-	public void endArray() throws IOException {
-		delegate.endArray();
 	}
 
 	@Override
@@ -129,40 +118,10 @@ public class AddRootSource implements JsonStreamSource {
 		case ROOT_XMLNS_VALUE: return JsonStreamToken.VALUE;
 		case END_DOC: return JsonStreamToken.END_OBJECT;
 		}
-		JsonStreamToken result = delegate.peek();
+		JsonStreamToken result = super.peek();
 		if (depth == 1 && result == JsonStreamToken.NONE) {
 			result = JsonStreamToken.END_OBJECT;
 		}
 		return result;
-	}
-
-	@Override
-	public void close() throws IOException {
-		delegate.close();
-	}
-	
-	@Override
-	public int getLineNumber() {
-		return delegate.getLineNumber();
-	}
-	
-	@Override
-	public int getColumnNumber() {
-		return delegate.getColumnNumber();
-	}
-	
-	@Override
-	public int getCharacterOffset() {
-		return delegate.getCharacterOffset();
-	}
-	
-	@Override
-	public String getPublicId() {
-		return null;
-	}
-
-	@Override
-	public String getSystemId() {
-		return null;
 	}
 }
