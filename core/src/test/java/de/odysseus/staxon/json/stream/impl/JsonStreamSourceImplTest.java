@@ -20,11 +20,47 @@ import java.io.StringReader;
 
 import junit.framework.Assert;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import de.odysseus.staxon.json.stream.JsonStreamToken;
 
 public class JsonStreamSourceImplTest {
+	@Rule
+	public final ExpectedException expectedException = ExpectedException.none();
+	
+	void readInvalid(String input, Class<? extends Exception> exceptionClass, String exceptiondMessage) throws IOException {
+		expectedException.expect(exceptionClass);
+	    expectedException.expectMessage(exceptiondMessage);
+		StringReader reader = new StringReader(input);
+		JsonStreamSourceImpl source = new JsonStreamSourceImpl(new Yylex(reader), true);
+		while (source.peek() != JsonStreamToken.NONE) {
+			switch (source.peek()) {
+			case START_OBJECT:
+				source.startObject();
+				break;
+			case END_OBJECT:
+				source.endObject();
+				break;
+			case START_ARRAY:
+				source.startArray();
+				break;
+			case END_ARRAY:
+				source.endArray();
+				break;
+			case NAME:
+				source.name();
+				break;
+			case VALUE:
+				source.value();
+				break;
+			default:
+				Assert.fail();
+			}
+		}
+	}
+
 	@Test
 	public void testStringValue() throws IOException {
 		StringReader reader = new StringReader("\"bob\"");
@@ -309,5 +345,40 @@ public class JsonStreamSourceImplTest {
 		
 		Assert.assertEquals(JsonStreamToken.NONE, source.peek());
 		source.close();
+	}
+
+	@Test
+	public void testInvalid_UnclosedArray() throws IOException {
+		readInvalid("{\"alice\":[\"bob\"}}", IOException.class, "unclosed array");
+	}
+
+	@Test
+	public void testInvalid_UnclosedArray2() throws IOException {
+		readInvalid("[\"edgar\",\"david\"}", IOException.class, "unclosed array");
+	}
+
+	@Test
+	public void testInvalid_NotInAnArray() throws IOException {
+		readInvalid("{\"alice\":\"bob\"]", IOException.class, "not in an array");
+	}
+
+	@Test
+	public void testInvalid_NotInAnArray2() throws IOException {
+		readInvalid("{\"alice\":[\"bob\"]]", IOException.class, "not in an array");
+	}
+
+	@Test
+	public void testInvalid_NotInAnObject() throws IOException {
+		readInvalid("{\"alice\":\"bob\"}}", IOException.class, "not in an object");
+	}
+
+	@Test
+	public void testInvalid_UnexpectedSymbol() throws IOException {
+		readInvalid("{\"alice\":{\"bob\":\"charlie\"}:}", IOException.class, "unexpected symbol: COLON");
+	}
+
+	@Test
+	public void testInvalid_PrematureEOF() throws IOException {
+		readInvalid("[\"edgar\",\"david\"", IOException.class, "premature EOF");
 	}
 }
