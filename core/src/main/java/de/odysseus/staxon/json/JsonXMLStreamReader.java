@@ -57,7 +57,7 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 	 * @throws XMLStreamException
 	 */
 	public JsonXMLStreamReader(JsonStreamSource source, boolean multiplePI, char namespaceSeparator) throws XMLStreamException {
-		super(new ScopeInfo());
+		super(new ScopeInfo(), source);
 		this.source = source;
 		this.multiplePI = multiplePI;
 		this.namespaceSeparator = namespaceSeparator;

@@ -170,7 +170,7 @@ class JsonStreamSourceImpl implements JsonStreamSource {
 
 	private void require(JsonStreamToken token) throws IOException {
 		if (token != peek()) {
-			throw new IOException();
+			throw new IOException("Unexpected token: " + peek());
 		}
 	}
 	
@@ -220,5 +220,30 @@ class JsonStreamSourceImpl implements JsonStreamSource {
 			token = next();
 		}
 		return token;
+	}
+	
+	@Override
+	public int getLineNumber() {
+		return scanner.getLineNumber() + 1;
+	}
+	
+	@Override
+	public int getColumnNumber() {
+		return scanner.getColumnNumber() + 1;
+	}
+	
+	@Override
+	public int getCharacterOffset() {
+		return scanner.getCharOffset();
+	}
+	
+	@Override
+	public String getPublicId() {
+		return null;
+	}
+
+	@Override
+	public String getSystemId() {
+		return null;
 	}
 }

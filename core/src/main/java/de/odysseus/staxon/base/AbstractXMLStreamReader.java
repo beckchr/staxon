@@ -35,11 +35,17 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		private final int type;
 		private final XMLStreamReaderScope<T> scope;
 		private final String text;
+		private final int lineNumber;
+		private final int columnNumber;
+		private final int characterOffset;
 
 		Event(int type, XMLStreamReaderScope<T> scope, String text) {
 			this.type = type;
 			this.scope = scope;
 			this.text = text;
+			this.lineNumber = locationProvider.getLineNumber();
+			this.columnNumber = locationProvider.getColumnNumber();
+			this.characterOffset = locationProvider.getCharacterOffset();
 		}
 
 		XMLStreamReaderScope<T> getScope() {
@@ -53,7 +59,32 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		String getText() {
 			return text;
 		}
-
+		
+		Location getLocation() {
+			return new Location() {
+				@Override
+				public int getLineNumber() {
+					return lineNumber;
+				}
+				@Override
+				public int getColumnNumber() {
+					return columnNumber;
+				}
+				@Override
+				public int getCharacterOffset() {
+					return characterOffset;
+				}
+				@Override
+				public String getPublicId() {
+					return locationProvider.getPublicId();
+				}
+				@Override
+				public String getSystemId() {
+					return locationProvider.getSystemId();
+				}
+			};
+		}
+		
 		@Override
 		public String toString() {
 			return new StringBuilder()
@@ -92,7 +123,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 				|| type == XMLStreamConstants.ENTITY_REFERENCE
 				|| type == XMLStreamConstants.SPACE;
 	}
-	
+
 	private static final Location UNKNOWN_LOCATION = new Location() {
 		@Override
 		public int getCharacterOffset() {
@@ -117,6 +148,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	};
 
 	private final Queue<Event> queue = new LinkedList<Event>();
+	private final Location locationProvider;
 
 	private XMLStreamReaderScope<T> scope;
 	private boolean moreTokens;
@@ -126,13 +158,22 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	private String encodingScheme;
 	private String version;
 	private Boolean standalone;	
-	
+
 	/**
 	 * Create new reader instance.
 	 * @param rootInfo root scope information
 	 */
 	public AbstractXMLStreamReader(T rootInfo) {
-		scope = new XMLStreamReaderScope<T>(XMLConstants.NULL_NS_URI, rootInfo);
+		this(rootInfo, UNKNOWN_LOCATION);
+	}	
+
+	/**
+	 * Create new reader instance.
+	 * @param rootInfo root scope information
+	 */
+	public AbstractXMLStreamReader(T rootInfo, Location locationProvider) {
+		this.scope = new XMLStreamReaderScope<T>(XMLConstants.NULL_NS_URI, rootInfo);
+		this.locationProvider = locationProvider;
 	}	
 	
 	private void ensureStartTagClosed() throws XMLStreamException {
@@ -194,7 +235,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	 */
 	protected void readStartDocument(String version, String encodingScheme, Boolean standalone) throws XMLStreamException {
 		if (startDocumentRead || !scope.isRoot()) {
-			throw new XMLStreamException("Cannot start document");
+			throw new XMLStreamException("Cannot start document", locationProvider);
 		}
 		queue.add(new Event(XMLStreamConstants.START_DOCUMENT, scope, null));
 		startDocumentRead = true;
@@ -234,7 +275,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	 */
 	protected void readAttr(String prefix, String localName, String namespaceURI, String value) throws XMLStreamException {
 		if (scope.isStartTagClosed()) {
-			throw new XMLStreamException("Cannot read attribute: element has children or text");
+			throw new XMLStreamException("Cannot read attribute: element has children or text", locationProvider);
 		}
 		if (prefix == null && namespaceURI == null) {
 			throw new IllegalArgumentException("at least one of prefix and namespaceURI must not be null!");
@@ -250,7 +291,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	 */
 	protected void readNsDecl(String prefix, String namespaceURI) throws XMLStreamException {
 		if (scope.isStartTagClosed()) {
-			throw new XMLStreamException("Cannot read namespace: element has children or text");
+			throw new XMLStreamException("Cannot read namespace: element has children or text", locationProvider);
 		}
 		if (prefix == null || namespaceURI == null) {
 			throw new IllegalArgumentException("at least one of prefix and namespaceURI must not be null!");
@@ -270,7 +311,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 			ensureStartTagClosed();
 			queue.add(new Event(type, scope, data));
 		} else {
-			throw new XMLStreamException("Unexpected event type " + getEventName(), getLocation());
+			throw new XMLStreamException("Unexpected event type " + getEventName(), locationProvider);
 		}
 	}
 
@@ -302,7 +343,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	 */
 	protected void readEndDocument() throws XMLStreamException {
 		if (!startDocumentRead || !scope.isRoot()) {
-			throw new XMLStreamException("Cannot start document");
+			throw new XMLStreamException("Cannot end document", locationProvider);
 		}
 		queue.add(new Event(XMLStreamConstants.END_DOCUMENT, scope, null));
 		startDocumentRead = false;
@@ -311,13 +352,13 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	@Override
 	public void require(int eventType, String namespaceURI, String localName) throws XMLStreamException {
 		if (eventType != getEventType()) {
-			throw new XMLStreamException("expected event type " + getEventName(eventType) + ", was " + getEventName(getEventType()));
+			throw new XMLStreamException("Expected event type " + getEventName(eventType) + ", was " + getEventName(getEventType()), getLocation());
 		}
 		if (namespaceURI != null && !namespaceURI.equals(getNamespaceURI())) {
-			throw new XMLStreamException("expected namespace " + namespaceURI + ", was " + getNamespaceURI());
+			throw new XMLStreamException("Expected namespace " + namespaceURI + ", was " + getNamespaceURI(), getLocation());
 		}
 		if (localName != null && !localName.equals(getLocalName())) {
-			throw new XMLStreamException("expected local name " + localName + ", was " + getLocalName());
+			throw new XMLStreamException("Expected local name " + localName + ", was " + getLocalName(), getLocation());
 		}
 	}
 
@@ -358,8 +399,8 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 			while (queue.isEmpty() && moreTokens) {
 				moreTokens = consume();
 			}
-		} catch (IOException ex) {
-			throw new XMLStreamException(ex);
+		} catch (IOException e) {
+			throw new XMLStreamException(e.getMessage(), locationProvider, e);
 		}
 		return !queue.isEmpty();
 	}
@@ -504,7 +545,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	
 	@Override
 	public Location getLocation() {
-		return UNKNOWN_LOCATION;
+		return event.getLocation();
 	}
 
 	@Override

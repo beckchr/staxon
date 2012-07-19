@@ -140,4 +140,29 @@ public class AddRootSource implements JsonStreamSource {
 	public void close() throws IOException {
 		delegate.close();
 	}
+	
+	@Override
+	public int getLineNumber() {
+		return delegate.getLineNumber();
+	}
+	
+	@Override
+	public int getColumnNumber() {
+		return delegate.getColumnNumber();
+	}
+	
+	@Override
+	public int getCharacterOffset() {
+		return delegate.getCharacterOffset();
+	}
+	
+	@Override
+	public String getPublicId() {
+		return null;
+	}
+
+	@Override
+	public String getSystemId() {
+		return null;
+	}
 }

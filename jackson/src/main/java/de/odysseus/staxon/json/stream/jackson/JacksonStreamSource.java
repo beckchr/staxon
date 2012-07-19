@@ -15,8 +15,11 @@
  */
 package de.odysseus.staxon.json.stream.jackson;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
+import org.codehaus.jackson.JsonLocation;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonToken;
 
@@ -25,7 +28,9 @@ import de.odysseus.staxon.json.stream.JsonStreamToken;
 
 class JacksonStreamSource implements JsonStreamSource {
 	private final JsonParser parser;
-	private JsonStreamToken peek;
+
+	private JsonStreamToken peek = null;
+	private JsonLocation location = JsonLocation.NA;
 	
 	JacksonStreamSource(JsonParser parser) {
 		this.parser = parser;
@@ -33,6 +38,7 @@ class JacksonStreamSource implements JsonStreamSource {
 
 	private JsonStreamToken read() throws IOException {
 		JsonToken token = parser.nextToken();
+		location = parser.getCurrentLocation();
 		if (token == null) {
 			return JsonStreamToken.NONE;
 		}
@@ -119,5 +125,36 @@ class JacksonStreamSource implements JsonStreamSource {
 	@Override
 	public void close() throws IOException {
 		parser.close();
+	}
+
+	@Override
+	public int getLineNumber() {
+		return location.getLineNr();
+	}
+
+	@Override
+	public int getColumnNumber() {
+		return location.getColumnNr();
+	}
+
+	@Override
+	public int getCharacterOffset() {
+		return (int)location.getCharOffset();
+	}
+	
+	@Override
+	public String getPublicId() {
+		return null;
+	}
+
+	@Override
+	public String getSystemId() {
+		if (location.getSourceRef() instanceof File) {
+			return ((File)location.getSourceRef()).toURI().toASCIIString();
+		}
+		if (location.getSourceRef() instanceof URL) {
+			return ((URL)location.getSourceRef()).toExternalForm();
+		}
+		return null;
 	}
 }

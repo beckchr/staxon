@@ -18,10 +18,12 @@ package de.odysseus.staxon.json.stream;
 import java.io.Closeable;
 import java.io.IOException;
 
+import javax.xml.stream.Location;
+
 /**
  * JSON stream source.
  */
-public interface JsonStreamSource extends Closeable {
+public interface JsonStreamSource extends Closeable, Location {
 	/**
 	 * Consume {@link JsonStreamToken#NAME} token.
 	 * @return name
