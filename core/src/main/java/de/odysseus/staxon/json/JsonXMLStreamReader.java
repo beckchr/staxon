@@ -164,16 +164,16 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 				return true;
 			}
 		case VALUE:
-			String text = source.value();
 			String name = scope.getInfo().currentTagName;
 			if (scope.getInfo().isArray()) {
 				scope.getInfo().incArraySize();
 				name = scope.getInfo().getArrayName();
 			}
 			if (getScope().isRoot() && !isStartDocumentRead()) { // hack: allow to read simple value
-				readData(text, XMLStreamConstants.CHARACTERS);
+				readData(source.value(), XMLStreamConstants.CHARACTERS);
 			} else {
 				readStartElementTag(name);
+				String text = source.value();
 				if (text != null) {
 					readData(text, XMLStreamConstants.CHARACTERS);
 				}

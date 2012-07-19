@@ -346,6 +346,61 @@ public class JsonStreamSourceImplTest {
 		Assert.assertEquals(JsonStreamToken.NONE, source.peek());
 		source.close();
 	}
+	
+	@Test
+	public void testLocation() throws IOException {
+		String input = "{\n\t\"alice\" : {\n\t\t\"bob\" : [ \"charlie\" ],\n\t\t\"edgar\" : \"david\"\n\t}\n}";
+//		System.out.println(input);
+		JsonStreamSourceImpl source = new JsonStreamSourceImpl(new Yylex(new StringReader(input)), true);
+
+		Assert.assertEquals(1, source.getLineNumber());
+		Assert.assertEquals(1, source.getColumnNumber());
+		Assert.assertEquals(0, source.getCharacterOffset());
+		source.startObject();
+		Assert.assertEquals(1, source.getLineNumber());
+		Assert.assertEquals(1, source.getColumnNumber());
+		Assert.assertEquals(0, source.getCharacterOffset());
+		source.name();
+		Assert.assertEquals(2, source.getLineNumber());
+		Assert.assertEquals(8, source.getColumnNumber());
+		Assert.assertEquals(9, source.getCharacterOffset());
+		source.startObject();
+		Assert.assertEquals(2, source.getLineNumber());
+		Assert.assertEquals(12, source.getColumnNumber());
+		Assert.assertEquals(13, source.getCharacterOffset());
+		source.name();
+		Assert.assertEquals(3, source.getLineNumber());
+		Assert.assertEquals(7, source.getColumnNumber());
+		Assert.assertEquals(21, source.getCharacterOffset());
+		source.startArray();
+		Assert.assertEquals(3, source.getLineNumber());
+		Assert.assertEquals(11, source.getColumnNumber());
+		Assert.assertEquals(25, source.getCharacterOffset());
+		source.value();
+		Assert.assertEquals(3, source.getLineNumber());
+		Assert.assertEquals(21, source.getColumnNumber());
+		Assert.assertEquals(35, source.getCharacterOffset());
+		source.endArray();
+		Assert.assertEquals(3, source.getLineNumber());
+		Assert.assertEquals(23, source.getColumnNumber());
+		Assert.assertEquals(37, source.getCharacterOffset());
+		source.name();
+		Assert.assertEquals(4, source.getLineNumber());
+		Assert.assertEquals(9, source.getColumnNumber());
+		Assert.assertEquals(48, source.getCharacterOffset());
+		source.value();
+		Assert.assertEquals(4, source.getLineNumber());
+		Assert.assertEquals(19, source.getColumnNumber());
+		Assert.assertEquals(58, source.getCharacterOffset());
+		source.endObject();
+		Assert.assertEquals(5, source.getLineNumber());
+		Assert.assertEquals(2, source.getColumnNumber());
+		Assert.assertEquals(61, source.getCharacterOffset());
+		source.endObject();
+		Assert.assertEquals(6, source.getLineNumber());
+		Assert.assertEquals(1, source.getColumnNumber());
+		Assert.assertEquals(63, source.getCharacterOffset());
+	}
 
 	@Test
 	public void testInvalid_UnclosedArray() throws IOException {

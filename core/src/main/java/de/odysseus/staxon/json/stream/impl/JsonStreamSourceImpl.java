@@ -55,13 +55,22 @@ class JsonStreamSourceImpl implements JsonStreamSource {
 	private final boolean[] arrays = new boolean[64];
 	private final boolean closeScanner;
 
-	private JsonStreamToken token;
-	private Scanner.Symbol symbol;
-	private int depth;
+	private JsonStreamToken token = null;
+	private Scanner.Symbol symbol = null;
+	private int depth = 0;
+	private boolean peeked = false;
+
+	private int lineNumber;
+	private int columnNumber;
+	private int charOffset;
+	
 	
 	JsonStreamSourceImpl(Scanner scanner, boolean closeScanner) {
 		this.scanner = scanner;
 		this.closeScanner = closeScanner;
+		this.lineNumber = scanner.getLineNumber();
+		this.columnNumber = scanner.getColumnNumber();
+		this.charOffset = scanner.getCharOffset();
 	}
 
 	private JsonStreamToken startJsonValue() throws IOException {
@@ -168,73 +177,76 @@ class JsonStreamSourceImpl implements JsonStreamSource {
 		}
 	}
 
-	private void require(JsonStreamToken token) throws IOException {
+	/**
+	 * Make the next token the current token.
+	 * Save location info from scanner to prevent changing location by peek()
+	 * @param token expected token
+	 * @throws IOException
+	 */
+	private void poll(JsonStreamToken token) throws IOException {
 		if (token != peek()) {
 			throw new IOException("Unexpected token: " + peek());
 		}
+		lineNumber = scanner.getLineNumber();
+		columnNumber = scanner.getColumnNumber();
+		charOffset = scanner.getCharOffset();
+		peeked = false;
 	}
 	
 	@Override
 	public String name() throws IOException {
-		require(JsonStreamToken.NAME);
-		String result = scanner.getText();
-		token = next();
-		return result;
+		poll(JsonStreamToken.NAME);
+		return scanner.getText();
 	}
 
 	@Override
 	public String value() throws IOException {
-		require(JsonStreamToken.VALUE);
-		String result = symbol == Scanner.Symbol.NULL ? null : scanner.getText();
-		token = next();
-		return result;
+		poll(JsonStreamToken.VALUE);
+		return symbol == Scanner.Symbol.NULL ? null : scanner.getText();
 	}
 
 	@Override
 	public void startObject() throws IOException {
-		require(JsonStreamToken.START_OBJECT);
-		token = next();
+		poll(JsonStreamToken.START_OBJECT);
 	}
 
 	@Override
 	public void endObject() throws IOException {
-		require(JsonStreamToken.END_OBJECT);
-		token = next();
+		poll(JsonStreamToken.END_OBJECT);
 	}
 
 	@Override
 	public void startArray() throws IOException {
-		require(JsonStreamToken.START_ARRAY);
-		token = next();
+		poll(JsonStreamToken.START_ARRAY);
 	}
 
 	@Override
 	public void endArray() throws IOException {
-		require(JsonStreamToken.END_ARRAY);
-		token = next();
+		poll(JsonStreamToken.END_ARRAY);
 	}
-
+	
 	@Override
 	public JsonStreamToken peek() throws IOException {
-		if (token == null) {
+		if (!peeked) {
 			token = next();
+			peeked = true;
 		}
 		return token;
 	}
 	
 	@Override
 	public int getLineNumber() {
-		return scanner.getLineNumber() + 1;
+		return lineNumber + 1;
 	}
 	
 	@Override
 	public int getColumnNumber() {
-		return scanner.getColumnNumber() + 1;
+		return columnNumber + 1;
 	}
 	
 	@Override
 	public int getCharacterOffset() {
-		return scanner.getCharOffset();
+		return charOffset;
 	}
 	
 	@Override
