@@ -33,8 +33,8 @@ public class JsonStreamSourceImplTest {
 	void readInvalid(String input, Class<? extends Exception> exceptionClass, String exceptiondMessage) throws IOException {
 		expectedException.expect(exceptionClass);
 	    expectedException.expectMessage(exceptiondMessage);
-		StringReader reader = new StringReader(input);
-		JsonStreamSourceImpl source = new JsonStreamSourceImpl(new Yylex(reader), true);
+
+		JsonStreamSourceImpl source = new JsonStreamSourceImpl(new Yylex(new StringReader(input)), true);
 		while (source.peek() != JsonStreamToken.NONE) {
 			switch (source.peek()) {
 			case START_OBJECT:
@@ -349,36 +349,36 @@ public class JsonStreamSourceImplTest {
 
 	@Test
 	public void testInvalid_UnclosedArray() throws IOException {
-		readInvalid("{\"alice\":[\"bob\"}}", IOException.class, "unclosed array");
+		readInvalid("{\"alice\":[\"bob\"}}", IOException.class, "Unclosed array");
 	}
 
 	@Test
 	public void testInvalid_UnclosedArray2() throws IOException {
-		readInvalid("[\"edgar\",\"david\"}", IOException.class, "unclosed array");
+		readInvalid("[\"edgar\",\"david\"}", IOException.class, "Unclosed array");
 	}
 
 	@Test
 	public void testInvalid_NotInAnArray() throws IOException {
-		readInvalid("{\"alice\":\"bob\"]", IOException.class, "not in an array");
+		readInvalid("{\"alice\":\"bob\"]", IOException.class, "Not in an array");
 	}
 
 	@Test
 	public void testInvalid_NotInAnArray2() throws IOException {
-		readInvalid("{\"alice\":[\"bob\"]]", IOException.class, "not in an array");
+		readInvalid("{\"alice\":[\"bob\"]]", IOException.class, "Not in an array");
 	}
 
 	@Test
 	public void testInvalid_NotInAnObject() throws IOException {
-		readInvalid("{\"alice\":\"bob\"}}", IOException.class, "not in an object");
+		readInvalid("{\"alice\":\"bob\"}}", IOException.class, "Not in an object");
 	}
 
 	@Test
 	public void testInvalid_UnexpectedSymbol() throws IOException {
-		readInvalid("{\"alice\":{\"bob\":\"charlie\"}:}", IOException.class, "unexpected symbol: COLON");
+		readInvalid("{\"alice\":{\"bob\":\"charlie\"}:}", IOException.class, "Unexpected symbol: COLON");
 	}
 
 	@Test
 	public void testInvalid_PrematureEOF() throws IOException {
-		readInvalid("[\"edgar\",\"david\"", IOException.class, "premature EOF");
+		readInvalid("[\"edgar\",\"david\"", IOException.class, "Premature EOF");
 	}
 }
