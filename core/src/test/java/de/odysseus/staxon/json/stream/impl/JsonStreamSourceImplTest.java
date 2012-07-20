@@ -17,6 +17,7 @@ package de.odysseus.staxon.json.stream.impl;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.StringWriter;
 
 import junit.framework.Assert;
 
@@ -25,6 +26,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import de.odysseus.staxon.json.stream.JsonStreamToken;
+import de.odysseus.staxon.json.stream.util.StreamSourceDelegate;
 
 public class JsonStreamSourceImplTest {
 	@Rule
@@ -34,33 +36,15 @@ public class JsonStreamSourceImplTest {
 		expectedException.expect(exceptionClass);
 	    expectedException.expectMessage(exceptiondMessage);
 
-		JsonStreamSourceImpl source = new JsonStreamSourceImpl(new Yylex(new StringReader(input)), true);
-		while (source.peek() != JsonStreamToken.NONE) {
-			switch (source.peek()) {
-			case START_OBJECT:
-				source.startObject();
-				break;
-			case END_OBJECT:
-				source.endObject();
-				break;
-			case START_ARRAY:
-				source.startArray();
-				break;
-			case END_ARRAY:
-				source.endArray();
-				break;
-			case NAME:
-				source.name();
-				break;
-			case VALUE:
-				source.value();
-				break;
-			default:
-				Assert.fail();
-			}
+		StreamSourceDelegate source =
+				new StreamSourceDelegate(new JsonStreamSourceImpl(new Yylex(new StringReader(input)), true));
+		try {
+			source.copy(new JsonStreamTargetImpl(new StringWriter(), true));
+		} finally {
+			source.close();
 		}
 	}
-
+	
 	@Test
 	public void testStringValue() throws IOException {
 		StringReader reader = new StringReader("\"bob\"");
@@ -316,16 +300,6 @@ public class JsonStreamSourceImplTest {
 		source.close();
 	}	
 
-	@Test(expected = IOException.class)
-	public void testUnexpected() throws IOException {
-		StringReader reader = new StringReader("\"alice\":\"bob\""); // missing document start/end
-		JsonStreamSourceImpl source = new JsonStreamSourceImpl(new Yylex(reader), true);
-
-		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		source.value();
-		source.peek();
-	}
-
 	@Test
 	public void testWhitespace() throws IOException {
 		StringReader reader = new StringReader("{\r  \"alice\" : \"bob\"\r\n}");
@@ -400,6 +374,7 @@ public class JsonStreamSourceImplTest {
 		Assert.assertEquals(6, source.getLineNumber());
 		Assert.assertEquals(1, source.getColumnNumber());
 		Assert.assertEquals(63, source.getCharacterOffset());
+		source.close();
 	}
 
 	@Test
@@ -430,6 +405,11 @@ public class JsonStreamSourceImplTest {
 	@Test
 	public void testInvalid_UnexpectedSymbol() throws IOException {
 		readInvalid("{\"alice\":{\"bob\":\"charlie\"}:}", IOException.class, "Unexpected symbol: COLON");
+	}
+
+	@Test
+	public void testInvalid_UnexpectedSymbol2() throws IOException {
+		readInvalid("\"alice\":\"bob\"", IOException.class, "Unexpected symbol: COLON");
 	}
 
 	@Test

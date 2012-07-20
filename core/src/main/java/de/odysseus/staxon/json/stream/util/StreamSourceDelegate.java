@@ -18,6 +18,7 @@ package de.odysseus.staxon.json.stream.util;
 import java.io.IOException;
 
 import de.odysseus.staxon.json.stream.JsonStreamSource;
+import de.odysseus.staxon.json.stream.JsonStreamTarget;
 import de.odysseus.staxon.json.stream.JsonStreamToken;
 
 /**
@@ -96,5 +97,42 @@ public class StreamSourceDelegate implements JsonStreamSource {
 	@Override
 	public JsonStreamToken peek() throws IOException {
 		return delegate.peek();
-	}	
+	}
+
+	/**
+	 * Copy events to given target until <code>peek() == JsonStreamToken.NONE</code>.
+	 * This method does <em>not</em> close streams. 
+	 * @param target
+	 * @throws IOException
+	 */
+	public void copy(JsonStreamTarget target) throws IOException {
+		while (true) {
+			switch (delegate.peek()) {
+			case START_OBJECT:
+				delegate.startObject();
+				target.startObject();
+				break;
+			case END_OBJECT:
+				delegate.endObject();
+				target.endObject();
+				break;
+			case START_ARRAY:
+				delegate.startArray();
+				target.startArray();
+				break;
+			case END_ARRAY:
+				delegate.endArray();
+				target.endArray();
+				break;
+			case NAME:
+				target.name(delegate.name());
+				break;
+			case VALUE:
+				target.value(delegate.value());
+				break;
+			case NONE:
+				return;
+			}
+		}		
+	}
 }
