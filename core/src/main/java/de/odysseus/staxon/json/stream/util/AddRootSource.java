@@ -27,7 +27,6 @@ public class AddRootSource extends StreamSourceDelegate {
 	private enum State {
 		START_DOC,
 		ROOT_NAME,
-		ROOT_XMLNS_START,
 		ROOT_XMLNS_NAME,
 		ROOT_XMLNS_VALUE,
 		DELEGATE,
@@ -48,11 +47,7 @@ public class AddRootSource extends StreamSourceDelegate {
 	@Override
 	public String name() throws IOException {
 		if (state == State.ROOT_NAME) {
-			if (XMLConstants.NULL_NS_URI.equals(root.getNamespaceURI())) {
-				state = State.DELEGATE;
-			} else { // declare namespace
-				state = State.ROOT_XMLNS_START;
-			}
+			state = State.DELEGATE;
 			if (XMLConstants.DEFAULT_NS_PREFIX.equals(root.getPrefix())) {
 				return root.getLocalPart();
 			} else {
@@ -83,7 +78,7 @@ public class AddRootSource extends StreamSourceDelegate {
 		if (state == State.START_DOC) {
 			state = State.ROOT_NAME;
 		} else {
-			if (state == State.ROOT_XMLNS_START) {
+			if (depth == 1 && !XMLConstants.NULL_NS_URI.equals(root.getNamespaceURI())) {
 				state = State.ROOT_XMLNS_NAME;
 			}
 			super.startObject();
@@ -117,11 +112,14 @@ public class AddRootSource extends StreamSourceDelegate {
 		case ROOT_XMLNS_NAME: return JsonStreamToken.NAME;
 		case ROOT_XMLNS_VALUE: return JsonStreamToken.VALUE;
 		case END_DOC: return JsonStreamToken.END_OBJECT;
+		case DELEGATE:
+			JsonStreamToken result = super.peek();
+			if (depth == 1 && result == JsonStreamToken.NONE) {
+				result = JsonStreamToken.END_OBJECT;
+			}
+			return result;
+		default:
+			throw new IllegalStateException("Unexpected state: " + state);
 		}
-		JsonStreamToken result = super.peek();
-		if (depth == 1 && result == JsonStreamToken.NONE) {
-			result = JsonStreamToken.END_OBJECT;
-		}
-		return result;
 	}
 }
