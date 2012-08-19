@@ -17,7 +17,7 @@ package de.odysseus.staxon.json.stream.jackson;
 
 import java.io.IOException;
 
-import org.codehaus.jackson.JsonGenerator;
+import com.fasterxml.jackson.core.JsonGenerator;
 
 import de.odysseus.staxon.json.stream.JsonStreamTarget;
 

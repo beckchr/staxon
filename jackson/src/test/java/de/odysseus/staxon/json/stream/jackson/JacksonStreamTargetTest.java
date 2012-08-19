@@ -20,7 +20,7 @@ import java.io.StringWriter;
 
 import junit.framework.Assert;
 
-import org.codehaus.jackson.JsonFactory;
+import com.fasterxml.jackson.core.JsonFactory;
 import org.junit.Test;
 
 public class JacksonStreamTargetTest {
