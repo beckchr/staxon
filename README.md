@@ -13,7 +13,7 @@ for XML (`javax.xml.stream`). StAXON acts as a door opener for JSON to powerful 
 - Support for JAXB and JAX-RS
 - Trigger JSON arrays via XML processing instruction
 - Full XML namespace support
-- Support [Jackson](http://jackson.codehaus.org/) and [Gson](http://code.google.com/p/google-gson/) as JSON streaming backends
+- Support [Jackson](http://wiki.fasterxml.com/JacksonHome/) and [Gson](http://code.google.com/p/google-gson/) as JSON streaming backends
 - Memory efficient, even for very large documents
 - It's pretty fast ([benchmark](https://github.com/beckchr/staxon/wiki/Benchmark))...
 
