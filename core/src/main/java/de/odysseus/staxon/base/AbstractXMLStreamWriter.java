@@ -150,7 +150,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 	 * @param type one of <code>CHARACTERS, COMMENT, CDATA, DTD, ENTITY_REFERENCE, SPACE</code>
 	 * @throws XMLStreamException
 	 */
-	protected abstract void writeData(String data, int type) throws XMLStreamException;
+	protected abstract void writeData(Object data, int type) throws XMLStreamException;
 	
 	/**
 	 * Read processing instruction.
@@ -271,10 +271,14 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		writeAttr(prefix, localName, namespaceURI, value);
 	}
 
+	protected final void writeCharacters(Object data, int type) throws XMLStreamException {
+		ensureStartTagClosed();
+		writeData(data, type);
+	}
+
 	@Override
 	public void writeCharacters(String text) throws XMLStreamException {
-		ensureStartTagClosed();
-		writeData(text, XMLStreamConstants.CHARACTERS);
+		writeCharacters(text, XMLStreamConstants.CHARACTERS);
 	}
 	
 	@Override
@@ -284,8 +288,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 
 	@Override
 	public void writeCData(String data) throws XMLStreamException {
-		ensureStartTagClosed();
-		writeData(data, XMLStreamConstants.CDATA);
+		writeCharacters(data, XMLStreamConstants.CDATA);
 	}
 
 	@Override

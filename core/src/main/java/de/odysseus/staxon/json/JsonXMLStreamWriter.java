@@ -58,34 +58,38 @@ import de.odysseus.staxon.json.stream.JsonStreamTarget;
  */
 public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWriter.ScopeInfo> {
 	static class ScopeInfo extends JsonXMLStreamScopeInfo {
-		private String leadText = null;
+		private Object leadData = null;
 		private StringBuilder builder = null;
 		boolean startObjectWritten = false;
 		boolean pendingStartArray = false;
 
 		void addText(String data) {
-			if (leadText == null) { // first event?
-				leadText = data;
+			if (leadData == null) { // first event?
+				this.leadData = data;
 			} else {
 				if (builder == null) { // second event?
-					builder = new StringBuilder(leadText);
+					builder = new StringBuilder(leadData.toString());
 				}
 				builder.append(data);
 			}
 		}
-		boolean hasText() {
-			return leadText != null;
+		boolean hasData() {
+			return leadData != null;
 		}
-		String getText() {
-			return builder == null ? leadText : builder.toString();
+		Object getData() {
+			return builder == null ? (hasData() ? leadData : null) : builder.toString();
 		}
-		void setText(String data) {
-			leadText = data;
-			builder = null;
+		void setData(Object data) {
+			this.leadData = data;
+			this.builder = null;
 		}
 	}
 
-	static boolean isWhitespace(String text) {
+	static boolean isWhitespace(Object data) {
+		if (data == null) {
+			return false;
+		}
+		String text = data.toString();
 		for (int i = 0; i < text.length(); i++) {
 			if (!Character.isWhitespace(text.charAt(i))) {
 				return false;
@@ -127,11 +131,11 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	@Override
 	protected ScopeInfo writeStartElementTag(String prefix, String localName, String namespaceURI) throws XMLStreamException {
 		ScopeInfo parentInfo = getScope().getInfo();
-		if (parentInfo.hasText()) {
-			if (!skipSpace || !isWhitespace(parentInfo.getText())) {
-				throw new XMLStreamException("Mixed content is not supported: '" + parentInfo.getText() + "'");
+		if (parentInfo.hasData()) {
+			if (!skipSpace || !isWhitespace(parentInfo.getData())) {
+				throw new XMLStreamException("Mixed content is not supported: '" + parentInfo.getData() + "'");
 			}
-			parentInfo.setText(null);
+			parentInfo.setData(null);
 		}
 		String fieldName = getFieldName(prefix, localName);
 		if (getScope().isRoot() && getScope().getLastChild() != null && !documentArray) {
@@ -172,18 +176,18 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	@Override
 	protected void writeEndElementTag() throws XMLStreamException {
 		try {
-			if (getScope().getInfo().hasText()) {
+			if (getScope().getInfo().hasData()) {
 				if (getScope().getInfo().startObjectWritten) {
 					target.name("$");
 				}
-				target.value(getScope().getInfo().getText());
+				target.value(getScope().getInfo().getData());
 			}
 			if (autoEndArray && getScope().getInfo().isArray()) {
 				writeEndArray();
 			}
 			if (getScope().getInfo().startObjectWritten) {
 				target.endObject();
-			} else if (!getScope().getInfo().hasText()) {
+			} else if (!getScope().getInfo().hasData()) {
 				target.value(null);
 			}
 		} catch (IOException e) {
@@ -227,7 +231,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	}
 	
 	@Override
-	protected void writeData(String data, int type) throws XMLStreamException {
+	protected void writeData(Object data, int type) throws XMLStreamException {
 		switch(type) {
 		case XMLStreamConstants.CHARACTERS:
 		case XMLStreamConstants.CDATA:
@@ -245,8 +249,10 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 					if (!skipSpace || !isWhitespace(data)) {
 						throw new XMLStreamException("Mixed content is not supported: '" + data + "'");
 					}
+				} else if (getScope().getInfo().hasData()) {
+					getScope().getInfo().addText(data.toString());
 				} else {
-					getScope().getInfo().addText(data);
+					getScope().getInfo().setData(data);
 				}
 			}
 			break;
@@ -354,5 +360,29 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Write number value.
+	 * @param value
+	 * @throws XMLStreamException
+	 */
+	public void writeCharacters(Number value) throws XMLStreamException {
+		if (getScope().getInfo().hasData()) {
+			throw new XMLStreamException("Cannot write number value");
+		}
+		super.writeCharacters(value, XMLStreamConstants.CHARACTERS);
+	}
+
+	/**
+	 * Write boolean value.
+	 * @param value
+	 * @throws XMLStreamException
+	 */
+	public void writeCharacters(Boolean value) throws XMLStreamException {
+		if (getScope().getInfo().hasData()) {
+			throw new XMLStreamException("Cannot write boolean value");
+		}
+		super.writeCharacters(value, XMLStreamConstants.CHARACTERS);
 	}
 }

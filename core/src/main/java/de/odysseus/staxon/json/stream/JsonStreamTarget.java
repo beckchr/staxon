@@ -35,7 +35,7 @@ public interface JsonStreamTarget extends Closeable, Flushable {
 	 * @param value
 	 * @throws IOException
 	 */
-	public void value(String value) throws IOException;
+	public void value(Object value) throws IOException;
 	
 	/**
 	 * Start object

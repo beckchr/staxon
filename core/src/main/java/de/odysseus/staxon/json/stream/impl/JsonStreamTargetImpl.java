@@ -133,7 +133,7 @@ class JsonStreamTargetImpl implements JsonStreamTarget {
 	}
 
 	@Override
-	public void value(String value) throws IOException {
+	public void value(Object value) throws IOException {
 		if (arrayPos[depth] > 0) {
 			if (arrayPos[depth] > 1) {
 				writer.write(',');
@@ -145,10 +145,12 @@ class JsonStreamTargetImpl implements JsonStreamTarget {
 		}
 		if (value == null) {
 			writer.write("null");
+		} else if (value instanceof String) {
+			writer.write('"');
+			writer.write(encode((String) value));
+			writer.write('"');
 		} else {
-			writer.write('"');
-			writer.write(encode(value));
-			writer.write('"');
+			writer.write(value.toString());
 		}
 	}
 

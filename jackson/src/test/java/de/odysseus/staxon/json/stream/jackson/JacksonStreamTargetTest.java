@@ -20,8 +20,9 @@ import java.io.StringWriter;
 
 import junit.framework.Assert;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import org.junit.Test;
+
+import com.fasterxml.jackson.core.JsonFactory;
 
 public class JacksonStreamTargetTest {
 	@Test
@@ -132,5 +133,21 @@ public class JacksonStreamTargetTest {
 		target.close();
 		
 		Assert.assertEquals("[\"\",\"abc\",\"\\b\\f\\n\\r\\t\",\"\\\"\",\"\\\\\",\"\\u001F\"]", writer.toString());
+	}
+
+	@Test
+	public void testSimpleValue() throws IOException {
+		StringWriter writer = new StringWriter();
+		JacksonStreamTarget target = new JacksonStreamTarget(new JsonFactory().createJsonGenerator(writer));
+		
+		target.startArray();
+		target.value("abc");
+		target.value(1234);
+		target.value(true);
+		target.endArray();
+		
+		target.close();
+		
+		Assert.assertEquals("[\"abc\",1234,true]", writer.toString());
 	}
 }
