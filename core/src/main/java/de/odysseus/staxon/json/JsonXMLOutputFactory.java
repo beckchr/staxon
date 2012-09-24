@@ -122,6 +122,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 		this.multiplePI = config.isMultiplePI();
 		this.virtualRoot = config.getVirtualRoot();
 		this.autoArray = config.isAutoArray();
+		this.autoPrimitive = config.isAutoPrimitive();
 		this.prettyPrint = config.isPrettyPrint();
 		this.namespaceSeparator = config.getNamespaceSeparator();
 		this.namespaceDeclarations = config.isNamespaceDeclarations();
