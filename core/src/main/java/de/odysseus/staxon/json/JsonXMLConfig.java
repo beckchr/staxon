@@ -32,6 +32,7 @@ public interface JsonXMLConfig {
 	 * <p>Default configuration:</p>
 	 * <ul>
 	 * <li><em>autoArray</em> - <code>false</code></li>
+	 * <li><em>autoPrimitive</em> - <code>false</code></li>
 	 * <li><em>multiplePI</em> - <code>true</code></li>
 	 * <li><em>namespaceDeclarations</em> - <code>true</code></li>
 	 * <li><em>namespaceSeparator</em> - <code>':'</code></li>
@@ -42,6 +43,10 @@ public interface JsonXMLConfig {
 	public static final JsonXMLConfig DEFAULT = new JsonXMLConfig() {
 		@Override
 		public boolean isAutoArray() {
+			return false;
+		}
+		@Override
+		public boolean isAutoPrimitive() {
 			return false;
 		}
 		@Override
@@ -76,6 +81,13 @@ public interface JsonXMLConfig {
 	 * @return auto array flag
 	 */
 	public boolean isAutoArray();
+
+	/**
+	 * <p>Convert element text to number/boolean/null primitives automatically?</p>
+	 * @see JsonXMLOutputFactory#PROP_AUTO_ARRAY
+	 * @return auto primitive flag
+	 */
+	public boolean isAutoPrimitive();
 
 	/**
 	 * <p>Whether to use the {@link JsonXMLStreamConstants#MULTIPLE_PI_TARGET}

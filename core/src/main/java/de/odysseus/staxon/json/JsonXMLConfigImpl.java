@@ -28,6 +28,7 @@ public class JsonXMLConfigImpl implements JsonXMLConfig, Cloneable {
 	private boolean multiplePI = JsonXMLConfig.DEFAULT.isMultiplePI();
 	private boolean prettyPrint = JsonXMLConfig.DEFAULT.isPrettyPrint();
 	private boolean autoArray = JsonXMLConfig.DEFAULT.isAutoArray();
+	private boolean autoPrimitive = JsonXMLConfig.DEFAULT.isAutoPrimitive();
 	private boolean namespaceDeclarations = JsonXMLConfig.DEFAULT.isNamespaceDeclarations();
 	private char namespaceSeparator = JsonXMLConfig.DEFAULT.getNamespaceSeparator();
 	
@@ -49,6 +50,15 @@ public class JsonXMLConfigImpl implements JsonXMLConfig, Cloneable {
 	
 	public void setAutoArray(boolean autoArray) {
 		this.autoArray = autoArray;
+	}
+	
+	@Override
+	public boolean isAutoPrimitive() {
+		return autoPrimitive;
+	}
+	
+	public void setAutoPrimitive(boolean autoPrimitive) {
+		this.autoPrimitive = autoPrimitive;
 	}
 
 	@Override

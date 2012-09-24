@@ -31,6 +31,7 @@ import de.odysseus.staxon.event.SimpleXMLEventWriter;
 import de.odysseus.staxon.json.stream.JsonStreamFactory;
 import de.odysseus.staxon.json.stream.JsonStreamTarget;
 import de.odysseus.staxon.json.stream.util.AutoArrayTarget;
+import de.odysseus.staxon.json.stream.util.AutoPrimitiveTarget;
 import de.odysseus.staxon.json.stream.util.RemoveRootTarget;
 
 /**
@@ -43,6 +44,13 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	 * <p>The default value is <code>false</code>.</p>
 	 */
 	public static final String PROP_AUTO_ARRAY = "JsonXMLOutputFactory.autoArray";
+	
+	/**
+	 * <p>Convert element text to JSON primitives (number, boolean, null) automatically?</p>
+	 * 
+	 * <p>The default value is <code>false</code>.</p>
+	 */
+	public static final String PROP_AUTO_PRIMITIVE = "JsonXMLOutputFactory.autoPrimitive";
 	
 	/**
 	 * <p>Whether to use the {@link JsonXMLStreamConstants#MULTIPLE_PI_TARGET}
@@ -93,6 +101,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	private boolean multiplePI;
 	private QName virtualRoot;
 	private boolean autoArray;
+	private boolean autoPrimitive;
 	private boolean prettyPrint;
 	private char namespaceSeparator;
 	private boolean namespaceDeclarations;
@@ -130,6 +139,9 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 		}
 		if (autoArray) {
 			target = new AutoArrayTarget(target);
+		}
+		if (autoPrimitive) {
+			target = new AutoPrimitiveTarget(target, false);
 		}
 		return target;
 	}
@@ -172,6 +184,8 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 		} else { // proprietary properties
 			if (PROP_AUTO_ARRAY.equals(name)) {
 				return Boolean.valueOf(autoArray);
+			} else if (PROP_AUTO_PRIMITIVE.equals(name)) {
+				return Boolean.valueOf(autoPrimitive);
 			} else if (PROP_MULTIPLE_PI.equals(name)) {
 				return Boolean.valueOf(multiplePI);
 			} else if (PROP_VIRTUAL_ROOT.equals(name)) {
@@ -195,6 +209,8 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 		} else { // proprietary properties
 			if (PROP_AUTO_ARRAY.equals(name)) {
 				autoArray = ((Boolean)value).booleanValue();
+			} else if (PROP_AUTO_PRIMITIVE.equals(name)) {
+				autoPrimitive = ((Boolean)value).booleanValue();
 			} else if (PROP_MULTIPLE_PI.equals(name)) {
 				multiplePI = ((Boolean)value).booleanValue();
 			} else if (PROP_VIRTUAL_ROOT.equals(name)) {

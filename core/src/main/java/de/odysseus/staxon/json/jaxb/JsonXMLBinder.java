@@ -62,6 +62,7 @@ public class JsonXMLBinder {
 	private JsonXMLConfig toJsonXMLConfig(Class<?> type, JsonXML config) throws JAXBException {
 		return new JsonXMLConfigBuilder().
 				autoArray(config.autoArray()).
+				autoPrimitive(config.autoPrimitive()).
 				multiplePI(true).
 				namespaceDeclarations(config.namespaceDeclarations()).
 				namespaceSeparator(config.namespaceSeparator()).

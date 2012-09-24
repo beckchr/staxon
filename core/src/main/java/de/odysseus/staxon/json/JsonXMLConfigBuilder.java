@@ -58,6 +58,16 @@ public class JsonXMLConfigBuilder {
 	}
 
 	/**
+	 * Set autoPrimitive property and return receiver.
+	 * @param autoPrimitive
+	 * @return this
+	 */
+	public JsonXMLConfigBuilder autoPrimitive(boolean autoPrimitive) {
+		config.setAutoPrimitive(autoPrimitive);
+		return this;
+	}
+
+	/**
 	 * Set multiplePI property and return receiver.
 	 * @param multiplePI
 	 * @return this

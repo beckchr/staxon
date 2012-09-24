@@ -95,6 +95,13 @@ public @interface JsonXML {
 	boolean autoArray() default false;
 
 	/**
+	 * <p>Convert element text to number/boolean/null primitives automatically?</p>
+	 * 
+	 * <p>The default value is <code>false</code>.</p>
+	 */
+	boolean autoPrimitive() default false;
+	
+	/**
 	 * <p>Whether to write namespace declarations.</p>
 	 * 
 	 * <p>The default value is <code>true</code>.</p>
