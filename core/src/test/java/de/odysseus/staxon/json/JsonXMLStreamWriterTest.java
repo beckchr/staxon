@@ -268,12 +268,12 @@ public class JsonXMLStreamWriterTest {
 	}
 
 	@Test
-	public void testNumberValue() throws Exception {
+	public void testWriteNumber() throws Exception {
 		StringWriter result = new StringWriter();
 		JsonXMLStreamWriter writer = (JsonXMLStreamWriter) new JsonXMLOutputFactory().createXMLStreamWriter(result);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
-		writer.writeCharacters(123.4);
+		writer.writeNumber(123.4);
 		writer.writeEndElement();
 		writer.writeEndDocument();
 		writer.close();
@@ -281,12 +281,12 @@ public class JsonXMLStreamWriterTest {
 	}
 
 	@Test
-	public void testBooleanValue() throws Exception {
+	public void testWriteBoolean() throws Exception {
 		StringWriter result = new StringWriter();
 		JsonXMLStreamWriter writer = (JsonXMLStreamWriter) new JsonXMLOutputFactory().createXMLStreamWriter(result);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
-		writer.writeCharacters(true);
+		writer.writeBoolean(true);
 		writer.writeEndElement();
 		writer.writeEndDocument();
 		writer.close();

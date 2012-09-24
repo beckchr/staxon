@@ -367,7 +367,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	 * @param value
 	 * @throws XMLStreamException
 	 */
-	public void writeCharacters(Number value) throws XMLStreamException {
+	public void writeNumber(Number value) throws XMLStreamException {
 		if (getScope().getInfo().hasData()) {
 			throw new XMLStreamException("Cannot write number value");
 		}
@@ -379,7 +379,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	 * @param value
 	 * @throws XMLStreamException
 	 */
-	public void writeCharacters(Boolean value) throws XMLStreamException {
+	public void writeBoolean(Boolean value) throws XMLStreamException {
 		if (getScope().getInfo().hasData()) {
 			throw new XMLStreamException("Cannot write boolean value");
 		}
