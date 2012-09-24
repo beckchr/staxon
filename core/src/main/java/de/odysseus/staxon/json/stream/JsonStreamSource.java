@@ -25,6 +25,56 @@ import javax.xml.stream.Location;
  */
 public interface JsonStreamSource extends Closeable, Location {
 	/**
+	 * Represents a simple value.
+	 */
+	public static class Value {
+		public final String text;
+		public final Object data;
+
+		private Value(String text, Object data) {
+			this.text = text;
+			this.data = data;
+		}
+
+		/**
+		 * Create number value
+		 * @param text
+		 * @param number
+		 */
+		public Value(String text, Number number) {
+			this(text, (Object) number);
+		}
+
+		/**
+		 * Create string value
+		 * @param text
+		 */
+		public Value(String text) {
+			this(text, text);
+		}
+		
+		@Override
+		public String toString() {
+			return text == null ? "null" : text;
+		}
+	}
+	
+	/**
+	 * "true" value
+	 */
+	public static final Value TRUE = new Value("true", Boolean.TRUE);
+	
+	/**
+	 * "false" value
+	 */
+	public static final Value FALSE = new Value("false", Boolean.FALSE);
+	
+	/**
+	 * "null" value
+	 */
+	public static final Value NULL = new Value(null, null);
+	
+	/**
 	 * Consume {@link JsonStreamToken#NAME} token.
 	 * @return name
 	 * @throws IOException
@@ -36,7 +86,7 @@ public interface JsonStreamSource extends Closeable, Location {
 	 * @return value
 	 * @throws IOException
 	 */
-	public Object value() throws IOException;
+	public Value value() throws IOException;
 	
 	/**
 	 * Consume {@link JsonStreamToken#START_OBJECT} token.

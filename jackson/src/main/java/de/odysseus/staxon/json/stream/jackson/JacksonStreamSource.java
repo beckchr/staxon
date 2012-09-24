@@ -114,20 +114,20 @@ class JacksonStreamSource implements JsonStreamSource {
 	}
 
 	@Override
- 	public Object value() throws IOException {
+ 	public Value value() throws IOException {
 		expect(JsonStreamToken.VALUE).consume();
 		switch (parser.getCurrentToken()) {
 		case VALUE_STRING:
-			return parser.getText();
+			return new Value(parser.getText());
 		case VALUE_TRUE:
 		case VALUE_FALSE:
-			return Boolean.valueOf(parser.getBooleanValue());
+			return parser.getBooleanValue() ? TRUE : FALSE;
 		case VALUE_NUMBER_FLOAT:
-			return parser.getDecimalValue();
+			return new Value(parser.getText(), parser.getDecimalValue());
 		case VALUE_NUMBER_INT:
-			return Long.valueOf(parser.getLongValue());
+			return new Value(parser.getText(), Long.valueOf(parser.getLongValue()));
 		case VALUE_NULL:
-			return null;
+			return NULL;
 		default:
 			throw new IOException("Not a value token: " + parser.getCurrentToken());
 		}

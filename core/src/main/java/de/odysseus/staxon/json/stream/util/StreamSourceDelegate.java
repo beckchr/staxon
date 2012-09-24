@@ -60,7 +60,7 @@ public class StreamSourceDelegate implements JsonStreamSource {
 	}
 
 	@Override
-	public Object value() throws IOException {
+	public Value value() throws IOException {
 		return delegate.value();
 	}
 
@@ -128,7 +128,7 @@ public class StreamSourceDelegate implements JsonStreamSource {
 				target.name(delegate.name());
 				break;
 			case VALUE:
-				target.value(delegate.value());
+				target.value(delegate.value().data);
 				break;
 			case NONE:
 				return;

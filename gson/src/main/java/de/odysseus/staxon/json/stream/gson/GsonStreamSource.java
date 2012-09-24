@@ -97,22 +97,23 @@ class GsonStreamSource implements JsonStreamSource {
 	}
 
 	@Override
-	public Object value() throws IOException {
+	public Value value() throws IOException {
 		consume(JsonStreamToken.VALUE);
 		switch (reader.peek()) {
 		case BOOLEAN:
-			return Boolean.valueOf(reader.nextBoolean());
+			return reader.nextBoolean() ? TRUE : FALSE;
 		case NULL:
 			reader.nextNull();
-			return null;
+			return NULL;
 		case NUMBER:
+			String s = reader.nextString();
 			try {
-				return Long.valueOf(reader.nextLong());
+				return new Value(s, Long.valueOf(s));
 			} catch (NumberFormatException e) {
-				return Double.valueOf(reader.nextDouble());
+				return new Value(s, Double.valueOf(s));
 			}
 		case STRING:
-			return reader.nextString();
+			return new Value(reader.nextString());
 		default:
 			throw new IOException("Not a value token: " + peek());
 		}

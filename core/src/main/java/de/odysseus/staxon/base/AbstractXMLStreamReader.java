@@ -34,14 +34,20 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	class Event {
 		private final int type;
 		private final XMLStreamReaderScope<T> scope;
+		private final String text;
 		private final Object data;
 		private final int lineNumber;
 		private final int columnNumber;
 		private final int characterOffset;
 
-		Event(int type, XMLStreamReaderScope<T> scope, Object data) {
+		Event(int type, XMLStreamReaderScope<T> scope) {
+			this(type, scope, null, null);
+		}
+
+		Event(int type, XMLStreamReaderScope<T> scope, String text, Object data) {
 			this.type = type;
 			this.scope = scope;
+			this.text = text;
 			this.data = data;
 			this.lineNumber = locationProvider.getLineNumber();
 			this.columnNumber = locationProvider.getColumnNumber();
@@ -57,7 +63,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		}
 
 		String getText() {
-			return data == null ? null : data.toString();
+			return text;
 		}
 
 		Object getData() {
@@ -215,7 +221,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		if (hasNext()) {
 			event = queue.remove();
 		} else {
-			event = new Event(XMLStreamConstants.END_DOCUMENT, scope, null);
+			event = new Event(XMLStreamConstants.END_DOCUMENT, scope);
 		}
 	}
 
@@ -241,7 +247,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		if (startDocumentRead || !scope.isRoot()) {
 			throw new XMLStreamException("Cannot start document", locationProvider);
 		}
-		queue.add(new Event(XMLStreamConstants.START_DOCUMENT, scope, null));
+		queue.add(new Event(XMLStreamConstants.START_DOCUMENT, scope));
 		startDocumentRead = true;
 
 		this.version = version;
@@ -266,7 +272,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		ensureStartTagClosed();
 		scope = new XMLStreamReaderScope<T>(scope, prefix, localName, namespaceURI);
 		scope.setInfo(scopeInfo);
-		queue.add(new Event(XMLStreamConstants.START_ELEMENT, scope, null));
+		queue.add(new Event(XMLStreamConstants.START_ELEMENT, scope));
 	}
 	
 	/**
@@ -306,14 +312,15 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 
 	/**
 	 * Read characters/comment/dtd/entity data.
-	 * @param data text/data
+	 * @param text text
+	 * @param data additional data exposed by {@link #getEventData()} (e.g. type conversion)
 	 * @param type one of <code>CHARACTERS, COMMENT, CDATA, DTD, ENTITY_REFERENCE, SPACE</code>
 	 * @throws XMLStreamException
 	 */
-	protected void readData(Object data, int type) throws XMLStreamException {
+	protected void readData(String text, Object data, int type) throws XMLStreamException {
 		if (hasData(type)) {
 			ensureStartTagClosed();
-			queue.add(new Event(type, scope, data));
+			queue.add(new Event(type, scope, text, data));
 		} else {
 			throw new XMLStreamException("Unexpected event type " + getEventName(), locationProvider);
 		}
@@ -328,7 +335,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	protected void readPI(String target, String data) throws XMLStreamException {
 		ensureStartTagClosed();
 		String text = data == null ? target : target + ':' + data;
-		queue.add(new Event(XMLStreamConstants.PROCESSING_INSTRUCTION, scope, text));
+		queue.add(new Event(XMLStreamConstants.PROCESSING_INSTRUCTION, scope, text, null));
 	}
 
 	/**
@@ -338,7 +345,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	 */
 	protected void readEndElementTag() throws XMLStreamException {
 		ensureStartTagClosed();
-		queue.add(new Event(XMLStreamConstants.END_ELEMENT, scope, null));
+		queue.add(new Event(XMLStreamConstants.END_ELEMENT, scope));
 		scope = scope.getParent();
 	}
 
@@ -349,7 +356,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		if (!startDocumentRead || !scope.isRoot()) {
 			throw new XMLStreamException("Cannot end document", locationProvider);
 		}
-		queue.add(new Event(XMLStreamConstants.END_DOCUMENT, scope, null));
+		queue.add(new Event(XMLStreamConstants.END_DOCUMENT, scope));
 		startDocumentRead = false;
 	}
 

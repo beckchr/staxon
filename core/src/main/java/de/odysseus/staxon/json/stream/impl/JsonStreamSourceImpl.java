@@ -202,21 +202,22 @@ class JsonStreamSourceImpl implements JsonStreamSource {
 	}
 
 	@Override
-	public Object value() throws IOException {
+	public Value value() throws IOException {
 		poll(JsonStreamToken.VALUE);
 		switch (symbol) {
 		case NULL:
-			return null;
+			return NULL;
 		case STRING:
-			return scanner.getText();
+			return new Value(scanner.getText());
 		case TRUE:
+			return TRUE;
 		case FALSE:
-			return Boolean.valueOf(scanner.getText());
+			return FALSE;
 		case NUMBER:
 			if (scanner.getText().indexOf('.') < 0 && scanner.getText().toLowerCase().indexOf('e') < 0) {
-				return new BigInteger(scanner.getText());
+				return new Value(scanner.getText(), new BigInteger(scanner.getText()));
 			} else {
-				return new BigDecimal(scanner.getText());
+				return new Value(scanner.getText(), new BigDecimal(scanner.getText()));
 			}
 		default:
 			throw new IOException("Not a value token: " + symbol);

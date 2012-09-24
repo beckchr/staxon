@@ -24,6 +24,7 @@ import javax.xml.stream.XMLStreamException;
 import de.odysseus.staxon.base.AbstractXMLStreamReader;
 import de.odysseus.staxon.base.XMLStreamReaderScope;
 import de.odysseus.staxon.json.stream.JsonStreamSource;
+import de.odysseus.staxon.json.stream.JsonStreamSource.Value;
 import de.odysseus.staxon.json.stream.JsonStreamToken;
 
 /**
@@ -90,20 +91,24 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 		}
 	}
 
+	private void readData(Value value, int type) throws XMLStreamException {
+		readData(value.text, value.data, type);
+	}
+
 	private void consumeName(ScopeInfo info) throws XMLStreamException, IOException {
 		String fieldName = source.name();
 		if (fieldName.startsWith("@")) {
 			fieldName = fieldName.substring(1);
 			if (source.peek() == JsonStreamToken.VALUE) {
-				readAttrNsDecl(fieldName, source.value().toString());
+				readAttrNsDecl(fieldName, source.value().text);
 			} else if (XMLConstants.XMLNS_ATTRIBUTE.equals(fieldName)) { // badgerfish
 				source.startObject();
 				while (source.peek() == JsonStreamToken.NAME) {
 					String prefix = source.name();
 					if ("$".equals(prefix)) {
-						readNsDecl(XMLConstants.DEFAULT_NS_PREFIX, source.value().toString());
+						readNsDecl(XMLConstants.DEFAULT_NS_PREFIX, source.value().text);
 					} else {
-						readNsDecl(prefix, source.value().toString());
+						readNsDecl(prefix, source.value().text);
 					}
 				}
 				source.endObject();
@@ -116,7 +121,7 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 			info.currentTagName = fieldName;
 		}
 	}
-	
+
 	@Override
 	protected boolean consume() throws XMLStreamException, IOException {
 		XMLStreamReaderScope<ScopeInfo> scope = getScope();
@@ -173,9 +178,9 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 				readData(source.value(), XMLStreamConstants.CHARACTERS);
 			} else {
 				readStartElementTag(name);
-				Object data = source.value();
-				if (data != null) {
-					readData(data, XMLStreamConstants.CHARACTERS);
+				Value value = source.value();
+				if (value != JsonStreamSource.NULL) {
+					readData(value, XMLStreamConstants.CHARACTERS);
 				}
 				readEndElementTag();
 			}

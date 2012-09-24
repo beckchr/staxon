@@ -65,10 +65,10 @@ public class AddRootSource extends StreamSourceDelegate {
 	}
 
 	@Override
-	public Object value() throws IOException {
+	public Value value() throws IOException {
 		if (state == State.ROOT_XMLNS_VALUE) {
 			state = State.DELEGATE;
-			return root.getNamespaceURI();
+			return new Value(root.getNamespaceURI());
 		}
 		return super.value();
 	}

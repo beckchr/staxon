@@ -27,6 +27,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import de.odysseus.staxon.json.stream.JsonStreamSource;
 import de.odysseus.staxon.json.stream.JsonStreamToken;
 import de.odysseus.staxon.json.stream.util.StreamSourceDelegate;
 
@@ -53,7 +54,7 @@ public class JsonStreamSourceImplTest {
 		JsonStreamSourceImpl source = new JsonStreamSourceImpl(new Yylex(reader), true);
 		
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("bob", source.value());
+		Assert.assertEquals("bob", source.value().text);
 
 		Assert.assertEquals(JsonStreamToken.NONE, source.peek());
 		source.close();
@@ -71,7 +72,7 @@ public class JsonStreamSourceImplTest {
 		Assert.assertEquals("alice", source.name());
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("bob", source.value());
+		Assert.assertEquals("bob", source.value().text);
 
 		Assert.assertEquals(JsonStreamToken.END_OBJECT, source.peek());
 		source.endObject();
@@ -89,7 +90,7 @@ public class JsonStreamSourceImplTest {
 		source.startArray();
 		
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("bob", source.value());
+		Assert.assertEquals("bob", source.value().text);
 
 		Assert.assertEquals(JsonStreamToken.END_ARRAY, source.peek());
 		source.endArray();
@@ -113,7 +114,7 @@ public class JsonStreamSourceImplTest {
 		source.startArray();
 		
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("bob", source.value());
+		Assert.assertEquals("bob", source.value().text);
 
 		Assert.assertEquals(JsonStreamToken.END_ARRAY, source.peek());
 		source.endArray();
@@ -146,10 +147,10 @@ public class JsonStreamSourceImplTest {
 		source.startArray();
 		
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("edgar", source.value());
+		Assert.assertEquals("edgar", source.value().text);
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("charlie", source.value());
+		Assert.assertEquals("charlie", source.value().text);
 
 		Assert.assertEquals(JsonStreamToken.END_ARRAY, source.peek());
 		source.endArray();
@@ -185,7 +186,7 @@ public class JsonStreamSourceImplTest {
 		source.startArray();
 		
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("bob", source.value());
+		Assert.assertEquals("bob", source.value().text);
 
 		Assert.assertEquals(JsonStreamToken.END_ARRAY, source.peek());
 		source.endArray();
@@ -197,7 +198,7 @@ public class JsonStreamSourceImplTest {
 		source.startArray();
 		
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("bob", source.value());
+		Assert.assertEquals("bob", source.value().text);
 
 		Assert.assertEquals(JsonStreamToken.END_ARRAY, source.peek());
 		source.endArray();
@@ -221,22 +222,22 @@ public class JsonStreamSourceImplTest {
 		source.startArray();
 		
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("", source.value());
+		Assert.assertEquals("", source.value().text);
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("abc", source.value());
+		Assert.assertEquals("abc", source.value().text);
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("\b\f\n\r\t", source.value());
+		Assert.assertEquals("\b\f\n\r\t", source.value().text);
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("\"", source.value());
+		Assert.assertEquals("\"", source.value().text);
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("\\", source.value());
+		Assert.assertEquals("\\", source.value().text);
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("\u001F", source.value());
+		Assert.assertEquals("\u001F", source.value().text);
 
 		Assert.assertEquals(JsonStreamToken.END_ARRAY, source.peek());
 		source.endArray();
@@ -249,18 +250,25 @@ public class JsonStreamSourceImplTest {
 	public void testLiteralValues() throws IOException {
 		StringReader reader = new StringReader("[true,false,null]");
 		JsonStreamSourceImpl source = new JsonStreamSourceImpl(new Yylex(reader), true);
+		JsonStreamSource.Value value = null;
 
 		Assert.assertEquals(JsonStreamToken.START_ARRAY, source.peek());
 		source.startArray();
 		
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals(Boolean.TRUE, source.value());
+		value = source.value();
+		Assert.assertEquals("true", value.text);
+		Assert.assertEquals(Boolean.TRUE, value.data);
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals(Boolean.FALSE, source.value());
+		value = source.value();
+		Assert.assertEquals("false", value.text);
+		Assert.assertEquals(Boolean.FALSE, value.data);
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertNull(source.value());
+		value = source.value();
+		Assert.assertNull(value.text);
+		Assert.assertNull(value.data);
 
 		Assert.assertEquals(JsonStreamToken.END_ARRAY, source.peek());
 		source.endArray();
@@ -273,27 +281,40 @@ public class JsonStreamSourceImplTest {
 	public void testNumberValues() throws IOException {
 		StringReader reader = new StringReader("[123,12e3,12E3,12.3,1.2e3,1.2E3]");
 		JsonStreamSourceImpl source = new JsonStreamSourceImpl(new Yylex(reader), true);
+		JsonStreamSource.Value value = null;
 
 		Assert.assertEquals(JsonStreamToken.START_ARRAY, source.peek());
 		source.startArray();
 		
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals(new BigInteger("123"), source.value());
+		value = source.value();
+		Assert.assertEquals("123", value.text);
+		Assert.assertEquals(new BigInteger("123"), value.data);
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals(new BigDecimal("12e3"), source.value());
+		value = source.value();
+		Assert.assertEquals("12e3", value.text);
+		Assert.assertEquals(new BigDecimal("12e3"), value.data);
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals(new BigDecimal("12E3"), source.value());
+		value = source.value();
+		Assert.assertEquals("12E3", value.text);
+		Assert.assertEquals(new BigDecimal("12E3"), value.data);
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals(new BigDecimal("12.3"), source.value());
+		value = source.value();
+		Assert.assertEquals("12.3", value.text);
+		Assert.assertEquals(new BigDecimal("12.3"), value.data);
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals(new BigDecimal("1.2e3"), source.value());
+		value = source.value();
+		Assert.assertEquals("1.2e3", value.text);
+		Assert.assertEquals(new BigDecimal("1.2e3"), value.data);
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals(new BigDecimal("1.2E3"), source.value());
+		value = source.value();
+		Assert.assertEquals("1.2E3", value.text);
+		Assert.assertEquals(new BigDecimal("1.2E3"), value.data);
 
 		Assert.assertEquals(JsonStreamToken.END_ARRAY, source.peek());
 		source.endArray();
@@ -314,7 +335,7 @@ public class JsonStreamSourceImplTest {
 		Assert.assertEquals("alice", source.name());
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("bob", source.value());
+		Assert.assertEquals("bob", source.value().text);
 
 		Assert.assertEquals(JsonStreamToken.END_OBJECT, source.peek());
 		source.endObject();
