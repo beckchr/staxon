@@ -33,11 +33,10 @@ public interface JsonStreamSource extends Closeable, Location {
 	
 	/**
 	 * Consume {@link JsonStreamToken#VALUE} token.
-	 * Numbers and booleans are reported as strings, <code>null</code> values are reported as <code>null</code>.
 	 * @return value
 	 * @throws IOException
 	 */
-	public String value() throws IOException;
+	public Object value() throws IOException;
 	
 	/**
 	 * Consume {@link JsonStreamToken#START_OBJECT} token.

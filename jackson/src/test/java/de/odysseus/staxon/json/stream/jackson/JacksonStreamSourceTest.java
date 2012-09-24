@@ -17,6 +17,8 @@ package de.odysseus.staxon.json.stream.jackson;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import junit.framework.Assert;
 
@@ -221,10 +223,10 @@ public class JacksonStreamSourceTest {
 		source.startArray();
 		
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("true", source.value());
+		Assert.assertEquals(Boolean.TRUE, source.value());
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("false", source.value());
+		Assert.assertEquals(Boolean.FALSE, source.value());
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
 		Assert.assertNull(source.value());
@@ -245,22 +247,22 @@ public class JacksonStreamSourceTest {
 		source.startArray();
 		
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("123", source.value());
+		Assert.assertEquals(new Long("123"), source.value());
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("12e3", source.value());
+		Assert.assertEquals(new BigDecimal("12e3"), source.value());
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("12E3", source.value());
+		Assert.assertEquals(new BigDecimal("12E3"), source.value());
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("12.3", source.value());
+		Assert.assertEquals(new BigDecimal("12.3"), source.value());
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("1.2e3", source.value());
+		Assert.assertEquals(new BigDecimal("1.2e3"), source.value());
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("1.2E3", source.value());
+		Assert.assertEquals(new BigDecimal("1.2E3"), source.value());
 
 		Assert.assertEquals(JsonStreamToken.END_ARRAY, source.peek());
 		source.endArray();
@@ -277,6 +279,8 @@ public class JacksonStreamSourceTest {
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
 		source.value();
 		source.peek();
+		
+		source.close();
 	}
 
 	@Test

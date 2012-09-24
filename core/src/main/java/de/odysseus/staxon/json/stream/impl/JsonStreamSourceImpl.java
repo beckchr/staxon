@@ -17,6 +17,8 @@ package de.odysseus.staxon.json.stream.impl;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import de.odysseus.staxon.json.stream.JsonStreamSource;
 import de.odysseus.staxon.json.stream.JsonStreamToken;
@@ -200,9 +202,25 @@ class JsonStreamSourceImpl implements JsonStreamSource {
 	}
 
 	@Override
-	public String value() throws IOException {
+	public Object value() throws IOException {
 		poll(JsonStreamToken.VALUE);
-		return symbol == Scanner.Symbol.NULL ? null : scanner.getText();
+		switch (symbol) {
+		case NULL:
+			return null;
+		case STRING:
+			return scanner.getText();
+		case TRUE:
+		case FALSE:
+			return Boolean.valueOf(scanner.getText());
+		case NUMBER:
+			if (scanner.getText().indexOf('.') < 0 && scanner.getText().toLowerCase().indexOf('e') < 0) {
+				return new BigInteger(scanner.getText());
+			} else {
+				return new BigDecimal(scanner.getText());
+			}
+		default:
+			throw new IOException("Not a value token: " + symbol);
+		}
 	}
 
 	@Override

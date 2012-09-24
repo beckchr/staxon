@@ -95,15 +95,15 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 		if (fieldName.startsWith("@")) {
 			fieldName = fieldName.substring(1);
 			if (source.peek() == JsonStreamToken.VALUE) {
-				readAttrNsDecl(fieldName, source.value());
+				readAttrNsDecl(fieldName, source.value().toString());
 			} else if (XMLConstants.XMLNS_ATTRIBUTE.equals(fieldName)) { // badgerfish
 				source.startObject();
 				while (source.peek() == JsonStreamToken.NAME) {
 					String prefix = source.name();
 					if ("$".equals(prefix)) {
-						readNsDecl(XMLConstants.DEFAULT_NS_PREFIX, source.value());
+						readNsDecl(XMLConstants.DEFAULT_NS_PREFIX, source.value().toString());
 					} else {
-						readNsDecl(prefix, source.value());
+						readNsDecl(prefix, source.value().toString());
 					}
 				}
 				source.endObject();
@@ -173,9 +173,9 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 				readData(source.value(), XMLStreamConstants.CHARACTERS);
 			} else {
 				readStartElementTag(name);
-				String text = source.value();
-				if (text != null) {
-					readData(text, XMLStreamConstants.CHARACTERS);
+				Object data = source.value();
+				if (data != null) {
+					readData(data, XMLStreamConstants.CHARACTERS);
 				}
 				readEndElementTag();
 			}
@@ -195,6 +195,36 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 		default:
 			throw new IOException("Unexpected token: " + source.peek());
 		}
+	}
+	
+	/**
+	 * @return <code>true</code> iff the current event data is a number primitive
+	 */
+	public boolean hasNumber() {
+		return getEventData() instanceof Number;
+	}
+	
+	/**
+	 * @return number primitive
+	 * @throws ClassCastException
+	 */
+	public Number getNumber() {
+		return (Number) getEventData();
+	}
+	
+	/**
+	 * @return <code>true</code> iff the current event data is a boolean primitive
+	 */
+	public boolean hasBoolean() {
+		return getEventData() instanceof Boolean;
+	}
+	
+	/**
+	 * @return boolean primitive
+	 * @throws ClassCastException
+	 */
+	public Boolean getBoolean() {
+		return (Boolean) getEventData();
 	}
 
 	@Override

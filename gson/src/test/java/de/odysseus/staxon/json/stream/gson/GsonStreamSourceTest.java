@@ -222,10 +222,10 @@ public class GsonStreamSourceTest {
 		source.startArray();
 		
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("true", source.value());
+		Assert.assertEquals(Boolean.TRUE, source.value());
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("false", source.value());
+		Assert.assertEquals(Boolean.FALSE, source.value());
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
 		Assert.assertNull(source.value());
@@ -246,22 +246,22 @@ public class GsonStreamSourceTest {
 		source.startArray();
 		
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("123", source.value());
+		Assert.assertEquals(Long.valueOf("123"), source.value());
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("12e3", source.value());
+		Assert.assertEquals(Double.valueOf("12e3").longValue(), source.value());
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("12E3", source.value());
+		Assert.assertEquals(Double.valueOf("12E3").longValue(), source.value());
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("12.3", source.value());
+		Assert.assertEquals(Double.valueOf("12.3"), source.value());
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("1.2e3", source.value());
+		Assert.assertEquals(Double.valueOf("1.2e3").longValue(), source.value());
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
-		Assert.assertEquals("1.2E3", source.value());
+		Assert.assertEquals(Double.valueOf("1.2E3").longValue(), source.value());
 
 		Assert.assertEquals(JsonStreamToken.END_ARRAY, source.peek());
 		source.endArray();
@@ -278,6 +278,8 @@ public class GsonStreamSourceTest {
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
 		source.value();
 		source.peek();
+		
+		source.close();
 	}
 
 	@Test

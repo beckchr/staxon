@@ -34,15 +34,15 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	class Event {
 		private final int type;
 		private final XMLStreamReaderScope<T> scope;
-		private final String text;
+		private final Object data;
 		private final int lineNumber;
 		private final int columnNumber;
 		private final int characterOffset;
 
-		Event(int type, XMLStreamReaderScope<T> scope, String text) {
+		Event(int type, XMLStreamReaderScope<T> scope, Object data) {
 			this.type = type;
 			this.scope = scope;
-			this.text = text;
+			this.data = data;
 			this.lineNumber = locationProvider.getLineNumber();
 			this.columnNumber = locationProvider.getColumnNumber();
 			this.characterOffset = locationProvider.getCharacterOffset();
@@ -57,7 +57,11 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		}
 
 		String getText() {
-			return text;
+			return data == null ? null : data.toString();
+		}
+
+		Object getData() {
+			return data;
 		}
 		
 		Location getLocation() {
@@ -306,7 +310,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 	 * @param type one of <code>CHARACTERS, COMMENT, CDATA, DTD, ENTITY_REFERENCE, SPACE</code>
 	 * @throws XMLStreamException
 	 */
-	protected void readData(String data, int type) throws XMLStreamException {
+	protected void readData(Object data, int type) throws XMLStreamException {
 		if (hasData(type)) {
 			ensureStartTagClosed();
 			queue.add(new Event(type, scope, data));
@@ -543,6 +547,13 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 		return getEventName(getEventType());
 	}
 	
+	/**
+	 * @return raw event data
+	 */
+	protected final Object getEventData() {
+		return event.getData();
+	}
+
 	@Override
 	public Location getLocation() {
 		return event.getLocation();

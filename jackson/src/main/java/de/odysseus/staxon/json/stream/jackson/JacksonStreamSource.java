@@ -83,10 +83,6 @@ class JacksonStreamSource implements JsonStreamSource {
 		return result;
 	}
 
-	private String text() throws IOException {
-		return parser.getCurrentToken() == JsonToken.VALUE_NULL ? null : parser.getText();
-	}
-	
 	@Override
 	public void endArray() throws IOException {
 		expect(JsonStreamToken.END_ARRAY).consume();
@@ -118,8 +114,23 @@ class JacksonStreamSource implements JsonStreamSource {
 	}
 
 	@Override
- 	public String value() throws IOException {
-		return expect(JsonStreamToken.VALUE).consume(text());
+ 	public Object value() throws IOException {
+		expect(JsonStreamToken.VALUE).consume();
+		switch (parser.getCurrentToken()) {
+		case VALUE_STRING:
+			return parser.getText();
+		case VALUE_TRUE:
+		case VALUE_FALSE:
+			return Boolean.valueOf(parser.getBooleanValue());
+		case VALUE_NUMBER_FLOAT:
+			return parser.getDecimalValue();
+		case VALUE_NUMBER_INT:
+			return Long.valueOf(parser.getLongValue());
+		case VALUE_NULL:
+			return null;
+		default:
+			throw new IOException("Not a value token: " + parser.getCurrentToken());
+		}
 	}
 
 	@Override
