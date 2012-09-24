@@ -149,25 +149,25 @@ public class SimpleXMLStreamWriter extends AbstractXMLStreamWriter<String> {
 	}
 
 	@Override
-	protected void writeData(String data, int type) throws XMLStreamException {
+	protected void writeData(Object data, int type) throws XMLStreamException {
 		try {
 			switch(type) {
 			case XMLStreamConstants.CHARACTERS:
-				writeEscaped(data, false);
+				writeEscaped(data.toString(), false);
 				break;
 			case XMLStreamConstants.CDATA:
 				writer.write("<![CDATA[");
-				writer.write(data);
+				writer.write(data.toString());
 				writer.write("]]>");
 				break;
 			case XMLStreamConstants.COMMENT:
 				writer.write("<!--");
-				writeEscaped(data, false);
+				writeEscaped(data.toString(), false);
 				writer.write("-->");
 				break;
 			case XMLStreamConstants.ENTITY_REFERENCE:
 				writer.write('&');
-				writer.write(data);
+				writer.write(data.toString());
 				writer.write(';');				
 				break;
 			default:

@@ -48,7 +48,7 @@ public class StreamTargetDelegate implements JsonStreamTarget {
 	}
 
 	@Override
-	public void value(String value) throws IOException {
+	public void value(Object value) throws IOException {
 		delegate.value(value);
 	}
 

@@ -131,9 +131,9 @@ public class AutoArrayTarget implements JsonStreamTarget {
 	}
 	
 	static final class ValueEvent implements Event {
-		final String value;
+		final Object value;
 		
-		ValueEvent(String value) {
+		ValueEvent(Object value) {
 			this.value = value;
 		}
 		@Override
@@ -194,7 +194,7 @@ public class AutoArrayTarget implements JsonStreamTarget {
 	}
 
 	@Override
-	public void value(String value) throws IOException {
+	public void value(Object value) throws IOException {
 		events.add(new ValueEvent(value));
 	}
 

@@ -144,4 +144,20 @@ public class JsonStreamTargetImplTest {
 		
 		Assert.assertEquals("[\"\",\"abc\",\"\\b\\f\\n\\r\\t\",\"\\\"\",\"\\\\\",\"\\u001F\"]", writer.toString());
 	}
+
+	@Test
+	public void testSimpleValue() throws IOException {
+		StringWriter writer = new StringWriter();
+		JsonStreamTargetImpl target = new JsonStreamTargetImpl(writer, true);
+		
+		target.startArray();
+		target.value("abc");
+		target.value(1234);
+		target.value(true);
+		target.endArray();
+		
+		target.close();
+		
+		Assert.assertEquals("[\"abc\",1234,true]", writer.toString());
+	}
 }

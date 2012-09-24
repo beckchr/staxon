@@ -243,6 +243,21 @@ public class JsonXMLStreamWriterTest {
 		Assert.assertEquals("[\"edgar\",\"david\"]", result.toString());
 	}
 
+	@Test
+	public void testMixedValueArray() throws Exception {
+		StringWriter result = new StringWriter();
+		XMLStreamWriter writer = new JsonXMLOutputFactory().createXMLStreamWriter(result);
+		writer.writeProcessingInstruction(JsonXMLStreamConstants.MULTIPLE_PI_TARGET);
+		writer.writeCharacters("edgar");
+		writer.writeStartDocument();
+		writer.writeStartElement("alice");
+		writer.writeCharacters("bob");
+		writer.writeEndElement();
+		writer.writeEndDocument();
+		writer.close();
+		Assert.assertEquals("[\"edgar\",{\"alice\":\"bob\"}]", result.toString());
+	}
+
 	@Test(expected = XMLStreamException.class)
 	public void testElementMultipleRoots() throws XMLStreamException {
 		XMLStreamWriter writer = new JsonXMLOutputFactory().createXMLStreamWriter(new StringWriter());
@@ -250,5 +265,31 @@ public class JsonXMLStreamWriterTest {
 		writer.writeStartElement("foo");
 		writer.writeEndElement();
 		writer.writeStartElement("bar");
+	}
+
+	@Test
+	public void testNumberValue() throws Exception {
+		StringWriter result = new StringWriter();
+		JsonXMLStreamWriter writer = (JsonXMLStreamWriter) new JsonXMLOutputFactory().createXMLStreamWriter(result);
+		writer.writeStartDocument();
+		writer.writeStartElement("alice");
+		writer.writeCharacters(123.4);
+		writer.writeEndElement();
+		writer.writeEndDocument();
+		writer.close();
+		Assert.assertEquals("{\"alice\":123.4}", result.toString());
+	}
+
+	@Test
+	public void testBooleanValue() throws Exception {
+		StringWriter result = new StringWriter();
+		JsonXMLStreamWriter writer = (JsonXMLStreamWriter) new JsonXMLOutputFactory().createXMLStreamWriter(result);
+		writer.writeStartDocument();
+		writer.writeStartElement("alice");
+		writer.writeCharacters(true);
+		writer.writeEndElement();
+		writer.writeEndDocument();
+		writer.close();
+		Assert.assertEquals("{\"alice\":true}", result.toString());
 	}
 }

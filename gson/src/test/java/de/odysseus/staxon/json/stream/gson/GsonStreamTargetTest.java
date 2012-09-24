@@ -134,4 +134,20 @@ public class GsonStreamTargetTest {
 		
 		Assert.assertEquals("[\"\",\"abc\",\"\\b\\f\\n\\r\\t\",\"\\\"\",\"\\\\\",\"\\u001f\"]", writer.toString());
 	}
+
+	@Test
+	public void testSimpleValue() throws IOException {
+		StringWriter writer = new StringWriter();
+		GsonStreamTarget target = new GsonStreamTarget(new JsonWriter(writer));
+		
+		target.startArray();
+		target.value("abc");
+		target.value(1234);
+		target.value(true);
+		target.endArray();
+		
+		target.close();
+		
+		Assert.assertEquals("[\"abc\",1234,true]", writer.toString());
+	}
 }

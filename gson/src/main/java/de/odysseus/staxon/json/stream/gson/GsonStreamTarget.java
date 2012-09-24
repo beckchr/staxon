@@ -54,11 +54,17 @@ class GsonStreamTarget implements JsonStreamTarget {
 	}
 
 	@Override
-	public void value(String value) throws IOException {
+	public void value(Object value) throws IOException {
 		if (value == null) {
 			writer.nullValue();
+		} else if (value instanceof String) {
+			writer.value((String) value);
+		} else if (value instanceof Number) {
+			writer.value((Number) value);
+		} else if (value instanceof Boolean) {
+			writer.value((Boolean) value);
 		} else {
-			writer.value(value);
+			throw new IOException("Cannot write value: " + value);
 		}
 	}
 

@@ -16,6 +16,8 @@
 package de.odysseus.staxon.json.stream.jackson;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 
@@ -54,11 +56,31 @@ class JacksonStreamTarget implements JsonStreamTarget {
 	}
 
 	@Override
-	public void value(String value) throws IOException {
+	public void value(Object value) throws IOException {
 		if (value == null) {
 			generator.writeNull();
+		} else if (value instanceof String) {
+			generator.writeString((String) value);
+		} else if (value instanceof Number) {
+			if (value instanceof BigDecimal) {
+				generator.writeNumber((BigDecimal) value);
+			} else if (value instanceof BigInteger) {
+				generator.writeNumber((BigInteger) value);
+			} else if (value instanceof Long) {
+				generator.writeNumber((Long) value);
+			} else if (value instanceof Integer) {
+				generator.writeNumber((Integer) value);
+			} else if (value instanceof Double) {
+				generator.writeNumber((Double) value);
+			} else if (value instanceof Float) {
+				generator.writeNumber((Float) value);
+			} else {
+				generator.writeNumber(value.toString());
+			}
+		} else if (value instanceof Boolean) {
+			generator.writeBoolean((Boolean) value);
 		} else {
-			generator.writeString(value);
+			throw new IOException("Cannot write value: " + value);
 		}
 	}
 
