@@ -250,7 +250,11 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 						throw new XMLStreamException("Mixed content is not supported: '" + data + "'");
 					}
 				} else if (getScope().getInfo().hasData()) {
-					getScope().getInfo().addText(data.toString());
+					if (data instanceof String) {
+						getScope().getInfo().addText(data.toString());
+					} else {
+						throw new XMLStreamException("Cannot append primitive data: " + data);
+					}
 				} else {
 					getScope().getInfo().setData(data);
 				}
