@@ -28,7 +28,7 @@ The [Downloads](https://github.com/beckchr/staxon/wiki/Downloads) page provides 
 
 ## Development
 
-Visit the [Github project](http://github.com/beckchr/staxon/).
+Visit the [GitHub project](http://github.com/beckchr/staxon/).
 
 ## License
 
