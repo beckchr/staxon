@@ -268,9 +268,9 @@ public class JsonXMLStreamWriterTest {
 	}
 
 	@Test
-	public void testWriteNumber() throws Exception {
+	public void testNumber() throws Exception {
 		StringWriter result = new StringWriter();
-		JsonXMLStreamWriter writer = (JsonXMLStreamWriter) new JsonXMLOutputFactory().createXMLStreamWriter(result);
+		JsonXMLStreamWriter writer = new JsonXMLOutputFactory().createXMLStreamWriter(result);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeNumber(123.4);
@@ -281,9 +281,9 @@ public class JsonXMLStreamWriterTest {
 	}
 
 	@Test
-	public void testWriteBoolean() throws Exception {
+	public void testBoolean() throws Exception {
 		StringWriter result = new StringWriter();
-		JsonXMLStreamWriter writer = (JsonXMLStreamWriter) new JsonXMLOutputFactory().createXMLStreamWriter(result);
+		JsonXMLStreamWriter writer = new JsonXMLOutputFactory().createXMLStreamWriter(result);
 		writer.writeStartDocument();
 		writer.writeStartElement("alice");
 		writer.writeBoolean(true);
@@ -291,5 +291,18 @@ public class JsonXMLStreamWriterTest {
 		writer.writeEndDocument();
 		writer.close();
 		Assert.assertEquals("{\"alice\":true}", result.toString());
+	}
+
+	@Test
+	public void testNull() throws Exception {
+		StringWriter result = new StringWriter();
+		JsonXMLStreamWriter writer = new JsonXMLOutputFactory().createXMLStreamWriter(result);
+		writer.writeStartDocument();
+		writer.writeStartElement("alice");
+//		writer.writeCharacters(null); // writing null is not allowed
+		writer.writeEndElement();
+		writer.writeEndDocument();
+		writer.close();
+		Assert.assertEquals("{\"alice\":null}", result.toString());
 	}
 }

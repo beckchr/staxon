@@ -16,6 +16,7 @@
 package de.odysseus.staxon.json;
 
 import java.io.StringReader;
+import java.math.BigDecimal;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
@@ -286,6 +287,68 @@ public class JsonXMLStreamReaderTest {
 		reader.next();
 		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
 		Assert.assertFalse(reader.hasNext());
+		reader.close();
+	}
+
+	/**
+	 * <code>&lt;alice&gt;123.40&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testNumber() throws Exception {
+		String input = "{\"alice\" : 123.40}";
+		JsonXMLStreamReader reader = new JsonXMLInputFactory().createXMLStreamReader(new StringReader(input));
+		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.CHARACTERS, null, "123.40");
+		Assert.assertTrue(reader.hasNumber());
+		Assert.assertFalse(reader.hasBoolean());
+		Assert.assertEquals(new BigDecimal("123.40"), reader.getNumber());
+		reader.next();
+		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
+		reader.close();
+	}
+
+	/**
+	 * <code>&lt;alice&gt;false&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testBoolean() throws Exception {
+		String input = "{\"alice\" : false}";
+		JsonXMLStreamReader reader = new JsonXMLInputFactory().createXMLStreamReader(new StringReader(input));
+		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.CHARACTERS, null, "false");
+		Assert.assertFalse(reader.hasNumber());
+		Assert.assertTrue(reader.hasBoolean());
+		Assert.assertFalse(reader.getBoolean());
+		reader.next();
+		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
+		reader.close();
+	}
+
+	/**
+	 * <code>&lt;alice/&gt;</code>
+	 */
+	@Test
+	public void testNull() throws Exception {
+		String input = "{\"alice\" : null}";
+		JsonXMLStreamReader reader = new JsonXMLInputFactory().createXMLStreamReader(new StringReader(input));
+		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
+		reader.next();
+//		verify(reader, XMLStreamConstants.CHARACTERS, null, null); // null is not reported
+		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
 		reader.close();
 	}
 }
