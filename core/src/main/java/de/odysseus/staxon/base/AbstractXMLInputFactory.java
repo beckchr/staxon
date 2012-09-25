@@ -17,9 +17,7 @@ package de.odysseus.staxon.base;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -50,15 +48,6 @@ public abstract class AbstractXMLInputFactory extends XMLInputFactory {
 	private boolean validating;
 	private boolean supportDTD;
 	
-	@Override
-	public XMLStreamReader createXMLStreamReader(InputStream stream, String encoding) throws XMLStreamException {
-		try {
-			return createXMLStreamReader(new InputStreamReader(stream, encoding));
-		} catch (UnsupportedEncodingException e) {
-			throw new XMLStreamException(e);
-		}
-	}
-
 	@Override
 	public XMLStreamReader createXMLStreamReader(Source source) throws XMLStreamException {
 		if (source instanceof StreamSource) {
@@ -107,16 +96,6 @@ public abstract class AbstractXMLInputFactory extends XMLInputFactory {
 			}
 		}
 		throw new XMLStreamException("Unsupported source type: " + source.getClass());
-	}
-
-	@Override
-	public XMLStreamReader createXMLStreamReader(String systemId, InputStream stream) throws XMLStreamException {
-		return createXMLStreamReader(stream);
-	}
-
-	@Override
-	public XMLStreamReader createXMLStreamReader(String systemId, Reader reader) throws XMLStreamException {
-		return createXMLStreamReader(reader);
 	}
 
 	@Override

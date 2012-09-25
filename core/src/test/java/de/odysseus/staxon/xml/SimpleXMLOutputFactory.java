@@ -16,6 +16,8 @@
 package de.odysseus.staxon.xml;
 
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 
 import javax.xml.stream.XMLEventWriter;
@@ -35,12 +37,21 @@ public class SimpleXMLOutputFactory extends AbstractXMLOutputFactory {
 	}
 
 	@Override
-	public XMLStreamWriter createXMLStreamWriter(Writer stream) throws XMLStreamException {
+	public SimpleXMLStreamWriter createXMLStreamWriter(OutputStream stream, String encoding) throws XMLStreamException {
+		try {
+			return createXMLStreamWriter(new OutputStreamWriter(stream, encoding));
+		} catch (UnsupportedEncodingException e) {
+			throw new XMLStreamException(e);
+		}
+	}
+
+	@Override
+	public SimpleXMLStreamWriter createXMLStreamWriter(Writer stream) throws XMLStreamException {
 		return new SimpleXMLStreamWriter(stream, Boolean.TRUE.equals(getProperty(IS_REPAIRING_NAMESPACES)));
 	}
 
 	@Override
-	public XMLStreamWriter createXMLStreamWriter(OutputStream stream) throws XMLStreamException {
+	public SimpleXMLStreamWriter createXMLStreamWriter(OutputStream stream) throws XMLStreamException {
 		return createXMLStreamWriter(stream, "UTF-8");
 	}
 

@@ -17,7 +17,9 @@ package de.odysseus.staxon.json;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
 import javax.xml.namespace.QName;
@@ -113,7 +115,26 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	}
 	
 	@Override
-	public XMLStreamReader createXMLStreamReader(Reader reader) throws XMLStreamException {
+	public JsonXMLStreamReader createXMLStreamReader(InputStream stream, String encoding) throws XMLStreamException {
+		try {
+			return createXMLStreamReader(new InputStreamReader(stream, encoding));
+		} catch (UnsupportedEncodingException e) {
+			throw new XMLStreamException(e);
+		}
+	}
+
+	@Override
+	public JsonXMLStreamReader createXMLStreamReader(String systemId, InputStream stream) throws XMLStreamException {
+		return createXMLStreamReader(stream);
+	}
+
+	@Override
+	public JsonXMLStreamReader createXMLStreamReader(String systemId, Reader reader) throws XMLStreamException {
+		return createXMLStreamReader(reader);
+	}
+
+	@Override
+	public JsonXMLStreamReader createXMLStreamReader(Reader reader) throws XMLStreamException {
 		try {
 			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(reader)), multiplePI, namespaceSeparator);
 		} catch (IOException e) {
@@ -122,7 +143,7 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	}
 
 	@Override
-	public XMLStreamReader createXMLStreamReader(InputStream stream) throws XMLStreamException {
+	public JsonXMLStreamReader createXMLStreamReader(InputStream stream) throws XMLStreamException {
 		try {
 			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(stream)), multiplePI, namespaceSeparator);
 		} catch (IOException e) {

@@ -16,8 +16,6 @@
 package de.odysseus.staxon.base;
 
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 
 import javax.xml.stream.XMLEventWriter;
@@ -33,15 +31,6 @@ import javax.xml.transform.stream.StreamResult;
 public abstract class AbstractXMLOutputFactory extends XMLOutputFactory {
 	private boolean repairingNamespaces;
 	
-	@Override
-	public XMLStreamWriter createXMLStreamWriter(OutputStream stream, String encoding) throws XMLStreamException {
-		try {
-			return createXMLStreamWriter(new OutputStreamWriter(stream, encoding));
-		} catch (UnsupportedEncodingException e) {
-			throw new XMLStreamException(e);
-		}
-	}
-
 	@Override
 	public XMLStreamWriter createXMLStreamWriter(Result result) throws XMLStreamException {
 		if (result instanceof StreamResult) {

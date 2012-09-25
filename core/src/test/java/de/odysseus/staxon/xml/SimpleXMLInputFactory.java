@@ -16,7 +16,9 @@
 package de.odysseus.staxon.xml;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 
 import javax.xml.stream.EventFilter;
 import javax.xml.stream.XMLEventReader;
@@ -43,12 +45,31 @@ public class SimpleXMLInputFactory extends AbstractXMLInputFactory {
 	}
 
 	@Override
-	public XMLStreamReader createXMLStreamReader(Reader reader) throws XMLStreamException {
+	public SimpleXMLStreamReader createXMLStreamReader(InputStream stream, String encoding) throws XMLStreamException {
+		try {
+			return createXMLStreamReader(new InputStreamReader(stream, encoding));
+		} catch (UnsupportedEncodingException e) {
+			throw new XMLStreamException(e);
+		}
+	}
+
+	@Override
+	public SimpleXMLStreamReader createXMLStreamReader(String systemId, InputStream stream) throws XMLStreamException {
+		return createXMLStreamReader(stream);
+	}
+
+	@Override
+	public SimpleXMLStreamReader createXMLStreamReader(String systemId, Reader reader) throws XMLStreamException {
+		return createXMLStreamReader(reader);
+	}
+
+	@Override
+	public SimpleXMLStreamReader createXMLStreamReader(Reader reader) throws XMLStreamException {
 		return new SimpleXMLStreamReader(reader);
 	}
 
 	@Override
-	public XMLStreamReader createXMLStreamReader(InputStream stream) throws XMLStreamException {
+	public SimpleXMLStreamReader createXMLStreamReader(InputStream stream) throws XMLStreamException {
 		return createXMLStreamReader(stream, "UTF-8");
 	}
 

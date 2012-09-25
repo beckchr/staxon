@@ -17,6 +17,8 @@ package de.odysseus.staxon.json;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.Arrays;
 
@@ -148,7 +150,16 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	}
 
 	@Override
-	public XMLStreamWriter createXMLStreamWriter(Writer stream) throws XMLStreamException {
+	public JsonXMLStreamWriter createXMLStreamWriter(OutputStream stream, String encoding) throws XMLStreamException {
+		try {
+			return createXMLStreamWriter(new OutputStreamWriter(stream, encoding));
+		} catch (UnsupportedEncodingException e) {
+			throw new XMLStreamException(e);
+		}
+	}
+
+	@Override
+	public JsonXMLStreamWriter createXMLStreamWriter(Writer stream) throws XMLStreamException {
 		boolean repairNamespaces = Boolean.TRUE.equals(getProperty(IS_REPAIRING_NAMESPACES));
 		try {
 			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), repairNamespaces, multiplePI, namespaceSeparator, namespaceDeclarations);
@@ -158,7 +169,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	}
 
 	@Override
-	public XMLStreamWriter createXMLStreamWriter(OutputStream stream) throws XMLStreamException {
+	public JsonXMLStreamWriter createXMLStreamWriter(OutputStream stream) throws XMLStreamException {
 		boolean repairNamespaces = Boolean.TRUE.equals(getProperty(IS_REPAIRING_NAMESPACES));
 		try {
 			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), repairNamespaces, multiplePI, namespaceSeparator, namespaceDeclarations);
