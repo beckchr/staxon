@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.odysseus.staxon</groupId>
 	<artifactId>staxon-jackson</artifactId>
-	<version>1.2-SNAPSHOT</version>
+	<version>1.2</version>
 	<packaging>jar</packaging>
 	<name>StAXON Jackson</name>
 	<description>JSON via StAX - Jackson</description>
@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>de.odysseus.staxon</groupId>
 		<artifactId>staxon-parent</artifactId>
-		<version>1.2-SNAPSHOT</version>
+		<version>1.2</version>
 	</parent>
 
 	<dependencies>
