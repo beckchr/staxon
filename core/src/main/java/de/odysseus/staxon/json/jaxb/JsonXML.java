@@ -114,4 +114,15 @@ public @interface JsonXML {
 	 * <p>The default value is <code>':'</code>.</p>
 	 */
 	char namespaceSeparator() default ':';
+
+	/**
+	 * <p>Specify namespace mappings.
+	 * A namespace mapping is used as a pre-defined namespace declaration when
+	 * reading JSON. It must be given as a serialized <code>javax.xml.namespace.QName</code>,
+	 * i.e. <code>"{namespaceURI}localPart"</code>. Here, <code>localPart</code> denotes
+	 * the prefix and <code>namespaceURI</code> denotes the namespace URI of the mapping.
+	 * When writing, prefixes specified by the mappings will be used when repairing
+	 * namespaces.</p>
+	 */
+	String[] namespaceMappings() default {};
 }

@@ -15,6 +15,8 @@
  */
 package de.odysseus.staxon.json;
 
+import java.util.Map;
+
 import javax.xml.namespace.QName;
 
 /**
@@ -31,6 +33,7 @@ public class JsonXMLConfigImpl implements JsonXMLConfig, Cloneable {
 	private boolean autoPrimitive = JsonXMLConfig.DEFAULT.isAutoPrimitive();
 	private boolean namespaceDeclarations = JsonXMLConfig.DEFAULT.isNamespaceDeclarations();
 	private char namespaceSeparator = JsonXMLConfig.DEFAULT.getNamespaceSeparator();
+	private Map<String, String> namespaceMappings = JsonXMLConfig.DEFAULT.getNamespaceMappings();
 	
 	private boolean repairingNamespaces = JsonXMLConfig.DEFAULT.isRepairingNamespaces();
 	
@@ -113,5 +116,14 @@ public class JsonXMLConfigImpl implements JsonXMLConfig, Cloneable {
 	
 	public void setRepairingNamespaces(boolean repairingNamespaces) {
 		this.repairingNamespaces = repairingNamespaces;
+	}
+	
+	@Override
+	public Map<String, String> getNamespaceMappings() {
+		return namespaceMappings;
+	}
+	
+	public void setNamespaceMappings(Map<String, String> namespaceMappings) {
+		this.namespaceMappings = namespaceMappings;
 	}
 }

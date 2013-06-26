@@ -21,6 +21,9 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.FactoryConfigurationError;
@@ -93,6 +96,14 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	public static final String PROP_NAMESPACE_DECLARATIONS = "JsonXMLOutputFactory.namespaceDeclarations";
 
 	/**
+	 * <p>Namespace mappings associate prefixes with URIs, used when repairing namespaces to
+	 * determine prefixes for namespace declarations.</p>
+	 * 
+	 * <p>The default value is <code>null</code>.</p>
+	 */
+	public static final String PROP_NAMESPACE_MAPPINGS = "JsonXMLOutputFactory.namespaceMappings";
+
+	/**
 	 * <p>Format output for better readability?</p>
 	 * 
 	 * <p>The default value is <code>false</code>.</p>
@@ -107,6 +118,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	private boolean prettyPrint;
 	private char namespaceSeparator;
 	private boolean namespaceDeclarations;
+	private Map<String, String> namespaceMappings;
 
 	public JsonXMLOutputFactory() throws FactoryConfigurationError {
 		this(JsonXMLConfig.DEFAULT);
@@ -128,6 +140,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 		this.prettyPrint = config.isPrettyPrint();
 		this.namespaceSeparator = config.getNamespaceSeparator();
 		this.namespaceDeclarations = config.isNamespaceDeclarations();
+		this.namespaceMappings = config.getNamespaceMappings();
 		this.streamFactory = streamFactory;
 
 		/*
@@ -148,7 +161,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 		}
 		return target;
 	}
-
+	
 	@Override
 	public JsonXMLStreamWriter createXMLStreamWriter(OutputStream stream, String encoding) throws XMLStreamException {
 		try {
@@ -157,12 +170,26 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 			throw new XMLStreamException(e);
 		}
 	}
+	
+	private Map<String, String> repairNamespacesMap() {
+		if (Boolean.TRUE.equals(getProperty(IS_REPAIRING_NAMESPACES))) {
+			if (namespaceMappings == null || namespaceMappings.isEmpty()) {
+				return Collections.<String, String>emptyMap();
+			}
+			// reverse associations to obtain URI-to-prefix mappings
+			Map<String, String> reverseNamespaceMappings = new HashMap<String, String>();
+			for (Map.Entry<String, String> namespaceMapping : namespaceMappings.entrySet()) {
+				reverseNamespaceMappings.put(namespaceMapping.getValue(), namespaceMapping.getKey());
+			}
+			return reverseNamespaceMappings;
+		}
+		return null;
+	}
 
 	@Override
 	public JsonXMLStreamWriter createXMLStreamWriter(Writer stream) throws XMLStreamException {
-		boolean repairNamespaces = Boolean.TRUE.equals(getProperty(IS_REPAIRING_NAMESPACES));
 		try {
-			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), repairNamespaces, multiplePI, namespaceSeparator, namespaceDeclarations);
+			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), repairNamespacesMap(), multiplePI, namespaceSeparator, namespaceDeclarations);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -170,9 +197,8 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 
 	@Override
 	public JsonXMLStreamWriter createXMLStreamWriter(OutputStream stream) throws XMLStreamException {
-		boolean repairNamespaces = Boolean.TRUE.equals(getProperty(IS_REPAIRING_NAMESPACES));
 		try {
-			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), repairNamespaces, multiplePI, namespaceSeparator, namespaceDeclarations);
+			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), repairNamespacesMap(), multiplePI, namespaceSeparator, namespaceDeclarations);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -186,7 +212,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	@Override
 	public boolean isPropertySupported(String name) {
 		return super.isPropertySupported(name)
-			|| Arrays.asList(PROP_AUTO_ARRAY, PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT, PROP_NAMESPACE_SEPARATOR, PROP_NAMESPACE_DECLARATIONS, PROP_PRETTY_PRINT).contains(name);
+			|| Arrays.asList(PROP_AUTO_ARRAY, PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT, PROP_NAMESPACE_SEPARATOR, PROP_NAMESPACE_DECLARATIONS, PROP_NAMESPACE_MAPPINGS, PROP_PRETTY_PRINT).contains(name);
 	}
 
 	@Override
@@ -208,6 +234,8 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 				return namespaceSeparator;
 			} else if (PROP_NAMESPACE_DECLARATIONS.equals(name)) {
 				return Boolean.valueOf(namespaceDeclarations);
+			} else if (PROP_NAMESPACE_MAPPINGS.equals(name)) {
+				return namespaceMappings;
 			} else {
 				throw new IllegalArgumentException("Unsupported property: " + name);
 			}
@@ -233,6 +261,10 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 				namespaceSeparator = (Character)value;
 			} else if (PROP_NAMESPACE_DECLARATIONS.equals(name)) {
 				namespaceDeclarations = ((Boolean)value).booleanValue();
+			} else if (PROP_NAMESPACE_MAPPINGS.equals(name)) {
+				@SuppressWarnings("unchecked")
+				Map<String, String> map = (Map<String, String>)value;
+				this.namespaceMappings = map;
 			} else {
 				throw new IllegalArgumentException("Unsupported property: " + name);
 			}

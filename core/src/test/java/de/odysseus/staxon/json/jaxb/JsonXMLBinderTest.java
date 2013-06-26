@@ -52,6 +52,9 @@ public class JsonXMLBinderTest {
 	@JsonXML(virtualRoot = true, multiplePaths = "/elements")
 	static class JsonXMLVirtualSampleRootElement {}
 
+	@JsonXML(namespaceDeclarations = false, namespaceMappings = {"{urn:staxon:jaxb:test}p"})
+	static class JsonXMLNamespaceMappings {}
+	
 	@XmlType
 	static class EmptyType {}
 
@@ -216,6 +219,17 @@ public class JsonXMLBinderTest {
 		XMLStreamReader reader = new JsonXMLBinder().createXMLStreamReader(type, config, new StringReader(json));
 		Unmarshaller unmarshaller = JAXBContext.newInstance(SampleTypeWithNamespace.class).createUnmarshaller();
 
+		Assert.assertNotNull(new JsonXMLBinder().unmarshal(SampleTypeWithNamespace.class, config, unmarshaller, reader));
+	}
+	
+	@Test
+	public void testUnmarshallSampleTypeWithNamespaceMapping() throws Exception {
+		JsonXML config = JsonXMLNamespaceMappings.class.getAnnotation(JsonXML.class);
+		Class<?> type = SampleTypeWithNamespace.class;
+		String json = "{\"p:sampleTypeWithNamespace\":null}";
+		XMLStreamReader reader = new JsonXMLBinder().createXMLStreamReader(type, config, new StringReader(json));
+		Assert.assertEquals("urn:staxon:jaxb:test", reader.getNamespaceContext().getNamespaceURI("p"));
+		Unmarshaller unmarshaller = JAXBContext.newInstance(SampleTypeWithNamespace.class).createUnmarshaller();
 		Assert.assertNotNull(new JsonXMLBinder().unmarshal(SampleTypeWithNamespace.class, config, unmarshaller, reader));
 	}
 	

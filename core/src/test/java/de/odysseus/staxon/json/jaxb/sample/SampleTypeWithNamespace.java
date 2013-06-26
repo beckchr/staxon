@@ -21,5 +21,5 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(namespace = "urn:staxon:jaxb:test")
 public class SampleTypeWithNamespace {
 	@XmlElement
-	String element;
+	public String element;
 }

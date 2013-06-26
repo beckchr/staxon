@@ -15,6 +15,8 @@
  */
 package de.odysseus.staxon.json;
 
+import java.util.Map;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLOutputFactory;
 
@@ -38,6 +40,7 @@ public interface JsonXMLConfig {
 	 * <li><em>namespaceSeparator</em> - <code>':'</code></li>
 	 * <li><em>prettyPrint</em> - <code>false</code></li>
 	 * <li><em>virtualRoot</em> - <code>null</code></li>
+	 * <li><em>namespaceMappings</em> - <code>null</code></li>
 	 * </ul>
 	 */
 	public static final JsonXMLConfig DEFAULT = new JsonXMLConfig() {
@@ -72,6 +75,10 @@ public interface JsonXMLConfig {
 		@Override
 		public boolean isRepairingNamespaces() {
 			return false;
+		}
+		@Override
+		public Map<String,String> getNamespaceMappings() {
+			return null;
 		}
 	};
 	
@@ -132,7 +139,7 @@ public interface JsonXMLConfig {
 	 * <p>JSON documents may have have multiple root properties. However,
 	 * XML requires a single root element. This property specifies
 	 * the root as a "virtual" element, which will be removed from the stream
-	 * when writing and added to the stream when reading.
+	 * when writing and added to the stream when reading.</p>
 	 * @see JsonXMLInputFactory#PROP_VIRTUAL_ROOT
 	 * @see JsonXMLOutputFactory#PROP_VIRTUAL_ROOT
 	 * @return virtual root
@@ -145,4 +152,13 @@ public interface JsonXMLConfig {
 	 * @return namespace-repairing flag
 	 */
 	public boolean isRepairingNamespaces();
+	
+	/**
+	 * <p>Namespace mappings associate URIs with prefixes when reading JSON.
+	 * This can be used to parse documents which are missing namespace declarations.
+	 * When writing, prefixes specified by the mappings will be used when repairing
+	 * namespaces.</p>
+	 * @return prefix/URI mappings
+	 */
+	public Map<String, String> getNamespaceMappings();
 }

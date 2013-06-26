@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.EventFilter;
@@ -72,11 +73,20 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	 */
 	public static final String PROP_NAMESPACE_SEPARATOR = "JsonXMLInputFactory.namespaceSeparator";
 
+	/**
+	 * <p>Namespace mappings associate prefixes with URIs when reading JSON.
+	 * This can be used to parse documents which are missing namespace declarations.</p>
+	 * 
+	 * <p>The default value is <code>null</code>.</p>
+	 */
+	public static final String PROP_NAMESPACE_MAPPINGS = "JsonXMLInputFactory.namespaceMappings";
+
 	private final JsonStreamFactory streamFactory;
 
 	private boolean multiplePI;
 	private QName virtualRoot;
 	private char namespaceSeparator;
+	private Map<String, String> namespaceMappings;
 
 	public JsonXMLInputFactory() throws FactoryConfigurationError {
 		this(JsonXMLConfig.DEFAULT);
@@ -94,6 +104,7 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 		this.multiplePI = config.isMultiplePI();
 		this.virtualRoot = config.getVirtualRoot();
 		this.namespaceSeparator = config.getNamespaceSeparator();
+		this.namespaceMappings = config.getNamespaceMappings();
 		this.streamFactory = streamFactory;
 		
 		/*
@@ -136,7 +147,7 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	@Override
 	public JsonXMLStreamReader createXMLStreamReader(Reader reader) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(reader)), multiplePI, namespaceSeparator);
+			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(reader)), multiplePI, namespaceSeparator, namespaceMappings);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -145,7 +156,7 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	@Override
 	public JsonXMLStreamReader createXMLStreamReader(InputStream stream) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(stream)), multiplePI, namespaceSeparator);
+			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(stream)), multiplePI, namespaceSeparator, namespaceMappings);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -178,7 +189,7 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	@Override
 	public boolean isPropertySupported(String name) {
 		return super.isPropertySupported(name)
-			|| Arrays.asList(PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT, PROP_NAMESPACE_SEPARATOR).contains(name);
+			|| Arrays.asList(PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT, PROP_NAMESPACE_SEPARATOR, PROP_NAMESPACE_MAPPINGS).contains(name);
 	}
 
 	@Override
@@ -192,6 +203,8 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 				return virtualRoot;
 			} else if (PROP_NAMESPACE_SEPARATOR.equals(name)) {
 				return namespaceSeparator;
+			} else if (PROP_NAMESPACE_MAPPINGS.equals(name)) {
+				return namespaceMappings;
 			} else {
 				throw new IllegalArgumentException("Unsupported property: " + name);
 			}
@@ -229,6 +242,10 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 				virtualRoot = value instanceof String ? QName.valueOf((String)value) : (QName)value;
 			} else if (PROP_NAMESPACE_SEPARATOR.equals(name)) {
 				namespaceSeparator = (Character)value;
+			} else if (PROP_NAMESPACE_MAPPINGS.equals(name)) {
+				@SuppressWarnings("unchecked")
+				Map<String, String> map = (Map<String, String>)value;
+				this.namespaceMappings = map;
 			} else {
 				throw new IllegalArgumentException("Unsupported property: " + name);
 			}

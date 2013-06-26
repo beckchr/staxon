@@ -16,6 +16,7 @@
 package de.odysseus.staxon.json;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.xml.XMLConstants;
 import javax.xml.stream.XMLStreamConstants;
@@ -106,15 +107,34 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	private final boolean namespaceDeclarations;
 
 	private boolean documentArray = false;
-	
+
 	/**
 	 * Create writer instance.
 	 * @param target stream target
+	 * @param repairNamespaces
 	 * @param multiplePI whether to consume <code>&lt;xml-multiple?&gt;</code> PIs to trigger array start
 	 * @param namespaceSeparator namespace prefix separator
 	 * @param namespaceDeclarations whether to write namespace declarations
 	 */
 	public JsonXMLStreamWriter(JsonStreamTarget target, boolean repairNamespaces, boolean multiplePI, char namespaceSeparator, boolean namespaceDeclarations) {
+		super(new ScopeInfo(), repairNamespaces);
+		this.target = target;
+		this.multiplePI = multiplePI;
+		this.namespaceSeparator = namespaceSeparator;
+		this.namespaceDeclarations = namespaceDeclarations;
+		this.autoEndArray = true;
+		this.skipSpace = true;
+	}
+
+	/**
+	 * Create writer instance.
+	 * @param target stream target
+	 * @param repairingNamespaces prefix-URI associations used to repair namespaces (<code>null</code> means do not repair)
+	 * @param multiplePI whether to consume <code>&lt;xml-multiple?&gt;</code> PIs to trigger array start
+	 * @param namespaceSeparator namespace prefix separator
+	 * @param namespaceDeclarations whether to write namespace declarations
+	 */
+	public JsonXMLStreamWriter(JsonStreamTarget target, Map<String, String> repairNamespaces, boolean multiplePI, char namespaceSeparator, boolean namespaceDeclarations) {
 		super(new ScopeInfo(), repairNamespaces);
 		this.target = target;
 		this.multiplePI = multiplePI;

@@ -16,6 +16,7 @@
 package de.odysseus.staxon.json;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.xml.XMLConstants;
 import javax.xml.stream.XMLStreamConstants;
@@ -58,11 +59,32 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 	 * @throws XMLStreamException
 	 */
 	public JsonXMLStreamReader(JsonStreamSource source, boolean multiplePI, char namespaceSeparator) throws XMLStreamException {
+		this(source, multiplePI, namespaceSeparator, null);
+	}
+
+	/**
+	 * Create reader instance.
+	 * @param source stream source
+	 * @param multiplePI whether to produce <code>&lt;xml-multiple?&gt;</code> PIs to signal array start
+	 * @param namespaceSeparator namespace prefix separator
+	 * @param namespaceMappings predefined namespaces (may be <code>null</code>)
+	 * @throws XMLStreamException
+	 */
+	public JsonXMLStreamReader(JsonStreamSource source, boolean multiplePI, char namespaceSeparator, Map<String, String> namespaceMappings) throws XMLStreamException {
 		super(new ScopeInfo(), source);
 		this.source = source;
 		this.multiplePI = multiplePI;
 		this.namespaceSeparator = namespaceSeparator;
-		initialize();
+		initialize(namespaceMappings);
+	}
+	
+	private void initialize(Map<String, String> namespaceMappings) throws XMLStreamException {
+		if (namespaceMappings != null && !namespaceMappings.isEmpty()) {
+			for (Map.Entry<String, String> namespace : namespaceMappings.entrySet()) {
+				getScope().setPrefix(namespace.getKey(), namespace.getValue());
+			}
+		}
+		super.initialize();
 	}
 
 	private void readStartElementTag(String name) throws XMLStreamException {

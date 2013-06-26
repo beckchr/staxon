@@ -15,6 +15,9 @@
  */
 package de.odysseus.staxon.base;
 
+import java.util.Collections;
+import java.util.Map;
+
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamConstants;
@@ -25,23 +28,33 @@ import javax.xml.stream.XMLStreamWriter;
  * Abstract XML stream writer.
  */
 public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
-	private final boolean repairingNamespaces;	
+	private final Map<String, String> repairingNamespaces;
 	private XMLStreamWriterScope<T> scope;
 	private boolean startDocumentWritten;
-	
+
 	/**
 	 * Create writer instance.
 	 * @param rootInfo root scope information
+	 * @param repairingNamespaces
 	 */
-	public AbstractXMLStreamWriter(T rootInfo, boolean repaireNamespaces) {
-		scope = new XMLStreamWriterScope<T>(XMLConstants.NULL_NS_URI, rootInfo);
-		startDocumentWritten = false;
-		repairingNamespaces = repaireNamespaces;
+	public AbstractXMLStreamWriter(T rootInfo, boolean repairingNamespaces) {
+		this(rootInfo, repairingNamespaces ? Collections.<String, String>emptyMap() : null);
+	}
+
+	/**
+	 * Create writer instance.
+	 * @param rootInfo root scope information
+	 * @param repairingNamespaces URI-prefix associations used to repair namespaces (<code>null</code> means do not repair)
+	 */
+	public AbstractXMLStreamWriter(T rootInfo, Map<String, String> repairingNamespaces) {
+		this.scope = new XMLStreamWriterScope<T>(XMLConstants.NULL_NS_URI, rootInfo);
+		this.repairingNamespaces = repairingNamespaces;
+		this.startDocumentWritten = false;
 	}
 	
 	private void ensureStartTagClosed() throws XMLStreamException {
 		if (!scope.isStartTagClosed()) {
-			if (repairingNamespaces) { // missing declaration?
+			if (repairingNamespaces != null) { // missing declaration?
 				String namespaceURI = getScope().getNamespaceURI();
 				if (!XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
 					String prefix = getScope().getPrefix();
@@ -64,15 +77,18 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 		}
 		boolean writeNamespace = false;
 		if (prefix == null) {
-			if (repairingNamespaces) {
-				if (XMLConstants.NULL_NS_URI.equals(getScope().getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX))) { // try empty prefix
-					prefix = XMLConstants.DEFAULT_NS_PREFIX;
-				} else { // find unused prefix
-					int index = 1;
-					while (getScope().getNamespaceURI("ns" + index) == null) {
-						index++;
+			if (repairingNamespaces != null) {
+				prefix = repairingNamespaces.get(namespaceURI);
+				if (prefix == null) { // find unused prefix
+					if (XMLConstants.NULL_NS_URI.equals(getScope().getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX))) { // try empty prefix
+						prefix = XMLConstants.DEFAULT_NS_PREFIX;
+					} else { // generic prefix
+						int index = 1;
+						while (getScope().getNamespaceURI("ns" + index) == null) {
+							index++;
+						}
+						prefix = index == 1 ? "ns" : "ns" + index;
 					}
-					prefix = index == 1 ? "ns" : "ns" + index;
 				}
 				writeNamespace = true;
 			} else {
@@ -175,7 +191,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 			throw new XMLStreamException("Namespace URI must not be null");
 		}
 		String prefix = scope.getPrefix(namespaceURI);
-		if (prefix == null && !repairingNamespaces) {
+		if (prefix == null && repairingNamespaces == null) {
 			throw new XMLStreamException("Namespace URI has not been bound to a prefix: " + namespaceURI);
 		}
 		writeStartElement(prefix, localName, namespaceURI, false);
@@ -217,7 +233,7 @@ public abstract class AbstractXMLStreamWriter<T> implements XMLStreamWriter {
 			throw new XMLStreamException("Namespace URI must not be null");
 		}
 		String prefix = scope.getPrefix(namespaceURI);
-		if (prefix == null && !repairingNamespaces) {
+		if (prefix == null && repairingNamespaces == null) {
 			throw new XMLStreamException("Namespace URI has not been bound to a prefix: " + namespaceURI);
 		}
 		writeStartElement(prefix, localName, namespaceURI, true);

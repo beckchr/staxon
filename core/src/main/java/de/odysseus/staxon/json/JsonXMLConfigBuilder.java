@@ -15,6 +15,9 @@
  */
 package de.odysseus.staxon.json;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.xml.namespace.QName;
 
 /**
@@ -134,6 +137,31 @@ public class JsonXMLConfigBuilder {
 	 */
 	public JsonXMLConfigBuilder repairingNamespaces(boolean repairingNamespaces) {
 		config.setRepairingNamespaces(repairingNamespaces);
+		return this;
+	}
+
+	/**
+	 * Set namespace mappings property and return receiver.
+	 * @param repairingNamespaces
+	 * @return this
+	 */
+	public JsonXMLConfigBuilder namespaceMappings(Map<String, String> namespaceMappings) {
+		config.setNamespaceMappings(namespaceMappings);
+		return this;
+	}
+
+	/**
+	 * Add a namespace mapping and return receiver.
+	 * @param repairingNamespaces
+	 * @return this
+	 */
+	public JsonXMLConfigBuilder namespaceMapping(String prefix, String namespaceURI) {
+		Map<String, String> namespaceMappings = new HashMap<String, String>();
+		if (config.getNamespaceMappings() != null) {
+			namespaceMappings.putAll(config.getNamespaceMappings());
+		}
+		namespaceMappings.put(prefix, namespaceURI);
+		config.setNamespaceMappings(namespaceMappings);
 		return this;
 	}
 }

@@ -157,6 +157,31 @@ public class JsonXMLStreamReaderTest {
 		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
 		reader.close();
 	}
+	
+	/**
+	 * Should use namespace mappings
+	 * <code>&lt;foo:alice&gt;bob&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testNamespaceMappings() throws Exception {
+		String input = "{\"foo:alice\":\"bob\"}";
+		JsonXMLConfig config = new JsonXMLConfigBuilder().namespaceMapping("foo", "http://some-namespace").build();
+		XMLStreamReader reader = new JsonXMLInputFactory(config).createXMLStreamReader(new StringReader(input));
+		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
+		Assert.assertEquals("http://some-namespace", reader.getNamespaceURI());
+		Assert.assertEquals(0, reader.getAttributeCount());
+		reader.next();
+		verify(reader, XMLStreamConstants.CHARACTERS, null, "bob");
+		reader.next();
+		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
+		Assert.assertEquals("http://some-namespace", reader.getNamespaceURI());
+		reader.next();
+		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
+		reader.close();
+	}
+
 
 	/**
 	 * <code>&lt;alice xmlns="http://foo" xmlns:bar="http://bar"&gt;bob&lt;/alice&gt;</code>

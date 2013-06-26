@@ -19,7 +19,9 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -27,6 +29,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -59,6 +62,18 @@ public class JsonXMLBinder {
 		this.writeDocumentArray = writeDocumentArray;
 	}
 	
+	private Map<String, String> namespaceMappings(String[] names) {
+		if (names == null || names.length == 0) {
+			return null;
+		}
+		Map<String, String> map = new HashMap<String, String>();
+		for (String name : names) {
+			QName qName = QName.valueOf(name);
+			map.put(qName.getLocalPart(), qName.getNamespaceURI());
+		}
+		return map;
+	}
+	
 	private JsonXMLConfig toJsonXMLConfig(Class<?> type, JsonXML config) throws JAXBException {
 		return new JsonXMLConfigBuilder().
 				autoArray(config.autoArray()).
@@ -68,6 +83,7 @@ public class JsonXMLBinder {
 				namespaceSeparator(config.namespaceSeparator()).
 				prettyPrint(config.prettyPrint()).
 				virtualRoot(config.virtualRoot() ? rootProvider.getName(type) : null).
+				namespaceMappings(namespaceMappings(config.namespaceMappings())).
 				build();
 	}
 	

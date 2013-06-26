@@ -160,6 +160,24 @@ public class JsonXMLStreamWriterTest {
 	}
 
 	/**
+	 * Should use prefixes from mappings when repairing namespaces
+	 * <code>&lt;foo:alice xmlns:foo="http://some-namespace"&gt;bob&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testNamespaceMappings() throws Exception {
+		StringWriter result = new StringWriter();
+		JsonXMLConfig config = new JsonXMLConfigBuilder().repairingNamespaces(true).namespaceMapping("foo", "http://some-namespace").build();
+		XMLStreamWriter writer = new JsonXMLOutputFactory(config).createXMLStreamWriter(result);
+		writer.writeStartDocument();
+		writer.writeStartElement("http://some-namespace", "alice");
+		writer.writeCharacters("bob");
+		writer.writeEndElement();
+		writer.writeEndDocument();
+		writer.close();
+		Assert.assertEquals("{\"foo:alice\":{\"@xmlns:foo\":\"http://some-namespace\",\"$\":\"bob\"}}", result.toString());
+	}
+
+	/**
 	 * <code>&lt;alice&gt;bob&lt;/alice&gt;&lt;alice&gt;bob&lt;/alice&gt;</code>
 	 */
 	@Test
