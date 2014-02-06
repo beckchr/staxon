@@ -78,6 +78,7 @@
 		<module>core</module>
 		<module>gson</module>
 		<module>jackson</module>
+		<module>jsr353</module>
 		<module>jaxrs</module>
 	</modules>
 	
