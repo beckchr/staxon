@@ -55,21 +55,21 @@ public class JacksonStreamFactory extends JsonStreamFactory {
 
 	@Override
 	public JsonStreamSource createJsonStreamSource(InputStream input) throws IOException {
-		return new JacksonStreamSource(configure(jsonFactory.createJsonParser(input)));
+		return new JacksonStreamSource(configure(jsonFactory.createParser(input)));
 	}
 	
 	@Override
 	public JsonStreamSource createJsonStreamSource(Reader reader) throws IOException {
-		return new JacksonStreamSource(configure(jsonFactory.createJsonParser(reader)));
+		return new JacksonStreamSource(configure(jsonFactory.createParser(reader)));
 	}
 
 	@Override
 	public JsonStreamTarget createJsonStreamTarget(OutputStream output, boolean pretty) throws IOException {
-		return new JacksonStreamTarget(configure(jsonFactory.createJsonGenerator(output, JsonEncoding.UTF8), pretty));
+		return new JacksonStreamTarget(configure(jsonFactory.createGenerator(output, JsonEncoding.UTF8), pretty));
 	}
 	
 	@Override
 	public JsonStreamTarget createJsonStreamTarget(Writer writer, boolean pretty) throws IOException {
-		return new JacksonStreamTarget(configure(jsonFactory.createJsonGenerator(writer), pretty));
+		return new JacksonStreamTarget(configure(jsonFactory.createGenerator(writer), pretty));
 	}
 }

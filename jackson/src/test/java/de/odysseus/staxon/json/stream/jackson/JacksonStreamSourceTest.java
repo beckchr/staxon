@@ -32,7 +32,7 @@ public class JacksonStreamSourceTest {
 	@Test
 	public void testObjectValue() throws IOException {
 		StringReader reader = new StringReader("{\"alice\":\"bob\"}");
-		JacksonStreamSource source = new JacksonStreamSource(new JsonFactory().createJsonParser(reader));
+		JacksonStreamSource source = new JacksonStreamSource(new JsonFactory().createParser(reader));
 		
 		Assert.assertEquals(JsonStreamToken.START_OBJECT, source.peek());
 		source.startObject();
@@ -53,7 +53,7 @@ public class JacksonStreamSourceTest {
 	@Test
 	public void testArrayValue() throws IOException {
 		StringReader reader = new StringReader("[\"bob\"]");
-		JacksonStreamSource source = new JacksonStreamSource(new JsonFactory().createJsonParser(reader));
+		JacksonStreamSource source = new JacksonStreamSource(new JsonFactory().createParser(reader));
 
 		Assert.assertEquals(JsonStreamToken.START_ARRAY, source.peek());
 		source.startArray();
@@ -71,7 +71,7 @@ public class JacksonStreamSourceTest {
 	@Test
 	public void testArray1() throws IOException {
 		StringReader reader = new StringReader("{\"alice\":[\"bob\"]}");
-		JacksonStreamSource source = new JacksonStreamSource(new JsonFactory().createJsonParser(reader));
+		JacksonStreamSource source = new JacksonStreamSource(new JsonFactory().createParser(reader));
 
 		Assert.assertEquals(JsonStreamToken.START_OBJECT, source.peek());
 		source.startObject();
@@ -98,7 +98,7 @@ public class JacksonStreamSourceTest {
 	@Test
 	public void testArray2() throws IOException {
 		StringReader reader = new StringReader("{\"alice\":{\"bob\":[\"edgar\",\"charlie\"]}}");
-		JacksonStreamSource source = new JacksonStreamSource(new JsonFactory().createJsonParser(reader));
+		JacksonStreamSource source = new JacksonStreamSource(new JsonFactory().createParser(reader));
 
 		Assert.assertEquals(JsonStreamToken.START_OBJECT, source.peek());
 		source.startObject();
@@ -137,7 +137,7 @@ public class JacksonStreamSourceTest {
 	@Test
 	public void testArray3() throws IOException {
 		StringReader reader = new StringReader("{\"alice\":{\"edgar\":[\"bob\"],\"charlie\":[\"bob\"]}}");
-		JacksonStreamSource source = new JacksonStreamSource(new JsonFactory().createJsonParser(reader));
+		JacksonStreamSource source = new JacksonStreamSource(new JsonFactory().createParser(reader));
 
 		Assert.assertEquals(JsonStreamToken.START_OBJECT, source.peek());
 		source.startObject();
@@ -185,7 +185,7 @@ public class JacksonStreamSourceTest {
 	@Test
 	public void testString() throws IOException {
 		StringReader reader = new StringReader("[\"\",\"abc\",\"\\b\\f\\n\\r\\t\",\"\\\"\",\"\\\\\",\"\\u001F\"]");
-		JacksonStreamSource source = new JacksonStreamSource(new JsonFactory().createJsonParser(reader));
+		JacksonStreamSource source = new JacksonStreamSource(new JsonFactory().createParser(reader));
 
 		Assert.assertEquals(JsonStreamToken.START_ARRAY, source.peek());
 		source.startArray();
@@ -218,7 +218,7 @@ public class JacksonStreamSourceTest {
 	@Test
 	public void testLiteralValues() throws IOException {
 		StringReader reader = new StringReader("[true,false,null]");
-		JacksonStreamSource source = new JacksonStreamSource(new JsonFactory().createJsonParser(reader));
+		JacksonStreamSource source = new JacksonStreamSource(new JsonFactory().createParser(reader));
 		JsonStreamSource.Value value = null;
 
 		Assert.assertEquals(JsonStreamToken.START_ARRAY, source.peek());
@@ -249,7 +249,7 @@ public class JacksonStreamSourceTest {
 	@Test
 	public void testNumberValues() throws IOException {
 		StringReader reader = new StringReader("[123,12e3,12E3,12.3,1.2e3,1.2E3]");
-		JacksonStreamSource source = new JacksonStreamSource(new JsonFactory().createJsonParser(reader));
+		JacksonStreamSource source = new JacksonStreamSource(new JsonFactory().createParser(reader));
 		JsonStreamSource.Value value = null;
 
 		Assert.assertEquals(JsonStreamToken.START_ARRAY, source.peek());
@@ -295,7 +295,7 @@ public class JacksonStreamSourceTest {
 	@Test(expected = IOException.class)
 	public void testUnexpected() throws IOException {
 		StringReader reader = new StringReader("\"alice\":\"bob\""); // missing document start/end
-		JacksonStreamSource source = new JacksonStreamSource(new JsonFactory().createJsonParser(reader));
+		JacksonStreamSource source = new JacksonStreamSource(new JsonFactory().createParser(reader));
 
 		Assert.assertEquals(JsonStreamToken.VALUE, source.peek());
 		source.value();
@@ -307,7 +307,7 @@ public class JacksonStreamSourceTest {
 	@Test
 	public void testWhitespace() throws IOException {
 		StringReader reader = new StringReader("{\r  \"alice\" : \"bob\"\r\n}");
-		JacksonStreamSource source = new JacksonStreamSource(new JsonFactory().createJsonParser(reader));
+		JacksonStreamSource source = new JacksonStreamSource(new JsonFactory().createParser(reader));
 		
 		Assert.assertEquals(JsonStreamToken.START_OBJECT, source.peek());
 		source.startObject();

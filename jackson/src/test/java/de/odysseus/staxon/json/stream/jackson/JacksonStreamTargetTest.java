@@ -28,7 +28,7 @@ public class JacksonStreamTargetTest {
 	@Test
 	public void testObjectValue() throws IOException {
 		StringWriter writer = new StringWriter();
-		JacksonStreamTarget target = new JacksonStreamTarget(new JsonFactory().createJsonGenerator(writer));
+		JacksonStreamTarget target = new JacksonStreamTarget(new JsonFactory().createGenerator(writer));
 		
 		target.startObject();
 		target.name("alice");
@@ -43,7 +43,7 @@ public class JacksonStreamTargetTest {
 	@Test
 	public void testArrayValue() throws IOException {
 		StringWriter writer = new StringWriter();
-		JacksonStreamTarget target = new JacksonStreamTarget(new JsonFactory().createJsonGenerator(writer));
+		JacksonStreamTarget target = new JacksonStreamTarget(new JsonFactory().createGenerator(writer));
 		
 		target.startArray();
 		target.value("bob");
@@ -57,7 +57,7 @@ public class JacksonStreamTargetTest {
 	@Test
 	public void testArray1() throws IOException {
 		StringWriter writer = new StringWriter();
-		JacksonStreamTarget target = new JacksonStreamTarget(new JsonFactory().createJsonGenerator(writer));
+		JacksonStreamTarget target = new JacksonStreamTarget(new JsonFactory().createGenerator(writer));
 		
 		target.startObject();
 		target.name("alice");
@@ -74,7 +74,7 @@ public class JacksonStreamTargetTest {
 	@Test
 	public void testArray2() throws IOException {
 		StringWriter writer = new StringWriter();
-		JacksonStreamTarget target = new JacksonStreamTarget(new JsonFactory().createJsonGenerator(writer));
+		JacksonStreamTarget target = new JacksonStreamTarget(new JsonFactory().createGenerator(writer));
 		
 		target.startObject();
 		target.name("alice");
@@ -95,7 +95,7 @@ public class JacksonStreamTargetTest {
 	@Test
 	public void testArray3() throws IOException {
 		StringWriter writer = new StringWriter();
-		JacksonStreamTarget target = new JacksonStreamTarget(new JsonFactory().createJsonGenerator(writer));
+		JacksonStreamTarget target = new JacksonStreamTarget(new JsonFactory().createGenerator(writer));
 		
 		target.startObject();
 		target.name("alice");
@@ -119,7 +119,7 @@ public class JacksonStreamTargetTest {
 	@Test
 	public void testString() throws IOException {
 		StringWriter writer = new StringWriter();
-		JacksonStreamTarget target = new JacksonStreamTarget(new JsonFactory().createJsonGenerator(writer));
+		JacksonStreamTarget target = new JacksonStreamTarget(new JsonFactory().createGenerator(writer));
 		
 		target.startArray();
 		target.value("");
@@ -138,7 +138,7 @@ public class JacksonStreamTargetTest {
 	@Test
 	public void testSimpleValue() throws IOException {
 		StringWriter writer = new StringWriter();
-		JacksonStreamTarget target = new JacksonStreamTarget(new JsonFactory().createJsonGenerator(writer));
+		JacksonStreamTarget target = new JacksonStreamTarget(new JsonFactory().createGenerator(writer));
 		
 		target.startArray();
 		target.value("abc");
