@@ -583,7 +583,7 @@ public abstract class AbstractXMLStreamReader<T> implements XMLStreamReader {
 
 	@Override
 	public int getTextCharacters(int sourceStart, char[] target, int targetStart, int length) throws XMLStreamException {
-		int count = Math.min(length, getTextLength());
+		int count = Math.min(length, getTextLength() - sourceStart);
 		if (count > 0) {
 			System.arraycopy(getTextCharacters(), sourceStart, target, targetStart, count);
 		}
