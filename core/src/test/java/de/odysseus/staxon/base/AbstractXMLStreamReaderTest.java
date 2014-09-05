@@ -71,6 +71,30 @@ public class AbstractXMLStreamReaderTest {
 	}
 
 	/**
+	 * <code>bob</code>
+	 */
+	@Test
+	public void testTextCharacters() throws XMLStreamException {
+		String input = "<?xml version=\"1.0\"?>bob";
+		XMLStreamReader reader = new SimpleXMLStreamReader(new StringReader(input));
+		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
+		reader.next();
+		Assert.assertEquals(XMLStreamConstants.CHARACTERS, reader.getEventType());
+		Assert.assertEquals(null, reader.getLocalName());
+		int length = 2;
+		char[] myBuffer = new char[length];
+		for (int sourceStart = 0; ; sourceStart += length) {
+			int nCopied = reader.getTextCharacters(sourceStart, myBuffer, 0, length);
+			if(nCopied < length) {
+				break;
+			}
+		}		
+		reader.next();
+		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
+		reader.close();
+	}
+
+	/**
 	 * <code>&lt;alice&gt;bob&lt;/alice&gt;</code>
 	 */
 	@Test
