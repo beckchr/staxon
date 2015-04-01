@@ -36,6 +36,8 @@ public class JsonXMLConfigImpl implements JsonXMLConfig, Cloneable {
 	private Map<String, String> namespaceMappings = JsonXMLConfig.DEFAULT.getNamespaceMappings();
 	
 	private boolean repairingNamespaces = JsonXMLConfig.DEFAULT.isRepairingNamespaces();
+	private boolean readXmlNil = JsonXMLConfig.DEFAULT.isReadXmlNil();
+	private boolean writeXmlNil = JsonXMLConfig.DEFAULT.isWriteXmlNil();
 	
 	@Override
 	protected JsonXMLConfigImpl clone() {
@@ -125,5 +127,29 @@ public class JsonXMLConfigImpl implements JsonXMLConfig, Cloneable {
 	
 	public void setNamespaceMappings(Map<String, String> namespaceMappings) {
 		this.namespaceMappings = namespaceMappings;
+	}
+
+	public void setReadXmlNil(boolean set) {
+		readXmlNil = set;
+	}
+
+	public void setWriteXmlNil(boolean set) {
+		writeXmlNil = set;
+	}
+
+	public boolean getReadXmlNil() {
+		return readXmlNil;
+	}
+
+	public boolean getWriteXmlNil() {
+		return writeXmlNil;
+	}
+
+	public boolean isReadXmlNil() {
+		return readXmlNil;
+	}
+
+	public boolean isWriteXmlNil() {
+		return writeXmlNil;
 	}
 }

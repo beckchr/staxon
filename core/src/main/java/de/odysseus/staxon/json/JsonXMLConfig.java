@@ -80,6 +80,14 @@ public interface JsonXMLConfig {
 		public Map<String,String> getNamespaceMappings() {
 			return null;
 		}
+
+		public boolean isReadXmlNil() {
+			return false;
+		}
+
+		public boolean isWriteXmlNil() {
+			return false;
+		}
 	};
 	
 	/**
@@ -161,4 +169,16 @@ public interface JsonXMLConfig {
 	 * @return prefix/URI mappings
 	 */
 	public Map<String, String> getNamespaceMappings();
+
+	/**
+	 *
+	 * @return
+	 */
+	public boolean isReadXmlNil();
+
+	/**
+	 *
+	 * @return
+	 */
+	public boolean isWriteXmlNil();
 }

@@ -164,4 +164,14 @@ public class JsonXMLConfigBuilder {
 		config.setNamespaceMappings(namespaceMappings);
 		return this;
 	}
+
+	public JsonXMLConfigBuilder readXmlNil(boolean read) {
+		config.setReadXmlNil(read);
+		return this;
+	}
+
+	public JsonXMLConfigBuilder writeXmlNil(boolean write) {
+		config.setWriteXmlNil(write);
+		return this;
+	}
 }
