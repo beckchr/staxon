@@ -37,6 +37,7 @@ import de.odysseus.staxon.json.stream.JsonStreamFactory;
 import de.odysseus.staxon.json.stream.JsonStreamTarget;
 import de.odysseus.staxon.json.stream.util.AutoArrayTarget;
 import de.odysseus.staxon.json.stream.util.AutoPrimitiveTarget;
+import de.odysseus.staxon.json.stream.util.CustomRegexIgnoreAutoPrimitiveTarget;
 import de.odysseus.staxon.json.stream.util.RemoveRootTarget;
 
 /**
@@ -110,6 +111,14 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	 */
 	public static final String PROP_PRETTY_PRINT = "JsonXMLOutputFactory.prettyPrint";
 
+	/**
+	 * <p>Convert element text to JSON primitives with ignore given regex (number, boolean, null) automatically?</p>
+	 *
+	 * <p>The default value is <code>null</code>.</p>
+	 */
+	public static final String PROP_CUSTOM_REGEX = "JsonXMLOutputFactory.customRegex";
+
+
 	private JsonStreamFactory streamFactory;
 	private boolean multiplePI;
 	private QName virtualRoot;
@@ -119,6 +128,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	private char namespaceSeparator;
 	private boolean namespaceDeclarations;
 	private Map<String, String> namespaceMappings;
+	private String customRegex;
 
 	public JsonXMLOutputFactory() throws FactoryConfigurationError {
 		this(JsonXMLConfig.DEFAULT);
@@ -142,6 +152,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 		this.namespaceDeclarations = config.isNamespaceDeclarations();
 		this.namespaceMappings = config.getNamespaceMappings();
 		this.streamFactory = streamFactory;
+		this.customRegex= config.getCustomRegex();
 
 		/*
 		 * initialize standard properties
@@ -157,7 +168,11 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 			target = new AutoArrayTarget(target);
 		}
 		if (autoPrimitive) {
-			target = new AutoPrimitiveTarget(target, false);
+			if (customRegex != null) {
+				target = new CustomRegexIgnoreAutoPrimitiveTarget(target, false, customRegex);
+			} else {
+				target = new AutoPrimitiveTarget(target, false);
+			}
 		}
 		return target;
 	}
@@ -212,7 +227,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	@Override
 	public boolean isPropertySupported(String name) {
 		return super.isPropertySupported(name)
-			|| Arrays.asList(PROP_AUTO_ARRAY, PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT, PROP_NAMESPACE_SEPARATOR, PROP_NAMESPACE_DECLARATIONS, PROP_NAMESPACE_MAPPINGS, PROP_PRETTY_PRINT).contains(name);
+			|| Arrays.asList(PROP_AUTO_ARRAY, PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT, PROP_NAMESPACE_SEPARATOR, PROP_NAMESPACE_DECLARATIONS, PROP_NAMESPACE_MAPPINGS, PROP_PRETTY_PRINT, PROP_CUSTOM_REGEX).contains(name);
 	}
 
 	@Override
@@ -236,6 +251,8 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 				return Boolean.valueOf(namespaceDeclarations);
 			} else if (PROP_NAMESPACE_MAPPINGS.equals(name)) {
 				return namespaceMappings;
+			} else if (PROP_CUSTOM_REGEX.equals(name)) {
+				return customRegex;
 			} else {
 				throw new IllegalArgumentException("Unsupported property: " + name);
 			}
@@ -265,6 +282,8 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 				@SuppressWarnings("unchecked")
 				Map<String, String> map = (Map<String, String>)value;
 				this.namespaceMappings = map;
+			} else if (PROP_CUSTOM_REGEX.equals(name) && value instanceof String) {
+				customRegex = (String) value;
 			} else {
 				throw new IllegalArgumentException("Unsupported property: " + name);
 			}

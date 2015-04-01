@@ -36,6 +36,7 @@ public class JsonXMLConfigImpl implements JsonXMLConfig, Cloneable {
 	private Map<String, String> namespaceMappings = JsonXMLConfig.DEFAULT.getNamespaceMappings();
 	
 	private boolean repairingNamespaces = JsonXMLConfig.DEFAULT.isRepairingNamespaces();
+	private String customRegex = JsonXMLConfig.DEFAULT.getCustomRegex();
 	
 	@Override
 	protected JsonXMLConfigImpl clone() {
@@ -125,5 +126,14 @@ public class JsonXMLConfigImpl implements JsonXMLConfig, Cloneable {
 	
 	public void setNamespaceMappings(Map<String, String> namespaceMappings) {
 		this.namespaceMappings = namespaceMappings;
+	}
+
+	@Override
+	public String getCustomRegex() {
+		return customRegex;
+	}
+
+	public void setCustomRegex(String customRegex){
+		this.customRegex = customRegex;
 	}
 }

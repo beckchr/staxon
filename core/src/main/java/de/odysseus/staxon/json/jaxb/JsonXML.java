@@ -125,4 +125,11 @@ public @interface JsonXML {
 	 * namespaces.</p>
 	 */
 	String[] namespaceMappings() default {};
+
+	/**
+	 <p>custom regex for ignore auto primitive</p>
+	 *
+	 * <p>The default value is <code>''</code>.</p>
+	 */
+	String customRegex() default "";
 }
