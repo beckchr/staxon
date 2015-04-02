@@ -15,13 +15,13 @@
  */
 package de.odysseus.staxon.json;
 
+import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
 import java.math.BigDecimal;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.*;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -207,6 +207,53 @@ public class JsonXMLStreamReaderTest {
 		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
 		reader.close();
 	}
+
+	@Test
+	public void testTestCustomRegexStringID() throws Exception {
+		String input = "<sample>\n" +
+				"    <person>\n" +
+				"        <ID>12999E105</ID>\n" +
+				"        <name>Paul</name>\n" +
+				"        <age>20</age>\n" +
+				"    </person>\n" +
+				"</sample>";
+		JsonXMLConfig config = new JsonXMLConfigBuilder().customRegex("^-?(0|[1-9][0-9]*)(\\.[0-9])?([eE][0-9]+)$").autoPrimitive(true).build();
+		XMLInputFactory inputFactory = new JsonXMLInputFactory(config);
+		XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(new StringReader(input));
+		XMLEventReader xmlEventReader = inputFactory.createXMLEventReader(reader);
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		XMLEventWriter writer = new JsonXMLOutputFactory(config).createXMLEventWriter(outputStream);
+		writer.add(xmlEventReader);
+		xmlEventReader.close();
+		writer.close();
+		outputStream.flush();
+		Assert.assertArrayEquals(outputStream.toByteArray(), "{\"sample\":{\"person\":{\"ID\":\"12999E105\",\"name\":\"Paul\",\"age\":20}}}".getBytes());
+		outputStream.close();
+	}
+
+	@Test
+	public void testTestWithoutCustomRegexStringID() throws Exception {
+		String input = "<sample>\n" +
+				"    <person>\n" +
+				"        <ID>12999E105</ID>\n" +
+				"        <name>Paul</name>\n" +
+				"        <age>20</age>\n" +
+				"    </person>\n" +
+				"</sample>";
+		JsonXMLConfig config = new JsonXMLConfigBuilder().autoPrimitive(true).build();
+		XMLInputFactory inputFactory = new JsonXMLInputFactory(config);
+		XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(new StringReader(input));
+		XMLEventReader xmlEventReader = inputFactory.createXMLEventReader(reader);
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		XMLEventWriter writer = new JsonXMLOutputFactory(config).createXMLEventWriter(outputStream);
+		writer.add(xmlEventReader);
+		xmlEventReader.close();
+		writer.close();
+		outputStream.flush();
+		Assert.assertArrayEquals(outputStream.toByteArray(), "{\"sample\":{\"person\":{\"ID\":1.2999E+109,\"name\":\"Paul\",\"age\":20}}}".getBytes());
+		outputStream.close();
+	}
+
 
 	/**
 	 * <code>&lt;alice&gt;bob&lt;/alice&gt;&lt;alice&gt;bob&lt;/alice&gt;</code>
