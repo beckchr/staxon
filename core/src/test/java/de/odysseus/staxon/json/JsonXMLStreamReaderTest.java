@@ -15,14 +15,17 @@
  */
 package de.odysseus.staxon.json;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.io.StringReader;
 import java.math.BigDecimal;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.*;
 
+import de.odysseus.staxon.event.SimpleXMLEventWriter;
+import de.odysseus.staxon.xml.SimpleXMLStreamWriter;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -182,6 +185,77 @@ public class JsonXMLStreamReaderTest {
 		reader.close();
 	}
 
+	/**
+	 * {"test":null} must produce &lt;test xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true" >&lt;/test>
+	 * @throws Exception
+	 */
+	@Test
+	public void testReadJsonNullToWriteXSINil() throws Exception {
+		String input = "{\"test\":null}";
+		JsonXMLConfig config = new JsonXMLConfigBuilder().readXmlNil(false).writeXmlNil(true).build();
+		XMLStreamReader reader = new JsonXMLInputFactory(config).createXMLStreamReader(new StringReader(input));
+		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "test", null);
+		Assert.assertEquals("", reader.getNamespaceURI());
+		Assert.assertEquals(1, reader.getAttributeCount());
+		QName attributeName = reader.getAttributeName(0);
+		Assert.assertEquals("nil", attributeName.getLocalPart());
+		Assert.assertEquals("xsi", attributeName.getPrefix());
+		Assert.assertEquals("http://www.w3.org/2001/XMLSchema-instance", attributeName.getNamespaceURI());
+		reader.close();
+	}
+
+	@Test
+	public void testReadXMLNilToWriteJsonNull() throws Exception {
+		String input = "<test xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:nil=\"true\" ></test>";
+		JsonXMLConfig config = new JsonXMLConfigBuilder().readXmlNil(true).namespaceDeclarations(true).writeXmlNil(false).build();
+		XMLInputFactory inputFactory = new JsonXMLInputFactory(config);
+		XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(new StringReader(input));
+		XMLEventReader xmlEventReader = inputFactory.createXMLEventReader(reader);
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		XMLEventWriter writer = new JsonXMLOutputFactory(config).createXMLEventWriter(outputStream);
+		writer.add(xmlEventReader);
+		xmlEventReader.close();
+		writer.close();
+		outputStream.flush();
+		Assert.assertArrayEquals(outputStream.toByteArray(), "{\"test\":null}".getBytes());
+		outputStream.close();
+	}
+
+	@Test
+	public void testReadXMLNilToWriteJsonEmpty() throws Exception {
+		String input = "<test></test>";
+		JsonXMLConfig config = new JsonXMLConfigBuilder().readXmlNil(true).writeXmlNil(false).build();
+		XMLInputFactory inputFactory = new JsonXMLInputFactory(config);
+		XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(new StringReader(input));
+		XMLEventReader xmlEventReader = inputFactory.createXMLEventReader(reader);
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		XMLEventWriter writer = new JsonXMLOutputFactory(config).createXMLEventWriter(outputStream);
+		writer.add(xmlEventReader);
+		xmlEventReader.close();
+		writer.close();
+		outputStream.flush();
+		Assert.assertArrayEquals(outputStream.toByteArray(), "{\"test\":\"\"}".getBytes());
+		outputStream.close();
+	}
+
+	/**
+	 * {"test": ""} must produce &lt;test>&lt;/test>
+	 * @throws Exception
+	 */
+	@Test
+	public void testReadJsonEmptyToWriteXML() throws Exception {
+		String input = "{\"test\":\"\"}";
+		JsonXMLConfig config = new JsonXMLConfigBuilder().readXmlNil(false).writeXmlNil(true).build();
+		XMLStreamReader reader = new JsonXMLInputFactory(config).createXMLStreamReader(new StringReader(input));
+		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "test", null);
+		Assert.assertEquals("", reader.getNamespaceURI());
+		Assert.assertEquals(0, reader.getAttributeCount());
+		reader.close();
+	}
 
 	/**
 	 * <code>&lt;alice xmlns="http://foo" xmlns:bar="http://bar"&gt;bob&lt;/alice&gt;</code>

@@ -42,6 +42,37 @@ public class JsonXMLStreamWriterTest {
 		Assert.assertEquals("{\"alice\":\"bob\"}", result.toString());
 	}
 
+	@Test
+	public void testTextContent2() throws Exception {
+		StringWriter result = new StringWriter();
+		JsonXMLConfig config = new JsonXMLConfigBuilder().readXmlNil(true).writeXmlNil(false).build();
+		XMLStreamWriter writer = new JsonXMLOutputFactory().createXMLStreamWriter(result);
+		writer.writeStartDocument();
+		writer.writeStartElement("test");
+		writer.writeCharacters("");
+		writer.writeEndElement();
+		writer.writeEndDocument();
+		writer.close();
+		Assert.assertEquals("{\"test\":\"\"}", result.toString());
+	}
+
+	@Test
+	public void testTextContent3() throws Exception {
+		StringWriter result = new StringWriter();
+		JsonXMLConfig config = new JsonXMLConfigBuilder().readXmlNil(true).namespaceDeclarations(false).writeXmlNil(true).build();
+		XMLStreamWriter writer = new JsonXMLOutputFactory().createXMLStreamWriter(result);
+		writer.writeStartDocument();
+		writer.writeStartElement("test");
+		//writer.writeNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+		writer.writeAttribute("xsi","http://www.w3.org/2001/XMLSchema-instance", "nil", "true");
+		//writer.writeCharacters("");
+
+		writer.writeEndElement();
+		writer.writeEndDocument();
+		writer.close();
+		Assert.assertEquals("{\"test\":\"\"}", result.toString());
+	}
+
 	/**
 	 * <code>&lt;alice&gt;&lt;bob&gt;charlie&lt;/bob&gt;&lt;david&gt;edgar&lt;/david&gt;&lt;/alice&gt;</code>
 	 */
@@ -322,5 +353,10 @@ public class JsonXMLStreamWriterTest {
 		writer.writeEndDocument();
 		writer.close();
 		Assert.assertEquals("{\"alice\":null}", result.toString());
+	}
+
+	@Test
+	public void testXmlNil() throws Exception {
+		JsonXMLConfig config = new JsonXMLConfigBuilder().writeXmlNil(true).build();
 	}
 }
