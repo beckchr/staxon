@@ -51,7 +51,11 @@ public class AutoPrimitiveTarget extends StreamTargetDelegate {
 			} else if ("null".equals(value)) {
 				super.value(null);
 			} else if (number.matcher(value.toString()).matches()) {
-				super.value(new BigDecimal(value.toString()));
+				try {
+					super.value(new BigDecimal(value.toString()));
+				} catch (NumberFormatException e) {
+					super.value(value); // fall back to string
+				}
 			} else {
 				super.value(value);
 			}

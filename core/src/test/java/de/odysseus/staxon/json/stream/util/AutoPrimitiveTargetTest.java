@@ -74,4 +74,20 @@ public class AutoPrimitiveTargetTest {
 		writer.close();
 		Assert.assertEquals("{\"alice\":{\"@edgar\":\"999\",\"bob\":[123,123.4]}}", result.toString());
 	}
+
+	/**
+	 * <code>&lt;alice&gt;493188617199e1170000000000000000&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testNumberFormatException() throws Exception {
+		StringWriter result = new StringWriter();
+		XMLStreamWriter writer = createXmlStreamWriter(result);
+		writer.writeStartDocument();
+		writer.writeStartElement("alice");
+		writer.writeCharacters("493188617199e1170000000000000000"); // throws NFE -> fall back to string
+		writer.writeEndElement();
+		writer.writeEndDocument();
+		writer.close();
+		Assert.assertEquals("{\"alice\":\"493188617199e1170000000000000000\"}", result.toString());
+	}
 }
