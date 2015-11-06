@@ -164,4 +164,14 @@ public class JsonXMLConfigBuilder {
 		config.setNamespaceMappings(namespaceMappings);
 		return this;
 	}
+
+	/**
+	 * Set Custom Regex for ignore  Auto Primitive mode
+	 * @param regex
+	 * @return this
+	 */
+	public JsonXMLConfigBuilder customRegex(String regex) {
+		config.setCustomRegex(regex);
+		return this;
+	}
 }

@@ -84,6 +84,7 @@ public class JsonXMLBinder {
 				prettyPrint(config.prettyPrint()).
 				virtualRoot(config.virtualRoot() ? rootProvider.getName(type) : null).
 				namespaceMappings(namespaceMappings(config.namespaceMappings())).
+				customRegex("".equals(config.customRegex()) ? config.customRegex() : null).
 				build();
 	}
 	
