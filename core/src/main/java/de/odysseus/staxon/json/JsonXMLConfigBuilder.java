@@ -164,4 +164,40 @@ public class JsonXMLConfigBuilder {
 		config.setNamespaceMappings(namespaceMappings);
 		return this;
 	}
+
+	/**
+	 * Formats the JSON Output during XML->JSON transformation.<br/>
+	 * Supports reading of XML Nil values as defined by http://www.w3.org/TR/xmlschema-1/#xsi_nil.
+	 * Enabling this configuration will produce corresponding JSON fields with null values for XML elements that define nil.
+	 * <br/><br/> Example:
+	 * <br/> If set to <tt>true</tt><br/>
+	 * <br/>&lt;test xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true" >&lt;/test> <br/>will produce
+	 * <br/>{"test":null}
+	 * <br/>AND
+	 * <br/>&lt;test>&lt;/test> <br/>will produce
+	 * <br/>{"test":""}
+	 * @param read
+	 * @return
+	 */
+	public JsonXMLConfigBuilder readXmlNil(boolean read) {
+		config.setReadXmlNil(read);
+		return this;
+	}
+
+	/**
+	 * Formats the XML Output during JSON->XML transformation.<br/>
+	 * Supports writing of XML Nil elements as defined by http://www.w3.org/TR/xmlschema-1/#xsi_nil when the
+	 * JSON input contains null values.
+	 * <br/><br/> Example: <br/>{"test":null} <br/>will produce
+	 * <br/>&lt;test xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true" >&lt;/test>
+	 * <br/>AND
+	 * <br/>{"test":""}<br/>will produce
+	 * <br/>&lt;test>&lt;/test>
+	 * @param write
+	 * @return
+	 */
+	public JsonXMLConfigBuilder writeXmlNil(boolean write) {
+		config.setWriteXmlNil(write);
+		return this;
+	}
 }

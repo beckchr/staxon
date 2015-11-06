@@ -58,6 +58,11 @@ import de.odysseus.staxon.json.stream.JsonStreamTarget;
  * if the name would have been omitted and collection were empty).</p>
  */
 public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWriter.ScopeInfo> {
+	private static final String XML_SCHEMA_NIL_VALUE = "de.odysseus.staxon.json.JsonXMLStreamWriter.{http://www.w3.org/2001/XMLSchema-instance}#nil=true_";
+	private static final String XSI = "xsi";
+	private static final String XSI_NIL = "nil";
+	private static final String XSI_NS = "http://www.w3.org/2001/XMLSchema-instance";
+
 	static class ScopeInfo extends JsonXMLStreamScopeInfo {
 		private Object leadData = null;
 		private StringBuilder builder = null;
@@ -105,6 +110,8 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	private final boolean skipSpace;
 	private final char namespaceSeparator;
 	private final boolean namespaceDeclarations;
+	private final boolean readXmlNil;
+	private final boolean writeXmlNil;
 
 	private boolean documentArray = false;
 
@@ -116,7 +123,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	 * @param namespaceSeparator namespace prefix separator
 	 * @param namespaceDeclarations whether to write namespace declarations
 	 */
-	public JsonXMLStreamWriter(JsonStreamTarget target, boolean repairNamespaces, boolean multiplePI, char namespaceSeparator, boolean namespaceDeclarations) {
+	public JsonXMLStreamWriter(JsonStreamTarget target, boolean repairNamespaces, boolean multiplePI, char namespaceSeparator, boolean namespaceDeclarations, boolean readXmlNil, boolean writeXmlNil) {
 		super(new ScopeInfo(), repairNamespaces);
 		this.target = target;
 		this.multiplePI = multiplePI;
@@ -124,6 +131,8 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 		this.namespaceDeclarations = namespaceDeclarations;
 		this.autoEndArray = true;
 		this.skipSpace = true;
+		this.readXmlNil = readXmlNil;
+		this.writeXmlNil = writeXmlNil;
 	}
 
 	/**
@@ -134,7 +143,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	 * @param namespaceSeparator namespace prefix separator
 	 * @param namespaceDeclarations whether to write namespace declarations
 	 */
-	public JsonXMLStreamWriter(JsonStreamTarget target, Map<String, String> repairNamespaces, boolean multiplePI, char namespaceSeparator, boolean namespaceDeclarations) {
+	public JsonXMLStreamWriter(JsonStreamTarget target, Map<String, String> repairNamespaces, boolean multiplePI, char namespaceSeparator, boolean namespaceDeclarations, boolean readXmlNil, boolean writeXmlNil) {
 		super(new ScopeInfo(), repairNamespaces);
 		this.target = target;
 		this.multiplePI = multiplePI;
@@ -142,6 +151,8 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 		this.namespaceDeclarations = namespaceDeclarations;
 		this.autoEndArray = true;
 		this.skipSpace = true;
+		this.readXmlNil = readXmlNil;
+		this.writeXmlNil = writeXmlNil;
 	}
 
 	private String getFieldName(String prefix, String localName) {
@@ -197,6 +208,10 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	protected void writeEndElementTag() throws XMLStreamException {
 		try {
 			if (getScope().getInfo().hasData()) {
+				if (readXmlNil && XML_SCHEMA_NIL_VALUE.equals(getScope().getInfo().getData())) {
+					target.value(null);
+					return;
+				}
 				if (getScope().getInfo().startObjectWritten) {
 					target.name("$");
 				}
@@ -208,11 +223,32 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 			if (getScope().getInfo().startObjectWritten) {
 				target.endObject();
 			} else if (!getScope().getInfo().hasData()) {
-				target.value(null);
+				if (readXmlNil) {
+					target.value("");
+				} else {
+					target.value(null);
+				}
 			}
 		} catch (IOException e) {
 			throw new XMLStreamException("Cannot write end element: " + getFieldName(getScope().getPrefix(), getScope().getLocalName()), e);
 		}
+	}
+
+	public void writeAttribute(String prefix, String namespaceURI, String localName, String value) throws XMLStreamException {
+		if (readXmlNil && (XSI_NS.equals(namespaceURI) || "".equals(namespaceURI)) &&
+				XSI_NIL.equals(localName) &&
+				"true".equals(value)) {
+			getScope().getInfo().setData(XML_SCHEMA_NIL_VALUE);
+			return;
+		}
+		super.writeAttribute(prefix, namespaceURI, localName, value);
+	}
+
+	public void writeNamespace(String prefix, String namespaceURI) throws XMLStreamException {
+		if (readXmlNil && /*XSI.equals(prefix) &&*/ XSI_NS.equals(namespaceURI)) {
+			return;
+		}
+		super.writeNamespace(prefix, namespaceURI);
 	}
 
 	@Override

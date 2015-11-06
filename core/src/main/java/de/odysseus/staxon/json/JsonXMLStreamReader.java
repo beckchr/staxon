@@ -48,6 +48,8 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 	private final JsonStreamSource source;
 	private final boolean multiplePI;
 	private final char namespaceSeparator;
+	private final boolean readXmlNil;
+	private final boolean writeXmlNil;
 	
 	private boolean documentArray = false;
 
@@ -58,8 +60,8 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 	 * @param namespaceSeparator namespace prefix separator
 	 * @throws XMLStreamException
 	 */
-	public JsonXMLStreamReader(JsonStreamSource source, boolean multiplePI, char namespaceSeparator) throws XMLStreamException {
-		this(source, multiplePI, namespaceSeparator, null);
+	public JsonXMLStreamReader(JsonStreamSource source, boolean multiplePI, char namespaceSeparator, boolean readXmlNil, boolean writeXmlNil) throws XMLStreamException {
+		this(source, multiplePI, namespaceSeparator, null, readXmlNil, writeXmlNil);
 	}
 
 	/**
@@ -70,11 +72,13 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 	 * @param namespaceMappings predefined namespaces (may be <code>null</code>)
 	 * @throws XMLStreamException
 	 */
-	public JsonXMLStreamReader(JsonStreamSource source, boolean multiplePI, char namespaceSeparator, Map<String, String> namespaceMappings) throws XMLStreamException {
+	public JsonXMLStreamReader(JsonStreamSource source, boolean multiplePI, char namespaceSeparator, Map<String, String> namespaceMappings, boolean readXmlNil, boolean writeXmlNil) throws XMLStreamException {
 		super(new ScopeInfo(), source);
 		this.source = source;
 		this.multiplePI = multiplePI;
 		this.namespaceSeparator = namespaceSeparator;
+		this.readXmlNil = readXmlNil;
+		this.writeXmlNil = writeXmlNil;
 		initialize(namespaceMappings);
 	}
 	
@@ -203,6 +207,9 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 				Value value = source.value();
 				if (value != JsonStreamSource.NULL) {
 					readData(value, XMLStreamConstants.CHARACTERS);
+				} else if (writeXmlNil) {
+					readAttrNsDecl("xsi:nil", Boolean.TRUE.toString());
+					readAttrNsDecl("xmlns:xsi", XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI);
 				}
 				readEndElementTag();
 			}

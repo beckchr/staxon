@@ -87,6 +87,8 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	private QName virtualRoot;
 	private char namespaceSeparator;
 	private Map<String, String> namespaceMappings;
+	private boolean readXmlNil;
+	private boolean writeXmlNil;
 
 	public JsonXMLInputFactory() throws FactoryConfigurationError {
 		this(JsonXMLConfig.DEFAULT);
@@ -106,6 +108,8 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 		this.namespaceSeparator = config.getNamespaceSeparator();
 		this.namespaceMappings = config.getNamespaceMappings();
 		this.streamFactory = streamFactory;
+		this.readXmlNil = config.isReadXmlNil();
+		this.writeXmlNil = config.isWriteXmlNil();
 		
 		/*
 		 * initialize standard properties
@@ -147,7 +151,7 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	@Override
 	public JsonXMLStreamReader createXMLStreamReader(Reader reader) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(reader)), multiplePI, namespaceSeparator, namespaceMappings);
+			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(reader)), multiplePI, namespaceSeparator, namespaceMappings, readXmlNil, writeXmlNil);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -156,7 +160,7 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	@Override
 	public JsonXMLStreamReader createXMLStreamReader(InputStream stream) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(stream)), multiplePI, namespaceSeparator, namespaceMappings);
+			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(stream)), multiplePI, namespaceSeparator, namespaceMappings, readXmlNil, writeXmlNil);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}

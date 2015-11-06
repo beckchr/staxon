@@ -119,6 +119,8 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	private char namespaceSeparator;
 	private boolean namespaceDeclarations;
 	private Map<String, String> namespaceMappings;
+	private boolean readXmlNil;
+	private boolean writeXmlNil;
 
 	public JsonXMLOutputFactory() throws FactoryConfigurationError {
 		this(JsonXMLConfig.DEFAULT);
@@ -142,6 +144,8 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 		this.namespaceDeclarations = config.isNamespaceDeclarations();
 		this.namespaceMappings = config.getNamespaceMappings();
 		this.streamFactory = streamFactory;
+		this.readXmlNil = config.isReadXmlNil();
+		this.writeXmlNil = config.isWriteXmlNil();
 
 		/*
 		 * initialize standard properties
@@ -189,7 +193,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	@Override
 	public JsonXMLStreamWriter createXMLStreamWriter(Writer stream) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), repairNamespacesMap(), multiplePI, namespaceSeparator, namespaceDeclarations);
+			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), repairNamespacesMap(), multiplePI, namespaceSeparator, namespaceDeclarations, readXmlNil, writeXmlNil);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -198,7 +202,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	@Override
 	public JsonXMLStreamWriter createXMLStreamWriter(OutputStream stream) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), repairNamespacesMap(), multiplePI, namespaceSeparator, namespaceDeclarations);
+			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), repairNamespacesMap(), multiplePI, namespaceSeparator, namespaceDeclarations, readXmlNil, writeXmlNil);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
