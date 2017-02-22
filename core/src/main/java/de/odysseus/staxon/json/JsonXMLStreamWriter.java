@@ -105,6 +105,9 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	private final boolean skipSpace;
 	private final char namespaceSeparator;
 	private final boolean namespaceDeclarations;
+	
+	private final String fieldPrefix;
+	private final String contentField;
 
 	private boolean documentArray = false;
 
@@ -116,7 +119,8 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	 * @param namespaceSeparator namespace prefix separator
 	 * @param namespaceDeclarations whether to write namespace declarations
 	 */
-	public JsonXMLStreamWriter(JsonStreamTarget target, boolean repairNamespaces, boolean multiplePI, char namespaceSeparator, boolean namespaceDeclarations) {
+	public JsonXMLStreamWriter(JsonStreamTarget target, boolean repairNamespaces, boolean multiplePI,
+	      char namespaceSeparator, boolean namespaceDeclarations, String fieldPrefix, String contentField) {
 		super(new ScopeInfo(), repairNamespaces);
 		this.target = target;
 		this.multiplePI = multiplePI;
@@ -124,6 +128,9 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 		this.namespaceDeclarations = namespaceDeclarations;
 		this.autoEndArray = true;
 		this.skipSpace = true;
+		
+		this.fieldPrefix = fieldPrefix;
+		this.contentField = contentField;
 	}
 
 	/**
@@ -134,7 +141,8 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	 * @param namespaceSeparator namespace prefix separator
 	 * @param namespaceDeclarations whether to write namespace declarations
 	 */
-	public JsonXMLStreamWriter(JsonStreamTarget target, Map<String, String> repairNamespaces, boolean multiplePI, char namespaceSeparator, boolean namespaceDeclarations) {
+	public JsonXMLStreamWriter(JsonStreamTarget target, Map<String, String> repairNamespaces, boolean multiplePI,
+	      char namespaceSeparator, boolean namespaceDeclarations, String fieldPrefix, String contentField) {
 		super(new ScopeInfo(), repairNamespaces);
 		this.target = target;
 		this.multiplePI = multiplePI;
@@ -142,6 +150,9 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 		this.namespaceDeclarations = namespaceDeclarations;
 		this.autoEndArray = true;
 		this.skipSpace = true;
+		
+		this.fieldPrefix = fieldPrefix;
+      this.contentField = contentField;
 	}
 
 	private String getFieldName(String prefix, String localName) {
@@ -198,7 +209,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 		try {
 			if (getScope().getInfo().hasData()) {
 				if (getScope().getInfo().startObjectWritten) {
-					target.name("$");
+					target.name(contentField);
 				}
 				target.value(getScope().getInfo().getData());
 			}
@@ -223,7 +234,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 				target.startObject();
 				getScope().getInfo().startObjectWritten = true;
 			}
-			target.name('@' + name);
+			target.name(fieldPrefix + name);
 			target.value(value);
 		} catch (IOException e) {
 			throw new XMLStreamException("Cannot write attribute: " + name, e);
@@ -239,9 +250,9 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 					getScope().getInfo().startObjectWritten = true;
 				}
 				if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-					target.name('@' + XMLConstants.XMLNS_ATTRIBUTE);
+					target.name(fieldPrefix + XMLConstants.XMLNS_ATTRIBUTE);
 				} else {
-					target.name('@' + XMLConstants.XMLNS_ATTRIBUTE + namespaceSeparator + prefix);
+					target.name(fieldPrefix + XMLConstants.XMLNS_ATTRIBUTE + namespaceSeparator + prefix);
 				}
 				target.value(namespaceURI);
 			} catch (IOException e) {

@@ -80,6 +80,14 @@ public interface JsonXMLConfig {
 		public Map<String,String> getNamespaceMappings() {
 			return null;
 		}
+      @Override
+      public String getFieldPrefix() {
+         return "@";
+      }
+      @Override
+      public String getContentField() {
+         return "$";
+      }
 	};
 	
 	/**
@@ -161,4 +169,8 @@ public interface JsonXMLConfig {
 	 * @return prefix/URI mappings
 	 */
 	public Map<String, String> getNamespaceMappings();
+
+   public String getFieldPrefix();
+
+   public String getContentField();
 }

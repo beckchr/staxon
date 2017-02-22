@@ -34,7 +34,7 @@ public class RemoveRootTargetTest {
 	}
 
 	private JsonXMLStreamWriter createXmlStreamWriter(StringWriter result, QName root) throws IOException {
-		return new JsonXMLStreamWriter(createTarget(result, root), false, true, ':', true);
+		return new JsonXMLStreamWriter(createTarget(result, root), false, true, ':', true, "@", "$");
 	}
 
 	/**
