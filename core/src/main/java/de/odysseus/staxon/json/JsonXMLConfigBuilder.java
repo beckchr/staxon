@@ -164,4 +164,16 @@ public class JsonXMLConfigBuilder {
 		config.setNamespaceMappings(namespaceMappings);
 		return this;
 	}
+	
+	public JsonXMLConfigBuilder fieldPrefix(String fieldPrefix)
+	{
+	   config.setFieldPrefix(fieldPrefix);
+	   return this;
+	}
+	
+	public JsonXMLConfigBuilder contentField(String contentField)
+	{
+	   config.setContentField(contentField);
+	   return this;
+	}
 }

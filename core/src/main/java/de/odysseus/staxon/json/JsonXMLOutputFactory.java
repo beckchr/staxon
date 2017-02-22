@@ -109,6 +109,9 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	 * <p>The default value is <code>false</code>.</p>
 	 */
 	public static final String PROP_PRETTY_PRINT = "JsonXMLOutputFactory.prettyPrint";
+	
+	public static final String PROP_FIELD_PREFIX = "JsonXMLOutputFactory.fieldPrefix";
+	public static final String PROP_CONTENT_FIELD = "JsonXMLOutputFactory.contentField";
 
 	private JsonStreamFactory streamFactory;
 	private boolean multiplePI;
@@ -119,6 +122,9 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	private char namespaceSeparator;
 	private boolean namespaceDeclarations;
 	private Map<String, String> namespaceMappings;
+	
+	private String fieldPrefix;
+   private String contentField;
 
 	public JsonXMLOutputFactory() throws FactoryConfigurationError {
 		this(JsonXMLConfig.DEFAULT);
@@ -143,6 +149,9 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 		this.namespaceMappings = config.getNamespaceMappings();
 		this.streamFactory = streamFactory;
 
+		this.fieldPrefix = config.getFieldPrefix();
+		this.contentField = config.getContentField();
+		
 		/*
 		 * initialize standard properties
 		 */
@@ -189,7 +198,9 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	@Override
 	public JsonXMLStreamWriter createXMLStreamWriter(Writer stream) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), repairNamespacesMap(), multiplePI, namespaceSeparator, namespaceDeclarations);
+			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)),
+			      repairNamespacesMap(), multiplePI, namespaceSeparator, namespaceDeclarations,
+			      fieldPrefix, contentField);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -198,7 +209,9 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	@Override
 	public JsonXMLStreamWriter createXMLStreamWriter(OutputStream stream) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), repairNamespacesMap(), multiplePI, namespaceSeparator, namespaceDeclarations);
+			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)),
+			      repairNamespacesMap(), multiplePI, namespaceSeparator, namespaceDeclarations,
+			      fieldPrefix, contentField);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -212,7 +225,9 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	@Override
 	public boolean isPropertySupported(String name) {
 		return super.isPropertySupported(name)
-			|| Arrays.asList(PROP_AUTO_ARRAY, PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT, PROP_NAMESPACE_SEPARATOR, PROP_NAMESPACE_DECLARATIONS, PROP_NAMESPACE_MAPPINGS, PROP_PRETTY_PRINT).contains(name);
+			|| Arrays.asList(PROP_AUTO_ARRAY, PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT, PROP_NAMESPACE_SEPARATOR,
+			      PROP_NAMESPACE_DECLARATIONS, PROP_NAMESPACE_MAPPINGS, PROP_PRETTY_PRINT,
+			      PROP_FIELD_PREFIX, PROP_CONTENT_FIELD).contains(name);
 	}
 
 	@Override
@@ -236,6 +251,10 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 				return Boolean.valueOf(namespaceDeclarations);
 			} else if (PROP_NAMESPACE_MAPPINGS.equals(name)) {
 				return namespaceMappings;
+			} else if(PROP_FIELD_PREFIX.equals(name)) {
+			   return fieldPrefix;
+			} else if (PROP_CONTENT_FIELD.equals(name)) {
+			   return contentField;
 			} else {
 				throw new IllegalArgumentException("Unsupported property: " + name);
 			}
@@ -265,7 +284,11 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 				@SuppressWarnings("unchecked")
 				Map<String, String> map = (Map<String, String>)value;
 				this.namespaceMappings = map;
-			} else {
+			} else if(PROP_FIELD_PREFIX.equals(name)) {
+            fieldPrefix = (String) value;
+         } else if (PROP_CONTENT_FIELD.equals(name)) {
+            contentField = (String) value;
+         } else {
 				throw new IllegalArgumentException("Unsupported property: " + name);
 			}
 		}

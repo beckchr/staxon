@@ -125,4 +125,7 @@ public @interface JsonXML {
 	 * namespaces.</p>
 	 */
 	String[] namespaceMappings() default {};
+	
+	String fieldPrefix() default "@";
+	String contentField() default "$";
 }

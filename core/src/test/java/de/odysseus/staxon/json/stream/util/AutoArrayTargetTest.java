@@ -32,7 +32,7 @@ public class AutoArrayTargetTest {
 	}
 	
 	private JsonXMLStreamWriter createXmlStreamWriter(StringWriter result) throws IOException {
-		return new JsonXMLStreamWriter(createTarget(result), false, true, ':', true);
+		return new JsonXMLStreamWriter(createTarget(result), false, true, ':', true, "@", "$");
 	}
 	
 	/**
