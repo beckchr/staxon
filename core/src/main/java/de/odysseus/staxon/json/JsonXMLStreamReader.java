@@ -48,6 +48,8 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 	private final JsonStreamSource source;
 	private final boolean multiplePI;
 	private final char namespaceSeparator;
+	private final String textProperty;
+	private final String attributePrefix;
 	
 	private boolean documentArray = false;
 
@@ -71,13 +73,29 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 	 * @throws XMLStreamException
 	 */
 	public JsonXMLStreamReader(JsonStreamSource source, boolean multiplePI, char namespaceSeparator, Map<String, String> namespaceMappings) throws XMLStreamException {
+		this(source, multiplePI, namespaceSeparator, namespaceMappings, "$", "@");
+	}
+
+	/**
+	 * Create reader instance.
+	 * @param source stream source
+	 * @param multiplePI whether to produce <code>&lt;xml-multiple?&gt;</code> PIs to signal array start
+	 * @param namespaceSeparator namespace prefix separator
+	 * @param namespaceMappings predefined namespaces (may be <code>null</code>)
+	 * @param textProperty name of text field (usually '$')
+	 * @param attributePrefix prefix of attrubute (usually '@')
+	 * @throws XMLStreamException
+	 */
+	public JsonXMLStreamReader(JsonStreamSource source, boolean multiplePI, char namespaceSeparator, Map<String, String> namespaceMappings, String textProperty, String attributePrefix) throws XMLStreamException {
 		super(new ScopeInfo(), source);
 		this.source = source;
 		this.multiplePI = multiplePI;
 		this.namespaceSeparator = namespaceSeparator;
+		this.textProperty = textProperty;
+		this.attributePrefix = attributePrefix;
 		initialize(namespaceMappings);
 	}
-	
+
 	private void initialize(Map<String, String> namespaceMappings) throws XMLStreamException {
 		if (namespaceMappings != null && !namespaceMappings.isEmpty()) {
 			for (Map.Entry<String, String> namespace : namespaceMappings.entrySet()) {
@@ -119,7 +137,9 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 
 	private void consumeName(ScopeInfo info) throws XMLStreamException, IOException {
 		String fieldName = source.name();
-		if (fieldName.startsWith("@")) {
+		if (textProperty.equals(fieldName)) {
+			readData(source.value(), XMLStreamConstants.CHARACTERS);
+		} else if (fieldName.startsWith(attributePrefix)) {
 			fieldName = fieldName.substring(1);
 			if (source.peek() == JsonStreamToken.VALUE) {
 				readAttrNsDecl(fieldName, source.value().text);
@@ -127,7 +147,7 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 				source.startObject();
 				while (source.peek() == JsonStreamToken.NAME) {
 					String prefix = source.name();
-					if ("$".equals(prefix)) {
+					if (textProperty.equals(prefix)) {
 						readNsDecl(XMLConstants.DEFAULT_NS_PREFIX, source.value().text);
 					} else {
 						readNsDecl(prefix, source.value().text);
@@ -137,8 +157,6 @@ public class JsonXMLStreamReader extends AbstractXMLStreamReader<JsonXMLStreamRe
 			} else {
 				throw new IllegalStateException("Expected attribute value");
 			}
-		} else if ("$".equals(fieldName)) {
-			readData(source.value(), XMLStreamConstants.CHARACTERS);
 		} else {
 			info.currentTagName = fieldName;
 		}

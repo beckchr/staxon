@@ -33,7 +33,7 @@ import de.odysseus.staxon.json.stream.util.AddRootSource;
 
 public class AddRootSourceTest {
 	private AddRootSource createSource(StringReader reader, QName root) throws IOException {
-		return new AddRootSource(new JsonStreamFactoryImpl().createJsonStreamSource(reader), root, ':');
+		return new AddRootSource(new JsonStreamFactoryImpl().createJsonStreamSource(reader), root, ':', "@");
 	}
 
 	void verify(XMLStreamReader reader, int expectedEventType, String expectedLocalName, String expectedText) {

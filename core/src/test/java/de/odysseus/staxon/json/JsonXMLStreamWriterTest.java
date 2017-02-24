@@ -323,4 +323,38 @@ public class JsonXMLStreamWriterTest {
 		writer.close();
 		Assert.assertEquals("{\"alice\":null}", result.toString());
 	}
+	
+	/**
+	 * <code>&lt;alice charlie="david"&gt;bob&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testTextProperty() throws Exception {
+		StringWriter result = new StringWriter();
+		XMLStreamWriter writer = new JsonXMLOutputFactory(new JsonXMLConfigBuilder().textProperty("@").build()).createXMLStreamWriter(result);
+		writer.writeStartDocument();
+		writer.writeStartElement("alice");
+		writer.writeAttribute("charlie", "david");
+		writer.writeCharacters("bob");
+		writer.writeEndElement();
+		writer.writeEndDocument();
+		writer.close();
+		Assert.assertEquals("{\"alice\":{\"@charlie\":\"david\",\"@\":\"bob\"}}", result.toString());
+	}
+
+	/**
+	 * <code>&lt;alice charlie="david"&gt;bob&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testAttributePrefix() throws Exception {
+		StringWriter result = new StringWriter();
+		XMLStreamWriter writer = new JsonXMLOutputFactory(new JsonXMLConfigBuilder().attributePrefix("$").build()).createXMLStreamWriter(result);
+		writer.writeStartDocument();
+		writer.writeStartElement("alice");
+		writer.writeAttribute("charlie", "david");
+		writer.writeCharacters("bob");
+		writer.writeEndElement();
+		writer.writeEndDocument();
+		writer.close();
+		Assert.assertEquals("{\"alice\":{\"$charlie\":\"david\",\"$\":\"bob\"}}", result.toString());
+	}
 }

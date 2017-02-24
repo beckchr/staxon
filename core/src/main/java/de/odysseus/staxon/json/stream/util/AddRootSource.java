@@ -34,14 +34,16 @@ public class AddRootSource extends StreamSourceDelegate {
 	}
 	private final QName root;
 	private final char namespaceSeparator;
+	private final String attributePrefix;
 	
 	private State state = State.START_DOC;
 	private int depth = 0;
 
-	public AddRootSource(JsonStreamSource delegate, QName root, char namespaceSeparator) {
+	public AddRootSource(JsonStreamSource delegate, QName root, char namespaceSeparator, String attributePrefix) {
 		super(delegate);
 		this.root = root;
 		this.namespaceSeparator = namespaceSeparator;
+		this.attributePrefix = attributePrefix;
 	}
 
 	@Override
@@ -56,9 +58,9 @@ public class AddRootSource extends StreamSourceDelegate {
 		} else if (state == State.ROOT_XMLNS_NAME) {
 			state = State.ROOT_XMLNS_VALUE;
 			if (XMLConstants.DEFAULT_NS_PREFIX.equals(root.getPrefix())) {
-				return '@' + XMLConstants.XMLNS_ATTRIBUTE;
+				return attributePrefix + XMLConstants.XMLNS_ATTRIBUTE;
 			} else {
-				return '@' + XMLConstants.XMLNS_ATTRIBUTE + namespaceSeparator + root.getLocalPart();
+				return attributePrefix + XMLConstants.XMLNS_ATTRIBUTE + namespaceSeparator + root.getLocalPart();
 			}
 		}
 		return super.name();

@@ -29,7 +29,7 @@ import de.odysseus.staxon.json.stream.impl.JsonStreamFactoryImpl;
 
 public class AutoPrimitiveTargetTest {
 	private AutoPrimitiveTarget createTarget(StringWriter result) throws IOException {
-		return new AutoPrimitiveTarget(new JsonStreamFactoryImpl().createJsonStreamTarget(result, false), false);
+		return new AutoPrimitiveTarget(new JsonStreamFactoryImpl().createJsonStreamTarget(result, false), false, "@");
 	}
 	
 	private JsonXMLStreamWriter createXmlStreamWriter(StringWriter result) throws IOException {

@@ -125,4 +125,18 @@ public @interface JsonXML {
 	 * namespaces.</p>
 	 */
 	String[] namespaceMappings() default {};
+	
+	/**
+	 * <p>Text property name.</p>
+	 * 
+	 * <p>The default value is <code>"$"</code>.</p>
+	 */
+	String textProperty() default "$";
+	
+	/**
+	 * <p>Attribute property prefix.</p>
+	 * 
+	 * <p>The default value is <code>"@"</code>.</p>
+	 */
+	String attributePrefix() default "@";
 }

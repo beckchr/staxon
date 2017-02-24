@@ -27,12 +27,14 @@ import de.odysseus.staxon.json.stream.JsonStreamTarget;
 public class AutoPrimitiveTarget extends StreamTargetDelegate {
 	private final Pattern number = Pattern.compile("^-?(0|[1-9][0-9]*)(\\.[0-9]+)?([eE][+-]?[0-9]+)?$");
 	private final boolean convertAttributes;
+	private final String attributePrefix;
 	
 	private String lastName;
 
-	public AutoPrimitiveTarget(JsonStreamTarget delegate, boolean convertAttributes) {
+	public AutoPrimitiveTarget(JsonStreamTarget delegate, boolean convertAttributes, String attributePrefix) {
 		super(delegate);
 		this.convertAttributes = convertAttributes;
+		this.attributePrefix = attributePrefix;
 	}
 
 	@Override
@@ -43,7 +45,7 @@ public class AutoPrimitiveTarget extends StreamTargetDelegate {
 	
 	@Override
 	public void value(Object value) throws IOException {
-		if (value instanceof String && (convertAttributes || !lastName.startsWith("@"))) {
+		if (value instanceof String && (convertAttributes || !lastName.startsWith(attributePrefix))) {
 			if ("true".equals(value)) {
 				super.value(Boolean.TRUE);
 			} else if ("false".equals(value)) {

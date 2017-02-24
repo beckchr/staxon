@@ -268,7 +268,6 @@ public class JsonXMLStreamReaderTest {
 		reader.close();
 	}
 
-
 	@Test
 	public void testSimpleValueArray() throws Exception {
 		String input = "[\"edgar\",\"david\"]";
@@ -371,6 +370,50 @@ public class JsonXMLStreamReaderTest {
 		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
 		reader.next();
 //		verify(reader, XMLStreamConstants.CHARACTERS, null, null); // null is not reported
+		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
+		reader.close();
+	}
+	
+	/**
+	 * <code>&lt;alice charlie="david"&gt;bob&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testTextProperty() throws Exception {
+		String input = "{\"alice\":{\"@charlie\":\"david\",\"@\":\"bob\"}}";
+		XMLStreamReader reader = new JsonXMLInputFactory(new JsonXMLConfigBuilder().textProperty("@").build()).createXMLStreamReader(new StringReader(input));
+		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
+		Assert.assertEquals(1, reader.getAttributeCount());
+		Assert.assertEquals("david", reader.getAttributeValue(null, "charlie"));
+		Assert.assertEquals("david", reader.getAttributeValue(XMLConstants.NULL_NS_URI, "charlie"));
+		reader.next();
+		verify(reader, XMLStreamConstants.CHARACTERS, null, "bob");
+		reader.next();
+		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
+		reader.next();
+		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);
+		reader.close();
+	}
+
+	/**
+	 * <code>&lt;alice charlie="david"&gt;bob&lt;/alice&gt;</code>
+	 */
+	@Test
+	public void testAttributePrefix() throws Exception {
+		String input = "{\"alice\":{\"$charlie\":\"david\",\"$\":\"bob\"}}";
+		XMLStreamReader reader = new JsonXMLInputFactory(new JsonXMLConfigBuilder().attributePrefix("$").build()).createXMLStreamReader(new StringReader(input));
+		verify(reader, XMLStreamConstants.START_DOCUMENT, null, null);
+		reader.next();
+		verify(reader, XMLStreamConstants.START_ELEMENT, "alice", null);
+		Assert.assertEquals(1, reader.getAttributeCount());
+		Assert.assertEquals("david", reader.getAttributeValue(null, "charlie"));
+		Assert.assertEquals("david", reader.getAttributeValue(XMLConstants.NULL_NS_URI, "charlie"));
+		reader.next();
+		verify(reader, XMLStreamConstants.CHARACTERS, null, "bob");
+		reader.next();
 		verify(reader, XMLStreamConstants.END_ELEMENT, "alice", null);
 		reader.next();
 		verify(reader, XMLStreamConstants.END_DOCUMENT, null, null);

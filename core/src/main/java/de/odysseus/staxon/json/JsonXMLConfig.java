@@ -40,7 +40,10 @@ public interface JsonXMLConfig {
 	 * <li><em>namespaceSeparator</em> - <code>':'</code></li>
 	 * <li><em>prettyPrint</em> - <code>false</code></li>
 	 * <li><em>virtualRoot</em> - <code>null</code></li>
+	 * <li><em>repairingNamespaces</em> - <code>false</code></li>
 	 * <li><em>namespaceMappings</em> - <code>null</code></li>
+	 * <li><em>textProperty</em> - <code>$</code></li>
+	 * <li><em>attributePrefix</em> - <code>@</code></li>
 	 * </ul>
 	 */
 	public static final JsonXMLConfig DEFAULT = new JsonXMLConfig() {
@@ -79,6 +82,14 @@ public interface JsonXMLConfig {
 		@Override
 		public Map<String,String> getNamespaceMappings() {
 			return null;
+		}
+		@Override
+		public String getTextProperty() {
+			return "$";
+		}
+		@Override
+		public String getAttributePrefix() {
+			return "@";
 		}
 	};
 	
@@ -161,4 +172,16 @@ public interface JsonXMLConfig {
 	 * @return prefix/URI mappings
 	 */
 	public Map<String, String> getNamespaceMappings();
+	
+	/**
+	 * <p>Name used as property name for text content</p>
+	 * @return text field name
+	 */
+	public String getTextProperty();
+	
+	/**
+	 * <p>Property prefix used for XML attributes</p>
+	 * @return attribute prefix
+	 */
+	public String getAttributePrefix();
 }

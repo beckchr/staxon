@@ -164,4 +164,24 @@ public class JsonXMLConfigBuilder {
 		config.setNamespaceMappings(namespaceMappings);
 		return this;
 	}
+
+	/**
+	 * Set textProperty property and return receiver.
+	 * @param textProperty (used for text content)
+	 * @return this
+	 */
+	public JsonXMLConfigBuilder textProperty(String textProperty) {
+		config.setTextProperty(textProperty);
+		return this;
+	}
+
+	/**
+	 * Set attributePrefix property and return receiver.
+	 * @param attributePrefix (used for XML attributes)
+	 * @return this
+	 */
+	public JsonXMLConfigBuilder attributePrefix(String attributePrefix) {
+		config.setAttributePrefix(attributePrefix);
+		return this;
+	}
 }

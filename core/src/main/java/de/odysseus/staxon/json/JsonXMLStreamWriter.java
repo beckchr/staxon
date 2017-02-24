@@ -16,6 +16,7 @@
 package de.odysseus.staxon.json;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 
 import javax.xml.XMLConstants;
@@ -105,6 +106,8 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	private final boolean skipSpace;
 	private final char namespaceSeparator;
 	private final boolean namespaceDeclarations;
+	private final String textProperty;
+	private final String attributePrefix;
 
 	private boolean documentArray = false;
 
@@ -117,13 +120,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	 * @param namespaceDeclarations whether to write namespace declarations
 	 */
 	public JsonXMLStreamWriter(JsonStreamTarget target, boolean repairNamespaces, boolean multiplePI, char namespaceSeparator, boolean namespaceDeclarations) {
-		super(new ScopeInfo(), repairNamespaces);
-		this.target = target;
-		this.multiplePI = multiplePI;
-		this.namespaceSeparator = namespaceSeparator;
-		this.namespaceDeclarations = namespaceDeclarations;
-		this.autoEndArray = true;
-		this.skipSpace = true;
+		this(target, repairNamespaces ? Collections.<String, String>emptyMap() : null, multiplePI, namespaceSeparator, namespaceDeclarations, "$", "@");
 	}
 
 	/**
@@ -135,11 +132,27 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 	 * @param namespaceDeclarations whether to write namespace declarations
 	 */
 	public JsonXMLStreamWriter(JsonStreamTarget target, Map<String, String> repairNamespaces, boolean multiplePI, char namespaceSeparator, boolean namespaceDeclarations) {
+		this(target, repairNamespaces, multiplePI, namespaceSeparator, namespaceDeclarations, "$", "@");
+	}
+	
+	/**
+	 * Create writer instance.
+	 * @param target stream target
+	 * @param repairingNamespaces prefix-URI associations used to repair namespaces (<code>null</code> means do not repair)
+	 * @param multiplePI whether to consume <code>&lt;xml-multiple?&gt;</code> PIs to trigger array start
+	 * @param namespaceSeparator namespace prefix separator
+	 * @param namespaceDeclarations whether to write namespace declarations
+	 * @param textProperty name of text field (usually '$')
+	 * @param attributePrefix prefix of attrubute (usually '@')
+	 */
+	public JsonXMLStreamWriter(JsonStreamTarget target, Map<String, String> repairNamespaces, boolean multiplePI, char namespaceSeparator, boolean namespaceDeclarations, String textProperty, String attributePrefix) {
 		super(new ScopeInfo(), repairNamespaces);
 		this.target = target;
 		this.multiplePI = multiplePI;
 		this.namespaceSeparator = namespaceSeparator;
 		this.namespaceDeclarations = namespaceDeclarations;
+		this.textProperty = textProperty;
+		this.attributePrefix = attributePrefix;
 		this.autoEndArray = true;
 		this.skipSpace = true;
 	}
@@ -198,7 +211,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 		try {
 			if (getScope().getInfo().hasData()) {
 				if (getScope().getInfo().startObjectWritten) {
-					target.name("$");
+					target.name(textProperty);
 				}
 				target.value(getScope().getInfo().getData());
 			}
@@ -223,7 +236,7 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 				target.startObject();
 				getScope().getInfo().startObjectWritten = true;
 			}
-			target.name('@' + name);
+			target.name(attributePrefix + name);
 			target.value(value);
 		} catch (IOException e) {
 			throw new XMLStreamException("Cannot write attribute: " + name, e);
@@ -239,9 +252,9 @@ public class JsonXMLStreamWriter extends AbstractXMLStreamWriter<JsonXMLStreamWr
 					getScope().getInfo().startObjectWritten = true;
 				}
 				if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-					target.name('@' + XMLConstants.XMLNS_ATTRIBUTE);
+					target.name(attributePrefix + XMLConstants.XMLNS_ATTRIBUTE);
 				} else {
-					target.name('@' + XMLConstants.XMLNS_ATTRIBUTE + namespaceSeparator + prefix);
+					target.name(attributePrefix + XMLConstants.XMLNS_ATTRIBUTE + namespaceSeparator + prefix);
 				}
 				target.value(namespaceURI);
 			} catch (IOException e) {

@@ -34,8 +34,9 @@ public class JsonXMLConfigImpl implements JsonXMLConfig, Cloneable {
 	private boolean namespaceDeclarations = JsonXMLConfig.DEFAULT.isNamespaceDeclarations();
 	private char namespaceSeparator = JsonXMLConfig.DEFAULT.getNamespaceSeparator();
 	private Map<String, String> namespaceMappings = JsonXMLConfig.DEFAULT.getNamespaceMappings();
-	
 	private boolean repairingNamespaces = JsonXMLConfig.DEFAULT.isRepairingNamespaces();
+	private String textProperty = JsonXMLConfig.DEFAULT.getTextProperty();
+	private String attributePrefix = JsonXMLConfig.DEFAULT.getAttributePrefix();
 	
 	@Override
 	protected JsonXMLConfigImpl clone() {
@@ -125,5 +126,23 @@ public class JsonXMLConfigImpl implements JsonXMLConfig, Cloneable {
 	
 	public void setNamespaceMappings(Map<String, String> namespaceMappings) {
 		this.namespaceMappings = namespaceMappings;
+	}
+	
+	@Override
+	public String getTextProperty() {
+		return textProperty;
+	}
+	
+	public void setTextProperty(String textProperty) {
+		this.textProperty = textProperty;
+	}
+	
+	@Override
+	public String getAttributePrefix() {
+		return attributePrefix;
+	}
+	
+	public void setAttributePrefix(String attributePrefix) {
+		this.attributePrefix = attributePrefix;
 	}
 }

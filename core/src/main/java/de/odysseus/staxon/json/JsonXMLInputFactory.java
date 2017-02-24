@@ -81,12 +81,28 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	 */
 	public static final String PROP_NAMESPACE_MAPPINGS = "JsonXMLInputFactory.namespaceMappings";
 
+	/**
+	 * <p>Name of property used for text content.</p>
+	 * 
+	 * <p>The default is <code>'$'</code></p>
+	 */
+	public static final String PROP_TEXT_PROPERTY = "JsonXMLInputFactory.textProperty";
+	
+	/**
+	 * <p>Prefix of property used for attributes.</p>
+	 * 
+	 * <p>The default is <code>'@'</code></p>
+	 */
+	public static final String PROP_ATTRIBUTE_PREFIX = "JsonXMLOutputFactory.attributePrefix";
+
 	private final JsonStreamFactory streamFactory;
 
 	private boolean multiplePI;
 	private QName virtualRoot;
 	private char namespaceSeparator;
 	private Map<String, String> namespaceMappings;
+	private String textProperty;
+	private String attributePrefix;
 
 	public JsonXMLInputFactory() throws FactoryConfigurationError {
 		this(JsonXMLConfig.DEFAULT);
@@ -105,6 +121,8 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 		this.virtualRoot = config.getVirtualRoot();
 		this.namespaceSeparator = config.getNamespaceSeparator();
 		this.namespaceMappings = config.getNamespaceMappings();
+		this.textProperty = config.getTextProperty();
+		this.attributePrefix = config.getAttributePrefix();
 		this.streamFactory = streamFactory;
 		
 		/*
@@ -120,7 +138,7 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	
 	private JsonStreamSource decorate(JsonStreamSource source) {
 		if (virtualRoot != null) {
-			source = new AddRootSource(source, virtualRoot, namespaceSeparator);
+			source = new AddRootSource(source, virtualRoot, namespaceSeparator, attributePrefix);
 		}
 		return source;
 	}
@@ -147,7 +165,7 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	@Override
 	public JsonXMLStreamReader createXMLStreamReader(Reader reader) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(reader)), multiplePI, namespaceSeparator, namespaceMappings);
+			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(reader)), multiplePI, namespaceSeparator, namespaceMappings, textProperty, attributePrefix);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -156,7 +174,7 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	@Override
 	public JsonXMLStreamReader createXMLStreamReader(InputStream stream) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(stream)), multiplePI, namespaceSeparator, namespaceMappings);
+			return new JsonXMLStreamReader(decorate(streamFactory.createJsonStreamSource(stream)), multiplePI, namespaceSeparator, namespaceMappings, textProperty, attributePrefix);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -189,7 +207,7 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 	@Override
 	public boolean isPropertySupported(String name) {
 		return super.isPropertySupported(name)
-			|| Arrays.asList(PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT, PROP_NAMESPACE_SEPARATOR, PROP_NAMESPACE_MAPPINGS).contains(name);
+			|| Arrays.asList(PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT, PROP_NAMESPACE_SEPARATOR, PROP_NAMESPACE_MAPPINGS, PROP_TEXT_PROPERTY, PROP_ATTRIBUTE_PREFIX).contains(name);
 	}
 
 	@Override
@@ -205,6 +223,10 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 				return namespaceSeparator;
 			} else if (PROP_NAMESPACE_MAPPINGS.equals(name)) {
 				return namespaceMappings;
+			} else if (PROP_TEXT_PROPERTY.equals(name)) {
+				return textProperty;
+			} else if (PROP_ATTRIBUTE_PREFIX.equals(name)) {
+				return attributePrefix;
 			} else {
 				throw new IllegalArgumentException("Unsupported property: " + name);
 			}
@@ -246,6 +268,10 @@ public class JsonXMLInputFactory extends AbstractXMLInputFactory {
 				@SuppressWarnings("unchecked")
 				Map<String, String> map = (Map<String, String>)value;
 				this.namespaceMappings = map;
+			} else if (PROP_TEXT_PROPERTY.equals(name)) {
+				this.textProperty = (String)value;
+			} else if (PROP_ATTRIBUTE_PREFIX.equals(name)) {
+				this.attributePrefix = (String)value;
 			} else {
 				throw new IllegalArgumentException("Unsupported property: " + name);
 			}

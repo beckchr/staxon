@@ -110,6 +110,20 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	 */
 	public static final String PROP_PRETTY_PRINT = "JsonXMLOutputFactory.prettyPrint";
 
+	/**
+	 * <p>Name of property used for text content.</p>
+	 * 
+	 * <p>The default is <code>'$'</code></p>
+	 */
+	public static final String PROP_TEXT_PROPERTY = "JsonXMLOutputFactory.textProperty";
+
+	/**
+	 * <p>Prefix of property used for attributes.</p>
+	 * 
+	 * <p>The default is <code>'@'</code></p>
+	 */
+	public static final String PROP_ATTRIBUTE_PREFIX = "JsonXMLOutputFactory.attributePrefix";
+
 	private JsonStreamFactory streamFactory;
 	private boolean multiplePI;
 	private QName virtualRoot;
@@ -119,6 +133,8 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	private char namespaceSeparator;
 	private boolean namespaceDeclarations;
 	private Map<String, String> namespaceMappings;
+	private String textProperty;
+	private String attributePrefix;
 
 	public JsonXMLOutputFactory() throws FactoryConfigurationError {
 		this(JsonXMLConfig.DEFAULT);
@@ -141,6 +157,8 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 		this.namespaceSeparator = config.getNamespaceSeparator();
 		this.namespaceDeclarations = config.isNamespaceDeclarations();
 		this.namespaceMappings = config.getNamespaceMappings();
+		this.textProperty = config.getTextProperty();
+		this.attributePrefix = config.getAttributePrefix();
 		this.streamFactory = streamFactory;
 
 		/*
@@ -157,7 +175,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 			target = new AutoArrayTarget(target);
 		}
 		if (autoPrimitive) {
-			target = new AutoPrimitiveTarget(target, false);
+			target = new AutoPrimitiveTarget(target, false, attributePrefix);
 		}
 		return target;
 	}
@@ -189,7 +207,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	@Override
 	public JsonXMLStreamWriter createXMLStreamWriter(Writer stream) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), repairNamespacesMap(), multiplePI, namespaceSeparator, namespaceDeclarations);
+			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), repairNamespacesMap(), multiplePI, namespaceSeparator, namespaceDeclarations, textProperty, attributePrefix);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -198,7 +216,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	@Override
 	public JsonXMLStreamWriter createXMLStreamWriter(OutputStream stream) throws XMLStreamException {
 		try {
-			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), repairNamespacesMap(), multiplePI, namespaceSeparator, namespaceDeclarations);
+			return new JsonXMLStreamWriter(decorate(streamFactory.createJsonStreamTarget(stream, prettyPrint)), repairNamespacesMap(), multiplePI, namespaceSeparator, namespaceDeclarations, textProperty, attributePrefix);
 		} catch (IOException e) {
 			throw new XMLStreamException(e);
 		}
@@ -212,7 +230,7 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 	@Override
 	public boolean isPropertySupported(String name) {
 		return super.isPropertySupported(name)
-			|| Arrays.asList(PROP_AUTO_ARRAY, PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT, PROP_NAMESPACE_SEPARATOR, PROP_NAMESPACE_DECLARATIONS, PROP_NAMESPACE_MAPPINGS, PROP_PRETTY_PRINT).contains(name);
+			|| Arrays.asList(PROP_AUTO_ARRAY, PROP_MULTIPLE_PI, PROP_VIRTUAL_ROOT, PROP_NAMESPACE_SEPARATOR, PROP_NAMESPACE_DECLARATIONS, PROP_NAMESPACE_MAPPINGS, PROP_PRETTY_PRINT, PROP_TEXT_PROPERTY, PROP_ATTRIBUTE_PREFIX).contains(name);
 	}
 
 	@Override
@@ -236,6 +254,10 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 				return Boolean.valueOf(namespaceDeclarations);
 			} else if (PROP_NAMESPACE_MAPPINGS.equals(name)) {
 				return namespaceMappings;
+			} else if (PROP_TEXT_PROPERTY.equals(name)) {
+				return textProperty;
+			} else if (PROP_ATTRIBUTE_PREFIX.equals(name)) {
+				return attributePrefix;
 			} else {
 				throw new IllegalArgumentException("Unsupported property: " + name);
 			}
@@ -265,6 +287,10 @@ public class JsonXMLOutputFactory extends AbstractXMLOutputFactory {
 				@SuppressWarnings("unchecked")
 				Map<String, String> map = (Map<String, String>)value;
 				this.namespaceMappings = map;
+			} else if (PROP_TEXT_PROPERTY.equals(name)) {
+				this.textProperty = (String)value;
+			} else if (PROP_ATTRIBUTE_PREFIX.equals(name)) {
+				this.attributePrefix = (String)value;
 			} else {
 				throw new IllegalArgumentException("Unsupported property: " + name);
 			}
